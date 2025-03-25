@@ -1,0 +1,118 @@
+/* Estilização geral */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  font-family: "Arial", sans-serif;
+  background: #f9f9f9;
+}
+
+/* Título principal */
+.titulo {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Mensagem de carregamento */
+.mensagem-carregando {
+  font-size: 18px;
+  font-weight: bold;
+  color: #555;
+  animation: fadeIn 1s infinite alternate;
+}
+
+/* Estilização dos eventos */
+.eventos-lista {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Subtítulo */
+.subtitulo {
+  font-size: 24px;
+  color: #444;
+  margin-bottom: 15px;
+}
+
+/* Grid dos eventos */
+.eventos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Cartão do evento */
+.evento-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-align: left;
+}
+
+.evento-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Cabeçalho do evento */
+.evento-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+/* Título do evento */
+.evento-titulo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Data do evento */
+.evento-data {
+  font-size: 14px;
+  color: #777;
+}
+
+/* Descrição do evento */
+.evento-descricao {
+  font-size: 16px;
+  color: #555;
+  margin: 10px 0;
+}
+
+/* Número de participantes */
+.evento-participantes {
+  font-size: 16px;
+  font-weight: bold;
+  color: #008000;
+}
+
+/* Mensagem de erro */
+.mensagem-erro {
+  font-size: 18px;
+  font-weight: bold;
+  color: red;
+  margin-top: 15px;
+}
+
+/* Animação de fade-in */
+@keyframes fadeIn {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
