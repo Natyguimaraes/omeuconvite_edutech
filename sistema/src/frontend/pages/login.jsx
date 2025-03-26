@@ -64,7 +64,7 @@ function LoginAdministrador() {
           <div className="h-20 w-20 mx-auto mb-6 bg-gradient-to-br from-[#8470A1] to-[#959FC6] rounded-2xl flex items-center justify-center shadow-lg">
             <LockKeyhole className="h-10 w-10 text-white" />
           </div>
-          <h1 className="text-3xl font-light tracking-tight text-[#333] mb-1">Login de Administrador</h1>
+          <h1 className="text-3xl font-light tracking-tight text-[#333] mb-1">Login do Cliente</h1>
           <p className="text-[#666] text-sm">Entre com suas credenciais de acesso</p>
         </div>
 

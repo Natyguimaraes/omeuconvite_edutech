@@ -86,7 +86,7 @@ function EventCredential() {
   };
 
   const handleAddAcompanhante = () => {
-    setAcompanhantes([...acompanhantes, { nome: "", telefone: "", email: "", confirmado: false }]);
+    setAcompanhantes([...acompanhantes, { nome: "", telefone: "", email: "", confirmado: true }]);
   };
 
   const handleRemoveAcompanhante = (index) => {
@@ -108,10 +108,10 @@ function EventCredential() {
   };
 
   const salvarAcompanhantes = async () => {
-    const temAcompanhantesInvalidos = acompanhantes.some(a => !a.nome || !a.telefone);
+    const temAcompanhantesInvalidos = acompanhantes.some(a => !a.nome);
     
     if (temAcompanhantesInvalidos) {
-      setError("Nome e telefone são obrigatórios para todos os acompanhantes!");
+      setError("Nome é obrigatório para todos os acompanhantes!");
       return;
     }
   
@@ -130,7 +130,7 @@ function EventCredential() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               nome: acompanhante.nome,
-              telefone: acompanhante.telefone,
+              telefone: acompanhante.telefone || "",
               email: acompanhante.email || ""
             })
           }
@@ -164,7 +164,7 @@ function EventCredential() {
     setError("");
     
     try {
-      // 1. Confirmar convidado principal
+
       const responseConvidado = await fetch(
         `http://localhost:5000/api/convidados/${convidadoId}/confirmacao?status=${status}`,
         { method: "GET" }
@@ -174,10 +174,10 @@ function EventCredential() {
         throw new Error("Erro ao confirmar presença do convidado principal");
       }
 
-      // 2. Se confirmando presença, confirmar acompanhantes selecionados
+      
       if (status === "sim") {
         const acompanhantesParaEnviar = acompanhantes
-          .filter(a => a.id) // Apenas acompanhantes com ID
+          .filter(a => a.id) 
           .map(a => ({
             id: a.id,
             confirmado: a.confirmado
@@ -206,7 +206,6 @@ function EventCredential() {
           : "Você escolheu não participar. ❌"
       );
       
-      // Recarrega os dados para garantir sincronização
       await buscarDadosConvidado();
     } catch (error) {
       console.error("Erro:", error);
@@ -228,15 +227,17 @@ function EventCredential() {
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              <div className="absolute bottom-4 left-4">
-                <h1 className="text-2xl font-bold text-white drop-shadow-lg">
+              
+             
+            </div>
+
+                <h1 className="text-2xl font-bold text-black drop-shadow-lg text-center mt-7">
                   {evento.nome || "Nome não disponível"}
                 </h1>
-                <p className="text-white/90 text-sm drop-shadow-md">
+                <p className="text-black/80 drop-shadow-md text-center bg-[#4d142238] p-8 mt-7">
                   {evento.descricao || "Descrição não disponível"}
                 </p>
-              </div>
-            </div>
+            <ChevronsUp size={35} color="#4d1422" className="m-auto mt-5 " />
             
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3 text-[#3b3e41]">
@@ -330,7 +331,7 @@ function EventCredential() {
                           id={`confirmar-${index}`}
                           checked={acompanhante.confirmado}
                           onChange={() => toggleConfirmacaoAcompanhante(index)}
-                          disabled={!acompanhante.id}
+                          // disabled={!acompanhante.id}
                           className={`rounded border-gray-300 text-[#591238] focus:ring-[#591238] mr-2 ${
                             !acompanhante.id ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                           }`}
@@ -368,7 +369,7 @@ function EventCredential() {
                         <input
                           className="w-full bg-white border border-gray-200 rounded-md py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#591238] focus:border-[#591238] transition-all"
                           type="tel"
-                          placeholder="Telefone (com DDD)"
+                          placeholder="Telefone com DDD (opcional)"
                           value={acompanhante.telefone}
                           onChange={(e) => handleChangeAcompanhante(index, "telefone", e.target.value)}
                           disabled={!!acompanhante.id}

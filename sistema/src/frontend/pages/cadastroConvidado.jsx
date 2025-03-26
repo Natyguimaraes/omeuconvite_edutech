@@ -8,6 +8,7 @@ function CadastroConvidados() {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
+  const [limite_acompanhante, setLimiteAcomp] = useState("");
   const [eventoId, setEventoId] = useState("");
   const [desejaInformarCandidato, setDesejaInformarCandidato] = useState(false);
   const [acompanhantes, setAcompanhantes] = useState([]);
@@ -91,6 +92,7 @@ function CadastroConvidados() {
           nome,
           telefone,
           email,
+          limite_acompanhante,
           evento_id: eventoId,
           acompanhantes,
         }),
@@ -106,6 +108,7 @@ function CadastroConvidados() {
         setNome("");
         setTelefone("");
         setEmail("");
+        setLimiteAcomp("");
         setEventoId("");
         setDesejaInformarCandidato(false);
         setAcompanhantes([]);
@@ -199,6 +202,17 @@ function CadastroConvidados() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="relative">
+              <User size={20} className="absolute left-3 top-3 text-event-secondary/60" />
+              <input
+                className="w-full bg-white/80 border border-event-accent/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-event-primary/30 transition-all"
+                type="number"
+                placeholder="Número de acompanhantes"
+                value={limite_acompanhante}
+                onChange={(e) => setLimiteAcomp(e.target.value)}
+              />
             </div>
 
             <label className="flex items-center space-x-2 cursor-pointer p-3 rounded-xl hover:bg-white/30 transition-colors">

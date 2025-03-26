@@ -93,7 +93,7 @@ router.put("/api/convidados/:convidadoId/confirmacao", async (req, res) => {
   const { convidadoId } = req.params;
   const { status } = req.query;
 
-  // Validando os parâmetros
+ 
   if (!convidadoId || isNaN(convidadoId)) {
     return res.status(400).json({ erro: "ID inválido." });
   }
@@ -102,22 +102,21 @@ router.put("/api/convidados/:convidadoId/confirmacao", async (req, res) => {
     return res.status(400).json({ erro: "Status inválido. Use 'sim' ou 'nao'." });
   }
 
-  // Convertendo 'sim' para 1 e 'nao' para 0
+
   const confirmado = status === "sim" ? 1 : 0;
 
   try {
-    // Atualizando o banco de dados
     const [resultado] = await conexao.query(
       "UPDATE convidados SET confirmado = ? WHERE id = ?",
       [confirmado, convidadoId]
     );
 
-    // Verificando se o convidado foi encontrado e atualizado
+    
     if (resultado.affectedRows === 0) {
       return res.status(404).json({ erro: "Convidado não encontrado." });
     }
 
-    // Retornando resposta de sucesso
+   
     res.json({
       mensagem: `Confirmação recebida! O convidado ${convidadoId} ${status === "sim" ? "confirmou" : "não confirmou"} presença.`,
     });
@@ -129,17 +128,17 @@ router.put("/api/convidados/:convidadoId/confirmacao", async (req, res) => {
 
 router.post("/:convidadoId/acompanhantes", async (req, res) => {
   const { convidadoId } = req.params;
-  const { nome, telefone, email } = req.body; // Recebe um objeto, não um array
+  const { nome, telefone, email } = req.body;
 
-  if (!nome || !telefone) {
-    return res.status(400).json({ erro: "Nome e telefone são obrigatórios" });
+  if (!nome) {
+    return res.status(400).json({ erro: "Nome é obrigatório" });
   }
 
   try {
     const result = await new Promise((resolve, reject) => {
       conexao.query(
         "INSERT INTO acompanhante (convidado_id, nome, telefone, email, confirmado) VALUES (?, ?, ?, ?, ?)",
-        [convidadoId, nome, telefone, email || null, 0],
+        [convidadoId, nome, telefone, email || null, 1],
         (err, result) => {
           if (err) return reject(err);
           resolve(result);
@@ -151,7 +150,7 @@ router.post("/:convidadoId/acompanhantes", async (req, res) => {
       id: result.insertId,
       convidado_id: convidadoId,
       nome,
-      telefone,
+      telefone: telefone || null,
       email: email || null,
       confirmado: 0
     });
@@ -163,7 +162,7 @@ router.post("/:convidadoId/acompanhantes", async (req, res) => {
     });
   }
 });
-// Adicione esta nova rota no seu arquivo de rotas
+
 router.post("/:convidadoId/confirmar-acompanhantes", confirmarAcompanhantes); 
 
 export default router;

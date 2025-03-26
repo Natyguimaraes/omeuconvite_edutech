@@ -1,10 +1,10 @@
 import { create, getAcompanhantesByConvidadoId, read, update, deleteConvidado, createAcompanhante, deleteAcompanhante, updateAcompanhante, confirmarAcompanhantesModel } from "../model/convidado.js";
 
 export async function createConvidado(req, res) {
-  const { nome, telefone, email, acompanhantes, evento_id } = req.body;
+  const { nome, telefone, email, limite_acompanhante, acompanhantes, evento_id } = req.body;
 
   try {
-    const result = await create(nome, telefone, email, evento_id);
+    const result = await create(nome, telefone, email, limite_acompanhante, evento_id);
     const convidadoId = result.insertId;
 
     if (acompanhantes && acompanhantes.length > 0) {
@@ -24,10 +24,10 @@ export async function getAllConvidados(req, res) {
   try {
     const convidados = await read();
 
-    // Buscar acompanhantes para cada convidado e adicionar ao convidado
+   
     for (const convidado of convidados) {
       const acompanhantes = await getAcompanhantesByConvidadoId(convidado.id);
-      convidado.acompanhantes = acompanhantes; // Armazenar acompanhantes completos
+      convidado.acompanhantes = acompanhantes; 
     }
 
     res.json(convidados);
@@ -96,12 +96,12 @@ export async function updateAcompanhanteById(req, res) {
   }
 }
 
-// No arquivo controller/convidado.js
+
 export async function confirmarAcompanhantes(req, res) {
   const { convidadoId } = req.params;
   const { acompanhantes } = req.body;
 
-  console.log('Dados recebidos:', { convidadoId, acompanhantes }); // Para debug
+  console.log('Dados recebidos:', { convidadoId, acompanhantes }); 
 
   if (!acompanhantes || !Array.isArray(acompanhantes)) {
     return res.status(400).json({ 
@@ -115,7 +115,7 @@ export async function confirmarAcompanhantes(req, res) {
       .filter(a => a?.id && a.confirmado)
       .map(a => a.id);
 
-    console.log('IDs a confirmar:', idsParaConfirmar); // Para debug
+    console.log('IDs a confirmar:', idsParaConfirmar); 
 
     if (idsParaConfirmar.length === 0) {
       return res.status(200).json({ 

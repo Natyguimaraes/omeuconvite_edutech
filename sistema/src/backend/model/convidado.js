@@ -10,11 +10,11 @@ export function read() {
 }
 
 
-export function create(nome, telefone, email, evento_id) {
+export function create(nome, telefone, email, limite_acompanhante, evento_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "INSERT INTO convidados (nome, telefone, email, evento_id) VALUES (?, ?, ?, ?)",
-      [nome, telefone, email, evento_id],
+      "INSERT INTO convidados (nome, telefone, email, limite_acompanhante, evento_id) VALUES (?, ?, ?, ?, ?)",
+      [nome, telefone, email, limite_acompanhante, evento_id],
       (err, result) => {
         if (err) return reject(err);
         resolve(result);
@@ -27,7 +27,7 @@ export function createAcompanhante(nome, telefone, email, convidado_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
       "INSERT INTO acompanhante (nome, telefone, email, convidado_id, confirmado) VALUES (?, ?, ?, ?, ?)",
-      [nome, telefone, email, convidado_id, 0], // Adicionado 0 como valor padrão para confirmado
+      [nome, telefone, email, convidado_id, 0], 
       (err, result) => {
         if (err) return reject(err);
         resolve(result);
