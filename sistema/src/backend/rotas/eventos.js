@@ -4,6 +4,7 @@ import {
   getAllEventos,
   updateEventoController,
   deleteEventoController,
+  getEventoById,
 } from "../controller/evento.js";
 import multer from "multer";
 import path from "path";
@@ -25,7 +26,7 @@ const upload = multer({ storage });
 
 
 router.get("/", getAllEventos); 
-
+router.get("/:id", getEventoById);
 
 router.post("/", upload.single("imagem_evento"), createEventoController);
 

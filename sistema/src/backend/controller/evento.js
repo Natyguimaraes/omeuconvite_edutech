@@ -3,6 +3,7 @@ import {
   readEventos,
   updateEvento,
   deleteEvento,
+  getEventoByIdModel,
 } from "../model/evento.js";
 
 export async function getAllEventos(req, res) {
@@ -67,4 +68,27 @@ export async function deleteEventoController(req, res) {
   }
 }
 
-
+export async function getEventoById(req, res) {
+  try {
+    const { id } = req.params;
+    const evento = await getEventoByIdModel(id); // Use a nova função específica
+    
+    if (!evento) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Evento não encontrado" 
+      });
+    }
+    
+    res.json({ 
+      success: true,
+      data: evento 
+    });
+  } catch (err) {
+    console.error("Erro ao buscar evento:", err);
+    res.status(500).json({ 
+      success: false,
+      error: "Erro ao buscar evento" 
+    });
+  }
+}

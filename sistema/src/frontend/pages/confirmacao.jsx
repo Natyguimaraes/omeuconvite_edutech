@@ -10,6 +10,7 @@ import {
   Loader2,
   Users,
   CalendarIcon,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,7 +28,25 @@ const Confirmacao = () => {
     email: "",
     acompanhantes: [],
   });
-  
+
+  // Função segura para obter convidados por evento
+  const getConvidadosPorEvento = (eventoId) => {
+    if (!Array.isArray(convidados)) return [];
+    return convidados.filter(c => c?.evento_id === eventoId);
+  };
+
+  // Função segura para contar participantes
+  const contarParticipantes = (convidadosEvento) => {
+    if (!Array.isArray(convidadosEvento)) return 0;
+    
+    return convidadosEvento.reduce((acc, convidado) => {
+      const acompanhantesCount = Array.isArray(convidado.acompanhantes) 
+        ? convidado.acompanhantes.length 
+        : 0;
+      return acc + 1 + acompanhantesCount;
+    }, 0);
+  };
+
   useEffect(() => {
     async function fetchDados() {
       setLoading(true);
@@ -36,14 +55,22 @@ const Confirmacao = () => {
           fetch("http://localhost:5000/api/eventos"),
           fetch("http://localhost:5000/api/convidados"),
         ]);
-
-        if (!eventosRes.ok || !convidadosRes.ok)
+  
+        if (!eventosRes.ok || !convidadosRes.ok) {
           throw new Error("Erro ao buscar dados");
-
-        setEventos(await eventosRes.json());
-        setConvidados(await convidadosRes.json());
+        }
+  
+        const eventosData = await eventosRes.json();
+        const convidadosData = await convidadosRes.json();
+  
+        setEventos(Array.isArray(eventosData) ? eventosData : []);
+        setConvidados(Array.isArray(convidadosData.data) ? convidadosData.data : []);
+        
       } catch (error) {
+        console.error("Erro ao carregar dados:", error);
         toast.error(`Erro ao buscar dados: ${error.message}`);
+        setEventos([]);
+        setConvidados([]);
       } finally {
         setLoading(false);
       }
@@ -103,107 +130,80 @@ const Confirmacao = () => {
     }
   };
 
-  const handleAcompanhanteChange = (index, campo, valor) => {
-    setEditData((prev) => {
-      const updatedAcompanhantes = [...prev.acompanhantes];
-      updatedAcompanhantes[index] = {
-        ...updatedAcompanhantes[index],
-        [campo]: valor,
-      };
-      return { ...prev, acompanhantes: updatedAcompanhantes };
-    });
-  };
-
-  const handleDeleteAcompanhante = (convidadoId, acompanhanteIndex) => {
-    
-    if (editIndex) {
-      setEditData((prev) => {
-        const updatedAcompanhantes = [...prev.acompanhantes];
-        updatedAcompanhantes.splice(acompanhanteIndex, 1);
-        return { ...prev, acompanhantes: updatedAcompanhantes };
-      });
+  const handleDeleteAcompanhante = async (convidadoId, acompanhanteId) => {
+    if (!acompanhanteId || isNaN(acompanhanteId) || acompanhanteId <= 0) {
+      toast.error("ID do acompanhante inválido");
       return;
     }
-    
-    const convidado = convidados.find(c => c.id === convidadoId);
-    if (!convidado || !convidado.acompanhantes || !convidado.acompanhantes[acompanhanteIndex]) return;
-    
-    const acompanhante = convidado.acompanhantes[acompanhanteIndex];
-    
-    if (!window.confirm("Tem certeza que deseja remover este acompanhante?"))
-      return;
-
-    handleDeleteAcompanhanteAPI(convidadoId, acompanhante.id);
-  };
-
-  const handleDeleteAcompanhanteAPI = async (convidadoId, acompanhanteId) => {
+  
     try {
-      const resposta = await fetch(
-        `http://localhost:5000/api/convidados/${convidadoId}/acompanhantes/${acompanhanteId}`,
-        { method: "DELETE" }
+      const response = await fetch(
+        `http://localhost:5000/api/convidados/acompanhantes/${acompanhanteId}`,
+        { 
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" }
+        }
       );
-
-      if (!resposta.ok) throw new Error("Erro ao excluir acompanhante");
-
-      // Atualiza a lista removendo o acompanhante excluído
-      setConvidados((prev) =>
-        prev.map((convidado) =>
-          convidado.id === convidadoId
-            ? {
-                ...convidado,
-                acompanhantes: convidado.acompanhantes.filter(
-                  (a) => a.id !== acompanhanteId
-                ),
-              }
-            : convidado
-        )
-      );
-
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao excluir acompanhante");
+      }
+  
+      setConvidados(prev => prev.map(c => 
+        c.id === convidadoId
+          ? {
+              ...c,
+              acompanhantes: c.acompanhantes.filter(a => a.id !== acompanhanteId)
+            }
+          : c
+      ));
+  
       toast.success("Acompanhante removido com sucesso!");
     } catch (error) {
-      toast.error(`Erro ao excluir acompanhante: ${error.message}`);
+      console.error("Erro na exclusão:", error);
+      toast.error(`Falha: ${error.message}`);
     }
   };
 
-  const handleUpdateAcompanhante = async (
-    convidadoId,
-    acompanhanteId,
-    newData
-  ) => {
-    if (!newData.nome || !newData.telefone) {
-      toast.error("Preencha todos os campos antes de salvar!");
-      return;
-    }
-
+  const handleUpdateAcompanhante = async (convidadoId, acompanhanteId, newData) => {
     try {
-      const resposta = await fetch(
+      const response = await fetch(
         `http://localhost:5000/api/convidados/${convidadoId}/acompanhantes/${acompanhanteId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newData),
+          body: JSON.stringify({
+            nome: newData.nome,
+            telefone: newData.telefone || null,
+            email: newData.email || null
+          })
         }
       );
-
-      if (!resposta.ok) throw new Error("Erro ao atualizar acompanhante");
-
-      setConvidados((prev) =>
-        prev.map((convidado) =>
-          convidado.id === Number(convidadoId)
-            ? {
-                ...convidado,
-                acompanhantes: convidado.acompanhantes.map((a) =>
-                  a.id === Number(acompanhanteId) ? { ...a, ...newData } : a
-                ),
-              }
-            : convidado
-        )
-      );
-      
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao atualizar acompanhante");
+      }
+  
+      setConvidados(prev => prev.map(c => {
+        if (c.id !== convidadoId) return c;
+        
+        return {
+          ...c,
+          acompanhantes: c.acompanhantes.map(a => 
+            a.id === acompanhanteId ? { ...a, ...newData } : a
+          )
+        };
+      }));
+  
       setEditingAcompanhante(null);
-      toast.success("Acompanhante atualizado com sucesso!");
+      toast.success(data.message || "Acompanhante atualizado!");
+  
     } catch (error) {
-      toast.error(`Erro ao atualizar acompanhante: ${error.message}`);
+      console.error("Erro na atualização:", error);
+      toast.error(error.message);
     }
   };
 
@@ -247,6 +247,15 @@ const Confirmacao = () => {
     window.open(linkWhatsapp, "_blank");
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 space-y-4">
+        <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+        <p className="text-gray-600">Carregando convidados...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8 page-transition">
       <div className="max-w-6xl mx-auto">
@@ -267,49 +276,36 @@ const Confirmacao = () => {
           </h1>
         </div>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center p-12 space-y-4">
-            <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
-            <p className="text-gray-600">
-              Carregando convidados...
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {eventos.map((evento) => {
-              const convidadosEvento = convidados.filter(
-                (c) => c.evento_id === evento.id
-              );
-              const totalConvidados = convidadosEvento.reduce((acc, convidado) => {
-               //contagem dos acompanhantes e convidados
-                return acc + 1 + (convidado.acompanhantes?.length || 0);
-              }, 0);
-              return (
-                <div
-                  className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md"
-                  key={evento.id}
-                  style={{ animationDelay: `${evento.id * 50}ms` }}
-                >
-                  <div className="p-6 border-b border-gray-100">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-3">
-                        <CalendarIcon className="h-5 w-5 text-blue-600" />
-                        <h3 className="text-xl font-semibold text-gray-900">
-                          {evento.nome}
-                        </h3>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="flex items-center mr-3 bg-green-100 text-green-600 py-1 px-3 rounded-full text-xs font-medium">
-                          <Users className="h-3 w-3 mr-1" />
-                          <span>{totalConvidados} convidados</span>
-                        </div>
+        <div className="space-y-8">
+          {Array.isArray(eventos) && eventos.map((evento) => {
+            const convidadosEvento = getConvidadosPorEvento(evento.id);
+            const totalParticipantes = contarParticipantes(convidadosEvento);
+
+            return (
+              <div
+                className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md"
+                key={evento.id}
+              >
+                <div className="p-6 border-b border-gray-100">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <CalendarIcon className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {evento.nome}
+                      </h3>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="flex items-center mr-3 bg-green-100 text-green-600 py-1 px-3 rounded-full text-xs font-medium">
+                        <Users className="h-3 w-3 mr-1" />
+                        <span>{totalParticipantes} convidados</span>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="overflow-x-auto">
-                    {convidadosEvento.length > 0 ? (
-                      <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                  {convidadosEvento.length > 0 ? (
+                    <table className="w-full text-sm">
                         <thead>
                           <tr className="bg-gray-50/80">
                             <th className="px-6 py-3 text-left font-medium text-gray-600 tracking-wider">
@@ -404,26 +400,34 @@ const Confirmacao = () => {
                                             <input
                                               type="text"
                                               value={acompanhante.nome || ""}
-                                              onChange={(e) =>
-                                                handleAcompanhanteChange(
-                                                  index,
-                                                  "nome",
-                                                  e.target.value
-                                                )
-                                              }
+                                              onChange={(e) => {
+                                                const updatedAcompanhantes = [...editData.acompanhantes];
+                                                updatedAcompanhantes[index] = {
+                                                  ...updatedAcompanhantes[index],
+                                                  nome: e.target.value,
+                                                };
+                                                setEditData({
+                                                  ...editData,
+                                                  acompanhantes: updatedAcompanhantes,
+                                                });
+                                              }}
                                               placeholder="Nome"
                                               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
                                             />
                                             <input
                                               type="text"
                                               value={acompanhante.telefone || ""}
-                                              onChange={(e) =>
-                                                handleAcompanhanteChange(
-                                                  index,
-                                                  "telefone",
-                                                  e.target.value
-                                                )
-                                              }
+                                              onChange={(e) => {
+                                                const updatedAcompanhantes = [...editData.acompanhantes];
+                                                updatedAcompanhantes[index] = {
+                                                  ...updatedAcompanhantes[index],
+                                                  telefone: e.target.value,
+                                                };
+                                                setEditData({
+                                                  ...editData,
+                                                  acompanhantes: updatedAcompanhantes,
+                                                });
+                                              }}
                                               placeholder="Telefone"
                                               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
                                             />
@@ -491,10 +495,10 @@ const Confirmacao = () => {
                                       <div className="space-y-1">
                                         {convidado.acompanhantes.map((acompanhante, index) => (
                                           <div
-                                            key={index}
+                                            key={`${acompanhante.id}-${index}`}
                                             className="flex items-center justify-between text-sm text-gray-700 bg-gray-50 p-2 rounded-lg"
                                           >
-                                            {editingAcompanhante === `${convidado.id}-${index}` ? (
+                                            {editingAcompanhante === `${convidado.id}-${acompanhante.id}` ? (
                                               <>
                                                 <div className="flex-1 grid grid-cols-2 gap-2">
                                                   <input
@@ -535,6 +539,12 @@ const Confirmacao = () => {
                                                   >
                                                     <Check className="h-3.5 w-3.5" />
                                                   </button>
+                                                  <button
+                                                    onClick={() => setEditingAcompanhante(null)}
+                                                    className="bg-gray-100 text-gray-600 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                                                  >
+                                                    <X className="h-3.5 w-3.5" />
+                                                  </button>
                                                 </div>
                                               </>
                                             ) : (
@@ -549,13 +559,17 @@ const Confirmacao = () => {
                                                 </div>
                                                 <div className="flex items-center space-x-1">
                                                   <button
-                                                    onClick={() => setEditingAcompanhante(`${convidado.id}-${index}`)}
+                                                    onClick={() => setEditingAcompanhante(`${convidado.id}-${acompanhante.id}`)}
                                                     className="text-blue-600 p-1 rounded-full hover:bg-blue-50 transition-colors"
                                                   >
                                                     <Edit className="h-3.5 w-3.5" />
                                                   </button>
                                                   <button
-                                                    onClick={() => handleDeleteAcompanhante(convidado.id, index)}
+                                                    onClick={() => {
+                                                      if (window.confirm(`Remover ${acompanhante.nome}?`)) {
+                                                        handleDeleteAcompanhante(convidado.id, acompanhante.id);
+                                                      }
+                                                    }}
                                                     className="text-red-600 p-1 rounded-full hover:bg-red-50 transition-colors"
                                                   >
                                                     <Trash2 className="h-3.5 w-3.5" />
@@ -602,18 +616,17 @@ const Confirmacao = () => {
                             </tr>
                           ))}
                         </tbody>
-                      </table>
-                    ) : (
-                      <div className="p-6 text-center text-gray-500">
-                        Nenhum convidado encontrado.
-                      </div>
-                    )}
-                  </div>
+                        </table>
+                  ) : (
+                    <div className="p-6 text-center text-gray-500">
+                      Nenhum convidado encontrado para este evento.
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

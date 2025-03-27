@@ -11,7 +11,7 @@ const conexao = mysql.createConnection({
   user: process.env.DB_USER || "root",
 
   // eslint-disable-next-line no-undef
-  password: process.env.DB_PASSWORD || "senha",
+  password: process.env.DB_PASSWORD || "123456789",
 
   // eslint-disable-next-line no-undef
   database: process.env.DB_NAME || "teste",

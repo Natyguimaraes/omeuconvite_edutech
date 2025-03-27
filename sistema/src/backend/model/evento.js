@@ -60,3 +60,22 @@ export function deleteEvento(id) {
     });
   });
 }
+
+export async function getEventoModel() {
+  return new Promise((resolve, reject) => {
+    conexao.query("SELECT * FROM eventos", async (err, evento) => {
+      if (err) return reject(err);
+      // Faltou o resolve aqui
+      resolve(evento); // Adicione esta linha
+    });
+  });
+}
+
+export async function getEventoByIdModel(id) {
+  return new Promise((resolve, reject) => {
+    conexao.query("SELECT * FROM eventos WHERE id = ?", [id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length > 0 ? results[0] : null);
+    });
+  });
+}

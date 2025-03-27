@@ -1,14 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { User, Phone, Mail, Calendar, Plus, X, ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";  // toast o para tratamento de erro
+import { toast } from "sonner";
 
 function CadastroConvidados() {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
-  const [limite_acompanhante, setLimiteAcomp] = useState("");
+  const [limite_acompanhante, setLimiteAcomp] = useState(0);
   const [eventoId, setEventoId] = useState("");
   const [desejaInformarCandidato, setDesejaInformarCandidato] = useState(false);
   const [acompanhantes, setAcompanhantes] = useState([]);
@@ -51,10 +50,16 @@ function CadastroConvidados() {
 
   const handleToggleCandidato = () => {
     setDesejaInformarCandidato(!desejaInformarCandidato);
-    setAcompanhantes([]);
+    if (!desejaInformarCandidato) {
+      setAcompanhantes([]);
+    }
   };
 
   const handleAddAcompanhante = () => {
+    if (acompanhantes.length >= limite_acompanhante) {
+      toast.error(`Limite de ${limite_acompanhante} acompanhantes atingido`);
+      return;
+    }
     setAcompanhantes([...acompanhantes, { nome: "", telefone: "", email: "" }]);
   };
 
@@ -83,6 +88,12 @@ function CadastroConvidados() {
       return;
     }
 
+    if (desejaInformarCandidato && acompanhantes.length > limite_acompanhante) {
+      setError(`Número de acompanhantes excede o limite de ${limite_acompanhante}`);
+      toast.error(`Número de acompanhantes excede o limite de ${limite_acompanhante}`);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const resposta = await fetch("http://localhost:5000/api/convidados", {
@@ -94,40 +105,29 @@ function CadastroConvidados() {
           email,
           limite_acompanhante,
           evento_id: eventoId,
-          acompanhantes,
+          acompanhantes: desejaInformarCandidato ? acompanhantes : [],
         }),
       });
 
       const dados = await resposta.json();
 
       if (resposta.ok) {
-        toast({
-          title: "Sucesso!",
-          description: "Convidado cadastrado com sucesso!",
-        });
+        toast.success("Convidado cadastrado com sucesso!");
         setNome("");
         setTelefone("");
         setEmail("");
-        setLimiteAcomp("");
+        setLimiteAcomp(0);
         setEventoId("");
         setDesejaInformarCandidato(false);
         setAcompanhantes([]);
       } else {
         setError(dados.erro || "Erro ao cadastrar convidado.");
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: dados.erro || "Não foi possível cadastrar o convidado.",
-        });
+        toast.error(dados.erro || "Não foi possível cadastrar o convidado.");
       }
     } catch (err) {
       console.error("Erro na requisição:", err);
       setError("Erro ao cadastrar convidado. Tente novamente mais tarde.");
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Falha na conexão com o servidor.",
-      });
+      toast.error("Falha na conexão com o servidor.");
     } finally {
       setIsLoading(false);
     }
@@ -163,6 +163,7 @@ function CadastroConvidados() {
                 placeholder="Nome"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
+                required
               />
             </div>
             
@@ -174,6 +175,7 @@ function CadastroConvidados() {
                 placeholder="Telefone"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
+                required
               />
             </div>
             
@@ -194,6 +196,7 @@ function CadastroConvidados() {
                 className="w-full bg-white/80 border border-event-accent/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-event-primary/30 transition-all appearance-none"
                 value={eventoId}
                 onChange={(e) => setEventoId(e.target.value)}
+                required
               >
                 <option value="">Selecione um evento</option>
                 {eventos.map((evento) => (
@@ -209,24 +212,32 @@ function CadastroConvidados() {
               <input
                 className="w-full bg-white/80 border border-event-accent/20 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-event-primary/30 transition-all"
                 type="number"
-                placeholder="Número de acompanhantes"
+                min="0"
+                placeholder="Limite de acompanhantes"
                 value={limite_acompanhante}
-                onChange={(e) => setLimiteAcomp(e.target.value)}
+                onChange={(e) => setLimiteAcomp(Math.max(0, parseInt(e.target.value) || 0))
+                }
               />
             </div>
 
-            <label className="flex items-center space-x-2 cursor-pointer p-3 rounded-xl hover:bg-white/30 transition-colors">
-              <input
-                type="checkbox"
-                checked={desejaInformarCandidato}
-                onChange={handleToggleCandidato}
-                className="rounded border-event-secondary/30 text-event-primary focus:ring-event-primary/30"
-              />
-              <span className="text-event-text-primary">Deseja informar acompanhantes?</span>
-            </label>
+            {limite_acompanhante > 0 && (
+              <label className="flex items-center space-x-2 cursor-pointer p-3 rounded-xl hover:bg-white/30 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={desejaInformarCandidato}
+                  onChange={handleToggleCandidato}
+                  className="rounded border-event-secondary/30 text-event-primary focus:ring-event-primary/30"
+                />
+                <span className="text-event-text-primary">Deseja informar acompanhantes?</span>
+              </label>
+            )}
 
             {desejaInformarCandidato && (
               <div className="space-y-4 mt-4 animate-fade-in">
+                <div className="text-sm text-event-text-secondary">
+                  {acompanhantes.length} de {limite_acompanhante} acompanhantes cadastrados
+                </div>
+                
                 {acompanhantes.map((acompanhante, index) => (
                   <div key={index} className="bg-white/70 p-5 rounded-xl border border-event-accent/20 relative">
                     <button 
@@ -248,6 +259,7 @@ function CadastroConvidados() {
                           placeholder="Nome"
                           value={acompanhante.nome}
                           onChange={(e) => handleChangeAcompanhante(index, "nome", e.target.value)}
+                          required
                         />
                       </div>
                       
@@ -275,18 +287,22 @@ function CadastroConvidados() {
                     </div>
                   </div>
                 ))}
-                <button
-                  type="button"
-                  onClick={handleAddAcompanhante}
-                  className="bg-event-accent/80 hover:bg-event-accent/60 text-white font-medium py-3 px-5 rounded-lg transition-colors w-full"
-                >
-                  <Plus size={18} />
-                  Adicionar acompanhante
-                </button>
+                
+                {acompanhantes.length < limite_acompanhante && (
+                  <button
+                    type="button"
+                    onClick={handleAddAcompanhante}
+                    className="bg-event-accent/80 hover:bg-event-accent/60 text-white font-medium py-3 px-5 rounded-lg transition-colors w-full"
+                    disabled={acompanhantes.length >= limite_acompanhante}
+                  >
+                    <Plus size={18} className="inline mr-2" />
+                    Adicionar acompanhante ({acompanhantes.length}/{limite_acompanhante})
+                  </button>
+                )}
               </div>
             )}
 
-            <div className="space-y-4 mt-8 bg-[rgb(135,167,188)] text-white font-medium py-2.5 px-4 rounded-full transition-all duration-200 hover:bg-[rgb(120,150,170)] active:bg-[rgb(110,140,155)] active:scale-95 shadow-sm ">
+            <div className="mt-8">
               <button 
                 type="button"
                 onClick={handleCadastro}

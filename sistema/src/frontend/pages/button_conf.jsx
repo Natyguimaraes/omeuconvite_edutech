@@ -5,94 +5,109 @@ import eventoImage from '../../backend/uploads/convite.jpg';
 
 function EventCredential() {
   const { convidadoId } = useParams();
-  const [evento, setEvento] = useState(null);
-  const [convidado, setConvidado] = useState(null);
+  const [evento, setEvento] = useState({}); // Objeto vazio em vez de null
+const [convidado, setConvidado] = useState({});
   const [mensagem, setMensagem] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [acompanhantes, setAcompanhantes] = useState([]);
   const [desejaInformarAcompanhante, setDesejaInformarAcompanhante] = useState(false);
   const [error, setError] = useState("");
-
-  const buscarDadosConvidado = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/convidados/${convidadoId}`);
-      if (!response.ok) throw new Error("Erro ao carregar dados");
-      
-      const data = await response.json();
-      setConvidado(data);
-      
-      if (data.acompanhantes) {
-        setAcompanhantes(data.acompanhantes.map(a => ({ 
-          ...a, 
-          confirmado: a.confirmado === 1 
-        })));
-      }
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      setError("Erro ao atualizar dados do convidado");
-    }
-  };
+  const [limiteAcompanhantes, setLimiteAcompanhantes] = useState(0);
 
   useEffect(() => {
-    const buscarEventoEConvidado = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const [eventoResponse, convidadoResponse] = await Promise.all([
-          fetch(`http://localhost:5000/api/eventos/${convidadoId}`),
-          fetch(`http://localhost:5000/api/convidados/${convidadoId}`)
-        ]);
-  
-        if (!eventoResponse.ok || !convidadoResponse.ok) {
-          throw new Error("Erro ao carregar dados.");
+        const convidadoResponse = await fetch(`http://localhost:5000/api/convidados/${convidadoId}`);
+        const convidadoData = await convidadoResponse.json();
+        
+        // Verifique a estrutura real dos dados
+        console.log('Dados brutos do convidado:', convidadoData);
+    
+        // Ajuste conforme a estrutura real da sua API
+        const dadosConvidado = convidadoData.data || convidadoData;
+        
+        if (!dadosConvidado?.evento_id) {
+          throw new Error("Convidado não associado a evento");
         }
-  
-        const [eventoData, convidadoData] = await Promise.all([
-          eventoResponse.json(),
-          convidadoResponse.json()
-        ]);
-  
-        if (eventoData.length > 0) {
-          setEvento(eventoData[0]);
+    
+        setConvidado(dadosConvidado);
+        setLimiteAcompanhantes(dadosConvidado.limite_acompanhante || 0);
+    
+        // Busca evento
+        const eventoResponse = await fetch(`http://localhost:5000/api/eventos/${dadosConvidado.evento_id}`);
+        const eventoData = await eventoResponse.json();
+        
+        // Ajuste conforme a estrutura real da sua API
+        setEvento(eventoData.data || eventoData);
+    
+        // Trata acompanhantes
+        if (dadosConvidado.acompanhantes?.length > 0) {
+          setAcompanhantes(dadosConvidado.acompanhantes.map(a => ({
+            ...a,
+            confirmado: a.confirmado === 1
+          })));
+          setDesejaInformarAcompanhante(true);
         }
-  
-        if (convidadoData) {
-          setConvidado(convidadoData);
-          if (convidadoData.acompanhantes && convidadoData.acompanhantes.length > 0) {
-            setAcompanhantes(
-              convidadoData.acompanhantes.map(a => ({ 
-                ...a, 
-                confirmado: a.confirmado === 1 
-              }))
-            );
-            setDesejaInformarAcompanhante(true);
-          }
-        }
+    
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
-        setMensagem("Erro ao carregar dados do evento.");
+        setError(error.message);
       } finally {
         setIsLoading(false);
       }
     };
-  
-    buscarEventoEConvidado();
+
+    fetchData();
   }, [convidadoId]);
 
   const handleToggleAcompanhante = () => {
-    setDesejaInformarAcompanhante(!desejaInformarAcompanhante);
-    if (!desejaInformarAcompanhante) {
+    const newValue = !desejaInformarAcompanhante;
+    setDesejaInformarAcompanhante(newValue);
+    
+    if (!newValue) {
       setAcompanhantes([]);
+    } else if (convidado?.acompanhantes) {
+      setAcompanhantes(
+        convidado.acompanhantes.map(a => ({ 
+          ...a, 
+          confirmado: a.confirmado === 1 
+        }))
+      );
     }
   };
 
   const handleAddAcompanhante = () => {
+    if (acompanhantes.length >= limiteAcompanhantes) {
+      setError(`Limite de ${limiteAcompanhantes} acompanhantes atingido`);
+      return;
+    }
     setAcompanhantes([...acompanhantes, { nome: "", telefone: "", email: "", confirmado: true }]);
   };
 
   const handleRemoveAcompanhante = (index) => {
     const updatedAcompanhantes = [...acompanhantes];
-    updatedAcompanhantes.splice(index, 1);
-    setAcompanhantes(updatedAcompanhantes);
+    const removed = updatedAcompanhantes.splice(index, 1);
+    
+    // Se estava salvo no banco, precisamos remover via API
+    if (removed[0]?.id) {
+      setIsLoading(true);
+      fetch(`http://localhost:5000/api/convidados/acompanhantes/${removed[0].id}`, {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Erro ao remover acompanhante");
+        setAcompanhantes(updatedAcompanhantes);
+        setMensagem("Acompanhante removido com sucesso");
+      })
+      .catch(error => {
+        console.error("Erro ao remover acompanhante:", error);
+        setError("Erro ao remover acompanhante");
+      })
+      .finally(() => setIsLoading(false));
+    } else {
+      setAcompanhantes(updatedAcompanhantes);
+    }
   };
 
   const handleChangeAcompanhante = (index, field, value) => {
@@ -107,22 +122,28 @@ function EventCredential() {
     setAcompanhantes(updatedAcompanhantes);
   };
 
-  const salvarAcompanhantes = async () => {
-    const temAcompanhantesInvalidos = acompanhantes.some(a => !a.nome);
+const salvarAcompanhantes = async () => {
+  setIsLoading(true);
+  setError("");
+  
+  try {
+    // Verifique se há novos acompanhantes para salvar
+    const novosAcompanhantes = acompanhantes.filter(a => !a.id);
     
-    if (temAcompanhantesInvalidos) {
-      setError("Nome é obrigatório para todos os acompanhantes!");
+    if (novosAcompanhantes.length === 0) {
+      setMensagem("Nenhum novo acompanhante para salvar");
       return;
     }
-  
-    setIsLoading(true);
-    setError("");
-    
-    try {
-      const novosAcompanhantes = acompanhantes.filter(a => !a.id);
-      const acompanhantesAtualizados = [...acompanhantes.filter(a => a.id)];
-  
-      for (const acompanhante of novosAcompanhantes) {
+
+    // Validação dos dados
+    const temAcompanhantesInvalidos = novosAcompanhantes.some(a => !a.nome);
+    if (temAcompanhantesInvalidos) {
+      throw new Error("Nome é obrigatório para todos os acompanhantes");
+    }
+
+    // Envie cada acompanhante para a API
+    const resultados = await Promise.all(
+      novosAcompanhantes.map(async (acompanhante) => {
         const response = await fetch(
           `http://localhost:5000/api/convidados/${convidadoId}/acompanhantes`,
           {
@@ -130,51 +151,55 @@ function EventCredential() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               nome: acompanhante.nome,
-              telefone: acompanhante.telefone || "",
-              email: acompanhante.email || ""
+              telefone: acompanhante.telefone || null,
+              email: acompanhante.email || null
             })
           }
         );
-  
+
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText);
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Erro ao salvar acompanhante");
         }
-  
-        const data = await response.json();
-        acompanhantesAtualizados.push({
-          ...acompanhante,
-          id: data.id,
-          confirmado: false
-        });
-      }
-  
-      setAcompanhantes(acompanhantesAtualizados);
-      setMensagem("Acompanhantes salvos com sucesso!");
-    } catch (error) {
-      console.error("Erro:", error);
-      setError("Erro ao salvar acompanhantes. Tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+
+        return await response.json();
+      })
+    );
+
+    // Atualize o estado com os novos IDs
+    setAcompanhantes(prev => [
+      ...prev.filter(a => a.id), // Mantém os existentes
+      ...resultados.map(r => r.data) // Adiciona os novos com IDs
+    ]);
+
+    setMensagem("Acompanhantes salvos com sucesso!");
+    
+  } catch (error) {
+    console.error("Erro ao salvar acompanhantes:", error);
+    setError(error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   const confirmarPresenca = async (status) => {
     setIsLoading(true);
     setError("");
     
     try {
-
       const responseConvidado = await fetch(
-        `http://localhost:5000/api/convidados/${convidadoId}/confirmacao?status=${status}`,
-        { method: "GET" }
+        `http://localhost:5000/api/convidados/${convidadoId}/confirmacao`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirmado: status === "sim" })
+        }
       );
 
       if (!responseConvidado.ok) {
         throw new Error("Erro ao confirmar presença do convidado principal");
       }
 
-      
       if (status === "sim") {
         const acompanhantesParaEnviar = acompanhantes
           .filter(a => a.id) 
@@ -183,20 +208,22 @@ function EventCredential() {
             confirmado: a.confirmado
           }));
 
-        const responseAcompanhantes = await fetch(
-          `http://localhost:5000/api/convidados/${convidadoId}/confirmar-acompanhantes`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              acompanhantes: acompanhantesParaEnviar
-            })
-          }
-        );
+        if (acompanhantesParaEnviar.length > 0) {
+          const responseAcompanhantes = await fetch(
+            `http://localhost:5000/api/convidados/${convidadoId}/confirmar-acompanhantes`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                acompanhantes: acompanhantesParaEnviar
+              })
+            }
+          );
 
-        if (!responseAcompanhantes.ok) {
-          const errorData = await responseAcompanhantes.json();
-          throw new Error(errorData.erro || "Erro ao confirmar acompanhantes");
+          if (!responseAcompanhantes.ok) {
+            const errorData = await responseAcompanhantes.json();
+            throw new Error(errorData.erro || "Erro ao confirmar acompanhantes");
+          }
         }
       }
 
@@ -206,7 +233,21 @@ function EventCredential() {
           : "Você escolheu não participar. ❌"
       );
       
-      await buscarDadosConvidado();
+      // Recarrega os dados do convidado
+ // Recarrega os dados do convidado
+const response = await fetch(`http://localhost:5000/api/convidados/${convidadoId}`);
+if (response.ok) {
+  const data = await response.json();
+  setConvidado(data);
+  if (data.acompanhantes) {
+    setAcompanhantes(
+      data.acompanhantes.map(a => ({ 
+        ...a, 
+        confirmado: a.confirmado === 1 
+      }))
+    );
+  }
+}
     } catch (error) {
       console.error("Erro:", error);
       setError(error.message || "Ocorreu um erro. Tente novamente.");
@@ -218,63 +259,57 @@ function EventCredential() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F4F4F9]/30 to-[#B6D4E6]/30 p-6">
       <div className="max-w-md w-full border border-[#D0D9E3] shadow-xl overflow-hidden rounded-2xl transform hover:scale-[1.01] transition-transform duration-300">
-        {evento && (
-          <>
-            <div className="relative overflow-hidden">
-              <img
-                src={eventoImage}
-                alt="Imagem do Evento"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              
-             
-            </div>
+        <div className="relative overflow-hidden">
+          <img
+            src={eventoImage}
+            alt="Imagem do Evento"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+        </div>
 
-                <h1 className="text-2xl font-bold text-black drop-shadow-lg text-center mt-7">
-                  {evento.nome || "Nome não disponível"}
-                </h1>
-                <p className="text-black/80 drop-shadow-md text-center bg-[#4d142238] p-8 mt-7">
-                  {evento.descricao || "Descrição não disponível"}
-                </p>
-            <ChevronsUp size={35} color="#4d1422" className="m-auto mt-5 " />
-            
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-3 text-[#3b3e41]">
-                <MapPin className="w-5 h-5 text-[#591238]" />
-                <span>{evento.local || "Local não informado"}</span>
-              </div>
+        <h1 className="text-2xl font-bold text-black drop-shadow-lg text-center mt-7">
+          {evento.nome || "Nome não disponível"}
+        </h1>
+        <p className="text-black/80 drop-shadow-md text-center bg-[#4d142238] p-8 mt-7">
+          {evento.descricao || "Descrição não disponível"}
+        </p>
+        <ChevronsUp size={35} color="#4d1422" className="m-auto mt-5 " />
+        
+        <div className="p-6 space-y-4">
+          <div className="flex items-center gap-3 text-[#3b3e41]">
+            <MapPin className="w-5 h-5 text-[#591238]" />
+            <span>{evento.local || "Local não informado"}</span>
+          </div>
 
-              <div className="flex items-center gap-3 text-[#3b3e41]">
-                <Clock className="w-5 h-5 text-[#591238]" />
-                <span>
-                  {evento.data_evento
-                    ? new Date(evento.data_evento).toLocaleString("pt-BR", {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })
-                    : "Data não disponível"}
-                </span>
-              </div>
+          <div className="flex items-center gap-3 text-[#3b3e41]">
+            <Clock className="w-5 h-5 text-[#591238]" />
+            <span>
+              {evento.data_evento
+                ? new Date(evento.data_evento).toLocaleString("pt-BR", {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                : "Data não disponível"}
+            </span>
+          </div>
 
-              <div className="mt-4 rounded-lg overflow-hidden shadow-sm border border-gray-200">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15550.029344321243!2d-38.53476171451526!3d-13.003331889437622!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x716037ee92ceae7%3A0x97ede61f92ef397b!2sBarra%2C%20Salvador%20-%20BA!5e0!3m2!1spt-PT!2sbr!4v1742953169002!5m2!1spt-PT!2sbr" 
-                  width="100%" 
-                  height="250" 
-                  style={{ border: 0 }} 
-                  allowFullScreen 
-                  loading="lazy" 
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="rounded-lg"
-                ></iframe>
-              </div>
-            </div>
-          </>
-        )}
+          <div className="mt-4 rounded-lg overflow-hidden shadow-sm border border-gray-200">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15550.029344321243!2d-38.53476171451526!3d-13.003331889437622!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x716037ee92ceae7%3A0x97ede61f92ef397b!2sBarra%2C%20Salvador%20-%20BA!5e0!3m2!1spt-PT!2sbr!4v1742953169002!5m2!1spt-PT!2sbr" 
+              width="100%" 
+              height="250" 
+              style={{ border: 0 }} 
+              allowFullScreen 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              className="rounded-lg"
+            ></iframe>
+          </div>
+        </div>
 
         <div className="p-6 pt-0">
           {error && (
@@ -299,26 +334,30 @@ function EventCredential() {
           )}
 
           <div className="mb-6">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={desejaInformarAcompanhante}
-                  onChange={handleToggleAcompanhante}
-                  className="rounded border-gray-300 text-[#591238] focus:ring-[#591238]"
-                />
-                <span className="text-gray-700 font-medium">Informar acompanhantes?</span>
-              </label>
-              {desejaInformarAcompanhante && (
-                <button
-                  onClick={handleAddAcompanhante}
-                  className="text-sm flex items-center gap-1 text-[#591238] hover:text-[#7a1a48]"
-                >
-                  <Plus size={16} />
-                  Adicionar
-                </button>
-              )}
-            </div>
+            {limiteAcompanhantes > 0 && (
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={desejaInformarAcompanhante}
+                    onChange={handleToggleAcompanhante}
+                    className="rounded border-gray-300 text-[#591238] focus:ring-[#591238]"
+                  />
+                  <span className="text-gray-700 font-medium">
+                    Informar acompanhantes? ({acompanhantes.length}/{limiteAcompanhantes})
+                  </span>
+                </label>
+                {desejaInformarAcompanhante && acompanhantes.length < limiteAcompanhantes && (
+                  <button
+                    onClick={handleAddAcompanhante}
+                    className="text-sm flex items-center gap-1 text-[#591238] hover:text-[#7a1a48]"
+                  >
+                    <Plus size={16} />
+                    Adicionar
+                  </button>
+                )}
+              </div>
+            )}
 
             {desejaInformarAcompanhante && (
               <div className="space-y-3">
@@ -331,7 +370,6 @@ function EventCredential() {
                           id={`confirmar-${index}`}
                           checked={acompanhante.confirmado}
                           onChange={() => toggleConfirmacaoAcompanhante(index)}
-                          // disabled={!acompanhante.id}
                           className={`rounded border-gray-300 text-[#591238] focus:ring-[#591238] mr-2 ${
                             !acompanhante.id ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                           }`}
@@ -340,7 +378,7 @@ function EventCredential() {
                           Acompanhante {index + 1}
                         </label>
                       </div>
-                      {!acompanhante.id && (
+                      {(!acompanhante.id || acompanhantes.length > 1) && (
                         <button 
                           onClick={() => handleRemoveAcompanhante(index)}
                           className="text-gray-400 hover:text-red-500 transition-colors"
