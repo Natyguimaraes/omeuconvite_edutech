@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate} from "react-router-dom";
 import {
   Check,
   Trash2,
@@ -16,7 +16,6 @@ import { toast } from "sonner";
 
 const Confirmacao = () => {
   const navigate = useNavigate();
-  const { id: convidadoIdParam } = useParams();
   const [eventos, setEventos] = useState([]);
   const [convidados, setConvidados] = useState([]);
   const [loading, setLoading] = useState(true);
