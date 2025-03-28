@@ -20,7 +20,7 @@ export async function createEventoController(req, res) {
   const { nome, descricao, data_evento, local, administrador_id } = req.body;
   const imagem_evento = req.file ? req.file.path : null; 
 
-  if (!imagem_evento ||!nome || !descricao || !data_evento || !local ) {
+  if (!nome || !descricao || !data_evento || !local ) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios." });
   }
 
