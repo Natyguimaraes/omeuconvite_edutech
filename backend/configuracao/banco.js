@@ -12,7 +12,7 @@ const conexao = mysql.createConnection({
   user: process.env.DB_USER || "root",
 
   
-  password: process.env.DB_PASSWORD || "123456789",
+  password: process.env.DB_PASSWORD || "senha",
 
   
   database: process.env.DB_NAME || "teste",

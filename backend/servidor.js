@@ -11,6 +11,7 @@ import process from 'process';
 const app = express();
 
 app.use(cors());
+
 //app.use(cors({
   //origin: [
   //  "http://localhost:5000", //local
