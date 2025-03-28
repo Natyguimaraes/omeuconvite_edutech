@@ -65,8 +65,8 @@ export async function getEventoModel() {
   return new Promise((resolve, reject) => {
     conexao.query("SELECT * FROM eventos", async (err, evento) => {
       if (err) return reject(err);
-      // Faltou o resolve aqui
-      resolve(evento); // Adicione esta linha
+     
+      resolve(evento); 
     });
   });
 }

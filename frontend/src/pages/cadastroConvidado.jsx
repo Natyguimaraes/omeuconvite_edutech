@@ -76,8 +76,8 @@ function CadastroConvidados() {
   const handleCadastro = async () => {
     setError("");
 
-    if (!nome || !telefone || !eventoId) {
-      setError("Nome, telefone e evento são obrigatórios.");
+    if (!nome || !telefone) {
+      setError("Nome, telefone são obrigatórios.");
       toast.error("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
@@ -219,7 +219,7 @@ function CadastroConvidados() {
                         className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all appearance-none"
                         value={eventoId}
                         onChange={(e) => setEventoId(e.target.value)}
-                        required
+                        
                       >
                         <option value="">Selecione um evento</option>
                         {eventos.map((evento) => (
