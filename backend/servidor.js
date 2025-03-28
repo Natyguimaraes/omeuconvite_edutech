@@ -10,6 +10,13 @@ import process from 'process';
 
 const app = express();
 
+app.use(cors());
+//app.use(cors({
+  //origin: [
+  //  "http://localhost:5000", //local
+    //"https://seu-frontend.up.railway.app" //em produção
+ // ]
+//}));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
