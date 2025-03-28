@@ -1,11 +1,9 @@
-
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Check, X, Clock, ChevronsUp, User, MapPin, Plus, Mail, Phone, Loader2, PartyPopper } from "lucide-react";
-import eventoImage from '../../../backend/uploads/convite.jpg';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from "framer-motion";
+
 
 function EventCredential() {
   const { convidadoId } = useParams();
@@ -364,7 +362,7 @@ function EventCredential() {
             {/* Cabeçalho do Evento */}
             <div className="relative h-[28rem] overflow-hidden group">
               <motion.img
-                src={eventoImage}
+                src="/convite.jpg"
                 alt="Imagem do Evento"
                 className="w-full h-full object-cover object-center"
                 initial={{ scale: 1 }}
