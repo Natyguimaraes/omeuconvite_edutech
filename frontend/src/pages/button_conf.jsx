@@ -386,22 +386,21 @@ function EventCredential() {
         >
           {/* Event header with original image size */}
           <div className="relative rounded-3xl overflow-hidden shadow-2xl group mb-6 md:mb-8">
-            <div className="relative overflow-hidden">
-              {evento.imagem_evento ? (
-                <motion.div className="w-full overflow-hidden">
-                  <motion.img
-                    src={evento.imagem_evento}
-                    alt={`Imagem do evento ${evento.nome}`}
-                    className="w-full h-auto max-h-[500px] object-contain"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1.2 }}
-                    loading="eager"
-                    onError={(e) => {
-                      console.error('Erro ao carregar imagem:', e);
-                      e.target.style.display = 'none';
-                    }}
-                  />
+  <div className="relative overflow-hidden">
+    <motion.div className="w-full overflow-hidden">
+      <motion.img
+        src={evento.imagem_evento || "/convite.jpg"} {/* Fallback para convite.jpg */}
+        alt={`Imagem do evento ${evento.nome}`}
+        className="w-full h-auto max-h-[500px] object-contain"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.2 }}
+        loading="eager"
+        onError={(e) => {
+          console.error('Erro ao carregar imagem:', e);
+          e.target.src = "/convite.jpg"; // Força o fallback em caso de erro
+        }}
+      />
                  
                 </motion.div>
               ) : (
