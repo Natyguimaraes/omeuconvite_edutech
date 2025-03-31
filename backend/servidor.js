@@ -9,14 +9,13 @@ import superadminRoutes from "./rotas/superadmin.js";
 import process from 'process';
 
 const app = express();
-
-app.use(cors());
-
 app.use(cors({
   origin: [
-   "http://localhost:5000", //local
-    "https://seu-frontend.up.railway.app" //em produção
-  ]
+    "http://localhost:3000", // Frontend local (ajuste a porta se necessário)
+    "https://seu-frontend.up.railway.app" // Frontend em produção
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 const __filename = fileURLToPath(import.meta.url);
