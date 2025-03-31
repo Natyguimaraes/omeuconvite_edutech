@@ -470,7 +470,7 @@ const Confirmacao = () => {
   const handleSendWhatsapp = async (convidado) => {
     const frontendUrl =
       import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
-    const linkConfirmacao = `${frontendUrl}/confirmacao/${convidado.id}`;
+    const linkConfirmacao = `${frontendUrl}/ana_luiza/${convidado.id}`;
     const mensagem = `Olá ${convidado.nome}, confirme sua presença no evento acessando este link: ${linkConfirmacao}`;
     const linkWhatsapp = `https://api.whatsapp.com/send?phone=55${
       convidado.telefone
