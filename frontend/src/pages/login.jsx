@@ -30,9 +30,11 @@ function LoginAdministrador() {
       }
   
       sessionStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.token);
   
       if (data.admin && data.admin.id) {
         sessionStorage.setItem("adminId", data.admin.id.toString());
+        localStorage.setItem("adminId", data.admin.id.toString());
       } else {
         throw new Error("ID do administrador não encontrado na resposta.");
       }
