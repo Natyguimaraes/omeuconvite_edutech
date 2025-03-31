@@ -12,7 +12,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:3000", // Frontend local (ajuste a porta se necessário)
-    "https://omeuconviteedutech-production.up.railway.app" // Frontend em produção
+    "https://omeuconvite-production.up.railway.app" // Frontend em produção
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
