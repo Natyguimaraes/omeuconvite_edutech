@@ -440,9 +440,18 @@ function EventCredential() {
             />
           </motion.div>
 
+          <motion.p
+                className="text-lg md:text-xl text-gray-700 text-center mb-8 font-bold leading-relaxed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+              >
+                Bem-vindo(a), {convidado.nome || "convidado"}
+              </motion.p>
 
+           
           <motion.p 
-                className="text-lg md:text-xl text-gray-700 text-center mb-8 font-light leading-relaxed"
+                className="text-xl md:text-xl text-gray-700 text-center mb-8 font-light leading-relaxed"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7, duration: 0.8 }}
