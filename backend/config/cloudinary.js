@@ -7,4 +7,6 @@ cloudinary.config({
   secure: true // Garante URLs HTTPS
 });
 
+console.log(process.env)
+
 export default cloudinary;
