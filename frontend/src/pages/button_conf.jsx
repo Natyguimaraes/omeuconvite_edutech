@@ -402,14 +402,14 @@ function EventCredential() {
         }}
       />
                  
-                </motion.div>
+                  </motion.div>
               ) : (
                 <motion.div 
                   className="w-full h-60"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8 }}
-                >
+                />
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1, rotate: 360 }}
@@ -417,8 +417,7 @@ function EventCredential() {
                   >
                     <Sparkles className="text-white w-16 h-16" />
                   </motion.div>
-                </motion.div>
-              )}
+                
             </div>
           </div>
 
