@@ -5,7 +5,7 @@ import {
 } from "react-router-dom";
 import LoginAdministrador from "./pages/login";
 import CadastroAdministrador from "./pages/cadastroAdm"; 
-import NavBar from "../../frontend/src/components/menu";
+import NavBar from "./components/menu";
 import CadastroConvidados from "./pages/cadastroConvidado";
 import CadastroEventos from "./pages/cadastroEvento";
 import Confirmacao from "./pages/confirmacao";
