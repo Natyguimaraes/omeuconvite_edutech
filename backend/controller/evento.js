@@ -1,3 +1,4 @@
+import { cloudnaryClient } from "../config/cloudinary.js";
 import {
   createEvento,
   readEventos,
@@ -7,7 +8,6 @@ import {
 } from "../model/evento.js";
 
 import { Buffer } from 'buffer';
-import { v2 as cloudinary } from 'cloudinary';
 
 export async function getAllEventos(req, res) {
   try {
@@ -43,10 +43,10 @@ export async function createEventoController(req, res) {
       const cleanName = nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
       const publicId = `evento_${cleanName}_${Date.now()}`;
       
-      const result = await cloudinary.uploader.upload(dataURI, {
+      const result = await cloudnaryClient.uploader.upload(dataURI, {
         folder: "eventos",
         public_id: publicId,
-        resource_type: "auto"
+        resource_type: "auto",
       });
       
       imagem_evento = {
