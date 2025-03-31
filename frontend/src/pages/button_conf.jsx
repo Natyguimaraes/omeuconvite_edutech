@@ -391,7 +391,7 @@ function EventCredential() {
       <motion.img
         src={evento.imagem_evento || "/convite.jpg"}
         alt={`Imagem do evento ${evento.nome}`}
-        className="w-full h-auto max-h-[500px] object-contain"
+        className="w-full h-auto max-h-[700px] object-contain"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.2 }}
@@ -402,24 +402,25 @@ function EventCredential() {
         }}
       />
                  
-                  </motion.div>
-              ) : (
-                <motion.div 
-                  className="w-full h-60"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8 }}
-                />
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1, rotate: 360 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                  >
-                    <Sparkles className="text-white w-16 h-16" />
-                  </motion.div>
-                
-            </div>
-          </div>
+                 </motion.div>
+
+  <motion.div 
+    className="w-full h-auto"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.8 }}
+  >
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1, rotate: 360 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+    >
+      <Sparkles className="text-white w-16 h-16" />
+    </motion.div>
+  </motion.div>
+
+</div>
+</div>
 
           {/* Event name section below the image */}
           <motion.div 
@@ -439,11 +440,8 @@ function EventCredential() {
             />
           </motion.div>
 
-          {/* Main content card */}
-          <div className="backdrop-blur-md bg-white/90 rounded-3xl overflow-hidden border border-white/50 shadow-xl">
-            {/* Event description and details */}
-            <div className="p-6 md:p-8">
-              <motion.p 
+
+          <motion.p 
                 className="text-lg md:text-xl text-gray-700 text-center mb-8 font-light leading-relaxed"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -451,6 +449,31 @@ function EventCredential() {
               >
                 {evento.descricao || "Descrição do evento"}
               </motion.p>
+
+          <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className="mt-8 rounded-3xl overflow-hidden shadow-xl"
+    >
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.989312273572!2d-38.386530382556124!3d-12.112883599999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x716b9f273764e37%3A0xcd8de6c2e5963b66!2sHaras%20Bom%20Jesus%20Eventos!5e0!3m2!1spt-PT!2sbr!4v1743444753198!5m2!1spt-PT!2sbr"
+        width="100%"
+        height="450"
+        style={{ border: 0 }}
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        className="rounded-3xl"
+        title="Localização do Evento - Haras Bom Jesus Eventos"
+      />
+    </motion.div>
+ 
+
+          <div className="backdrop-blur-md bg-white/90 rounded-3xl overflow-hidden border border-white/50 shadow-xl">
+           
+            <div className="p-6 md:p-8">
+             
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <motion.div 
@@ -498,58 +521,7 @@ function EventCredential() {
               </div>
             </div>
 
-            {/* Form Section */}
-            <div className="p-6 md:p-8 pt-4 pb-10 border-t border-indigo-100">
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="bg-red-50 text-red-600 p-4 md:p-5 rounded-xl mb-6 md:mb-8 flex items-start gap-4 border border-red-100 shadow-md"
-                  >
-                    <div className="bg-red-100 p-2 rounded-full flex-shrink-0">
-                      <X size={20} className="text-red-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold mb-1 text-lg">Ocorreu um erro</h3>
-                      <p>{error}</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence>
-                {mensagem && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className={`p-6 md:p-8 rounded-xl mb-6 md:mb-8 shadow-md ${
-                      mensagem.type === "success" 
-                        ? "bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100"
-                        : "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100"
-                    }`}
-                  >
-                    <div className="flex flex-col items-center text-center">
-                      {typeof mensagem.content === 'string' ? (
-                        <>
-                          <motion.div
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                            className="text-4xl mb-4"
-                          >
-                            {mensagem.emoji || "🎉"}
-                          </motion.div>
-                          <p className="text-xl font-medium">{mensagem.content}</p>
-                        </>
-                      ) : (
-                        mensagem.content
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          
 
               <div className="mb-8 md:mb-10">
                 {limiteAcompanhantes > 0 && (
@@ -720,6 +692,59 @@ function EventCredential() {
                   </div>
                 )}
               </div>
+
+                {/* Form Section */}
+            <div className="p-6 md:p-8 pt-4 pb-10 border-t border-indigo-100">
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="bg-red-50 text-red-600 p-4 md:p-5 rounded-xl mb-6 md:mb-8 flex items-start gap-4 border border-red-100 shadow-md"
+                  >
+                    <div className="bg-red-100 p-2 rounded-full flex-shrink-0">
+                      <X size={20} className="text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold mb-1 text-lg">Ocorreu um erro</h3>
+                      <p>{error}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {mensagem && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className={`p-6 md:p-8 rounded-xl mb-6 md:mb-8 shadow-md ${
+                      mensagem.type === "success" 
+                        ? "bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100"
+                        : "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      {typeof mensagem.content === 'string' ? (
+                        <>
+                          <motion.div
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="text-4xl mb-4"
+                          >
+                            {mensagem.emoji || "🎉"}
+                          </motion.div>
+                          <p className="text-xl font-medium">{mensagem.content}</p>
+                        </>
+                      ) : (
+                        mensagem.content
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Confirmation Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
