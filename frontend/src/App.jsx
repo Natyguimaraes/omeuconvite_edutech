@@ -42,6 +42,7 @@ function App() {
         <Route path="/confirmacao" element={<Confirmacao />} />
         <Route path="/eventos" element={<Eventos />} />
         <Route path="/confirmacao/:convidadoId" element={<ButtonConf />} />
+        <Route path="/ana_luiza/:convidadoId" element={<ButtonConf />} />
       </Routes>
     </Router>
   );
