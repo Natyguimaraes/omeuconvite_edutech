@@ -11,7 +11,7 @@ import process from 'process';
 const app = express();
 app.use(cors({
   origin: [
-    "http://localhost:3000", // Frontend local (ajuste a porta se necessário)
+    "http://localhost:5173", // Frontend local (ajuste a porta se necessário)
     "https://omeuconvite-production.up.railway.app" // Frontend em produção
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
