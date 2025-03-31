@@ -389,7 +389,7 @@ function EventCredential() {
   <div className="relative overflow-hidden">
     <motion.div className="w-full overflow-hidden">
       <motion.img
-        src={evento.imagem_evento || "/convite.jpg"} {/* Fallback para convite.jpg */}
+        src={evento.imagem_evento || "/convite.jpg"}
         alt={`Imagem do evento ${evento.nome}`}
         className="w-full h-auto max-h-[500px] object-contain"
         initial={{ opacity: 0 }}
