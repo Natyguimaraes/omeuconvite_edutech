@@ -58,8 +58,8 @@ function Eventos() {
           : [];
 
         // Normalização robusta dos convidados
-        const convidadosProcessados = Array.isArray(convidadosData)
-          ? convidadosData
+        const convidadosProcessados = Array.isArray(convidadosData?.data)
+          ? convidadosData?.data
               .map(c => {
                 if (!c) return null;
                 
