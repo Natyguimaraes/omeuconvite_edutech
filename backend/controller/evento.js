@@ -6,6 +6,9 @@ import {
   getEventoByIdModel,
 } from "../model/evento.js";
 
+import { Buffer } from 'buffer';
+import { v2 as cloudinary } from 'cloudinary';
+
 export async function getAllEventos(req, res) {
   try {
     const eventos = await readEventos();
@@ -17,16 +20,55 @@ export async function getAllEventos(req, res) {
 }
 
 export async function createEventoController(req, res) {
-  const { nome, descricao, data_evento, local, administrador_id } = req.body;
-  const imagem_evento = req.file ? req.file.path : null; 
+  const { nome, descricao, data_evento, local, tipo, administrador_id } = req.body;
 
-  if (!nome || !descricao || !data_evento || !local ) {
+  if (!nome || !descricao || !data_evento || !local || !tipo) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios." });
   }
 
   try {
-    const result = await createEvento(imagem_evento, nome, descricao, data_evento, local, administrador_id);
-    res.status(201).json({ message: "Evento cadastrado com sucesso!", data: result });
+    let imagem_evento = null;
+
+    if (req.file) {
+      // Validação adicional do tipo de arquivo
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ error: "Tipo de arquivo não suportado." });
+      }
+
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+      
+      // Usar parte do nome do evento no public_id (removendo caracteres especiais)
+      const cleanName = nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const publicId = `evento_${cleanName}_${Date.now()}`;
+      
+      const result = await cloudinary.uploader.upload(dataURI, {
+        folder: "eventos",
+        public_id: publicId,
+        resource_type: "auto"
+      });
+      
+      imagem_evento = {
+        url: result.secure_url,
+        public_id: result.public_id // Armazenar o public_id para possível exclusão futura
+      };
+    }
+
+    const result = await createEvento(
+      imagem_evento ? imagem_evento.url : null, // Armazena apenas a URL no banco
+      nome, 
+      descricao, 
+      data_evento, 
+      local, 
+      tipo, 
+      administrador_id
+    );
+    
+    res.status(201).json({ 
+      message: "Evento cadastrado com sucesso!", 
+      data: result 
+    });
   } catch (err) {
     console.error("Erro ao cadastrar evento:", err);
     res.status(500).json({ error: "Erro ao cadastrar evento." });
@@ -55,12 +97,25 @@ export async function deleteEventoController(req, res) {
   const { id } = req.params;
 
   try {
+    // Primeiro obtém o evento para pegar a imagem
+    const evento = await getEventoByIdModel(id);
+    
+    if (!evento) {
+      return res.status(404).json({ error: "Evento não encontrado para exclusão." });
+    }
+
+    // Se houver imagem no Cloudinary, deleta
+    if (evento.imagem_evento) {
+      // Extrai o public_id da URL (isso depende de como você armazenou)
+      // Ou melhor, armazene o public_id no banco de dados
+      // await cloudinary.uploader.destroy(publicId);
+    }
+
     const result = await deleteEvento(id);
     if (result.affectedRows === 0) {
-      return res
-        .status(404)
-        .json({ error: "Evento não encontrado para exclusão." });
+      return res.status(404).json({ error: "Evento não encontrado para exclusão." });
     }
+    
     res.status(200).json({ message: "Evento excluído com sucesso" });
   } catch (err) {
     console.error("Erro ao excluir evento:", err);

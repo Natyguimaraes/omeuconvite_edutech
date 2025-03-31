@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Check, X, Clock, ChevronsUp, User, MapPin, Plus, Mail, Phone, Loader2, PartyPopper } from "lucide-react";
+import { Check, X, Clock, User, MapPin, Plus, Mail, Phone, Loader2, Sparkles } from "lucide-react";
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from "framer-motion";
-
 
 function EventCredential() {
   const { convidadoId } = useParams();
@@ -21,7 +20,6 @@ function EventCredential() {
     height: window.innerHeight
   });
 
-  // Configuração da URL da API
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
   const API_EVENTOS = `${API_URL}/api/eventos`;
@@ -38,7 +36,6 @@ function EventCredential() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Componente do botão de confirmação premium
   const ConfirmacaoButton = ({ confirmed, onClick, disabled }) => {
     return (
       <motion.button
@@ -86,7 +83,11 @@ function EventCredential() {
         const eventoResponse = await fetch(`${API_EVENTOS}/${dadosConvidado.evento_id}`);
         const eventoData = await eventoResponse.json();
         
-        setEvento(eventoData.data || eventoData);
+        const eventoFormatado = eventoData.data || eventoData;
+        setEvento({
+          ...eventoFormatado,
+          imagem_evento: eventoFormatado.imagem_url || eventoFormatado.imagem_evento
+        });
     
         if (dadosConvidado.acompanhantes?.length > 0) {
           setAcompanhantes(dadosConvidado.acompanhantes.map(a => ({
@@ -105,7 +106,7 @@ function EventCredential() {
     };
 
     fetchData();
-  }, [convidadoId, API_CONVIDADOS, API_EVENTOS]);
+  }, [convidadoId]);
 
   const handleToggleAcompanhante = () => {
     const newValue = !desejaInformarAcompanhante;
@@ -211,10 +212,17 @@ function EventCredential() {
 
       setAcompanhantes(prev => [
         ...prev.filter(a => a.id),
-        ...resultados.map(r => r.data)
+        ...resultados.map(r => ({
+          ...r.data,
+          confirmado: true
+        }))
       ]);
 
-      setMensagem("Acompanhantes salvos com sucesso!");
+      setMensagem({
+        type: "success",
+        content: "Acompanhantes salvos com sucesso!",
+        emoji: "🎉"
+      });
       
     } catch (error) {
       console.error("Erro ao salvar acompanhantes:", error);
@@ -268,29 +276,44 @@ function EventCredential() {
           }
         }
 
-        // efeitos de confirmação
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
         
-        setMensagem(
-          <div className="text-center animate-pulse">
-            <PartyPopper className="w-12 h-12 mx-auto text-yellow-500 mb-4 animate-bounce" />
-            <h3 className="text-3xl font-bold text-emerald-700 mb-2">CONFIRMADO! 🎉</h3>
-            <p className="text-xl text-gray-700">Estamos muito felizes por você vir!</p>
-            <p className="mt-4 text-gray-600">Contamos com sua presença!</p>
-          </div>
-        );
+        setMensagem({
+          type: "success",
+          content: (
+            <div className="text-center">
+              <h3 className="text-3xl md:text-4xl font-bold text-emerald-600 mb-4 tracking-tight">
+                CONFIRMADO! 🎉
+              </h3>
+              <p className="text-xl md:text-2xl text-gray-700 mb-2">
+                Ficamos muito felizes com sua confirmação!
+              </p>
+              <p className="mt-4 text-gray-600">
+                Contamos com sua presença na celebração!
+              </p>
+            </div>
+          )
+        });
       } else {
-        setMensagem(
-          <div className="text-center py-4">
-            <h3 className="text-2xl font-bold text-gray-700 mb-2">Que pena! 😢</h3>
-            <p className="text-lg">Sua ausência será sentida!</p>
-            <p className="mt-2 text-gray-600">Caso mude de ideia, você pode confirmar depois.</p>
-          </div>
-        );
+        setMensagem({
+          type: "info",
+          content: (
+            <div className="text-center">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-700 mb-3">
+                Que pena! 😢
+              </h3>
+              <p className="text-lg md:text-xl">
+                Sua ausência será sentida!
+              </p>
+              <p className="mt-2 text-gray-600">
+                Caso mude de ideia, você pode confirmar depois.
+              </p>
+            </div>
+          )
+        });
       }
       
-      // Recarrega os dados do convidado
       const response = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       if (response.ok) {
         const data = await response.json();
@@ -319,21 +342,24 @@ function EventCredential() {
           width={windowSize.width}
           height={windowSize.height}
           recycle={false}
-          numberOfPieces={500}
-          gravity={0.2}
+          numberOfPieces={800}
+          gravity={0.15}
+          tweenDuration={5000}
+          colors={['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#a855f7']}
+          style={{ position: 'fixed', zIndex: 9999 }}
         />
       )}
 
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-16 px-4 sm:px-6 lg:px-8 pt-24 relative overflow-hidden">
-        {/* Efeitos de fundo animados */}
-        <div className="absolute inset-0 overflow-hidden z-0">
-          {[...Array(15)].map((_, i) => (
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50 pt-6 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute rounded-full bg-indigo-100 opacity-20"
+              className="absolute rounded-full bg-gradient-to-br from-pink-100/30 to-indigo-100/30"
               style={{
-                width: Math.random() * 300 + 100,
-                height: Math.random() * 300 + 100,
+                width: Math.random() * 400 + 100,
+                height: Math.random() * 400 + 100,
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
               }}
@@ -343,7 +369,7 @@ function EventCredential() {
                 opacity: [0.1, 0.2, 0.1],
               }}
               transition={{
-                duration: Math.random() * 20 + 10,
+                duration: Math.random() * 30 + 15,
                 repeat: Infinity,
                 repeatType: "reverse",
                 ease: "easeInOut",
@@ -355,62 +381,93 @@ function EventCredential() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto relative z-10"
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="max-w-3xl mx-auto relative z-10"
         >
-          <div className="backdrop-blur-lg bg-white/90 rounded-3xl overflow-hidden border border-white/30 shadow-2xl">
-            {/* Cabeçalho do Evento */}
-            <div className="relative h-[28rem] overflow-hidden group">
-              <motion.img
-                src="/convite.jpg"
-                alt="Imagem do Evento"
-                className="w-full h-full object-cover object-center"
-                initial={{ scale: 1 }}
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.5 }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-              
-              <div className="absolute bottom-0 left-0 right-0 p-8 text-white text-center">
-                <motion.h1 
-                  className="text-5xl font-bold mb-4 text-shadow-lg"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  {evento.nome || "Nome do Evento"}
-                </motion.h1>
-                <motion.p 
-                  className="text-2xl opacity-90 mb-6 text-shadow"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  {evento.descricao || "Descrição do evento"}
-                </motion.p>
-                <motion.div
+          {/* Event header with original image size */}
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl group mb-6 md:mb-8">
+            <div className="relative overflow-hidden">
+              {evento.imagem_evento ? (
+                <motion.div className="w-full overflow-hidden">
+                  <motion.img
+                    src={evento.imagem_evento}
+                    alt={`Imagem do evento ${evento.nome}`}
+                    className="w-full h-auto max-h-[500px] object-contain"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.2 }}
+                    loading="eager"
+                    onError={(e) => {
+                      console.error('Erro ao carregar imagem:', e);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                 
+                </motion.div>
+              ) : (
+                <motion.div 
+                  className="w-full h-60"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
+                  transition={{ duration: 0.8 }}
                 >
-                  <ChevronsUp size={48} className="mx-auto mt-4 animate-bounce text-yellow-300" />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1, rotate: 360 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  >
+                    <Sparkles className="text-white w-16 h-16" />
+                  </motion.div>
                 </motion.div>
-              </div>
+              )}
             </div>
+          </div>
 
-            {/* Detalhes do Evento */}
-            <div className="p-8 space-y-8">
-              <div className="grid md:grid-cols-2 gap-6">
+          {/* Event name section below the image */}
+          <motion.div 
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.7 }}
+          >
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-gray-900 tracking-tight">
+              {evento.nome || "Nome do Evento"}
+            </h1>
+            <motion.div 
+              className="w-24 h-1 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mx-auto mb-6 rounded-full"
+              initial={{ scaleX: 0, opacity: 0 }}
+              animate={{ scaleX: 1, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            />
+          </motion.div>
+
+          {/* Main content card */}
+          <div className="backdrop-blur-md bg-white/90 rounded-3xl overflow-hidden border border-white/50 shadow-xl">
+            {/* Event description and details */}
+            <div className="p-6 md:p-8">
+              <motion.p 
+                className="text-lg md:text-xl text-gray-700 text-center mb-8 font-light leading-relaxed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+              >
+                {evento.descricao || "Descrição do evento"}
+              </motion.p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <motion.div 
-                  className="flex items-start gap-4 text-gray-700 bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow"
+                  className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from-white to-pink-50 p-5 rounded-2xl border border-pink-100/70 shadow-md hover:shadow-lg transition-all"
                   whileHover={{ y: -5 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
                 >
-                  <div className="bg-indigo-100 p-3 rounded-xl">
-                    <Clock className="w-8 h-8 text-indigo-600" />
+                  <div className="bg-gradient-to-br from-pink-100 to-pink-200 p-3 rounded-xl shadow-inner">
+                    <Clock className="w-7 h-7 text-pink-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-xl mb-2 text-gray-800">Data e Hora</h3>
-                    <p className="text-lg text-gray-600">
+                    <h3 className="font-bold text-lg md:text-xl mb-1 text-gray-800">Data e Hora</h3>
+                    <p className="text-base md:text-lg text-gray-600">
                       {evento.data_evento
                         ? new Date(evento.data_evento).toLocaleString("pt-BR", {
                             weekday: 'long',
@@ -426,48 +483,34 @@ function EventCredential() {
                 </motion.div>
 
                 <motion.div 
-                  className="flex items-start gap-4 text-gray-700 bg-white p-6 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow"
+                  className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from-white to-indigo-50 p-5 rounded-2xl border border-indigo-100/70 shadow-md hover:shadow-lg transition-all"
                   whileHover={{ y: -5 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.9, duration: 0.5 }}
                 >
-                  <div className="bg-pink-100 p-3 rounded-xl">
-                    <MapPin className="w-8 h-8 text-pink-600" />
+                  <div className="bg-gradient-to-br from-indigo-100 to-indigo-200 p-3 rounded-xl shadow-inner">
+                    <MapPin className="w-7 h-7 text-indigo-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-xl mb-2 text-gray-800">Localização</h3>
-                    <p className="text-lg text-gray-600">{evento.local || "Local não informado"}</p>
+                    <h3 className="font-bold text-lg md:text-xl mb-1 text-gray-800">Localização</h3>
+                    <p className="text-base md:text-lg text-gray-600">{evento.local || "Local não informado"}</p>
                   </div>
                 </motion.div>
               </div>
-
-              <motion.div 
-                className="rounded-2xl overflow-hidden shadow-xl border border-gray-200"
-                whileHover={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15550.029344321243!2d-38.53476171451526!3d-13.003331889437622!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x716037ee92ceae7%3A0x97ede61f92ef397b!2sBarra%2C%20Salvador%20-%20BA!5e0!3m2!1spt-PT!2sbr!4v1742953169002!5m2!1spt-PT!2sbr" 
-                  width="100%" 
-                  height="350" 
-                  style={{ border: 0 }} 
-                  allowFullScreen 
-                  loading="lazy" 
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="rounded-xl"
-                />
-              </motion.div>
             </div>
 
-            {/* Seção de Confirmação */}
-            <div className="p-8 pt-0 pb-10">
+            {/* Form Section */}
+            <div className="p-6 md:p-8 pt-4 pb-10 border-t border-indigo-100">
               <AnimatePresence>
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="bg-red-50 text-red-600 p-5 rounded-xl mb-8 flex items-start gap-4 border border-red-100 shadow-md"
+                    className="bg-red-50 text-red-600 p-4 md:p-5 rounded-xl mb-6 md:mb-8 flex items-start gap-4 border border-red-100 shadow-md"
                   >
-                    <div className="bg-red-100 p-2 rounded-full">
+                    <div className="bg-red-100 p-2 rounded-full flex-shrink-0">
                       <X size={20} className="text-red-600" />
                     </div>
                     <div>
@@ -484,25 +527,42 @@ function EventCredential() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className={`p-8 rounded-xl mb-8 shadow-md ${
-                      mensagem.props?.children?.props?.className?.includes('text-emerald-700') 
-                        ? "bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200"
-                        : "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200"
+                    className={`p-6 md:p-8 rounded-xl mb-6 md:mb-8 shadow-md ${
+                      mensagem.type === "success" 
+                        ? "bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100"
+                        : "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100"
                     }`}
                   >
-                    {mensagem}
+                    <div className="flex flex-col items-center text-center">
+                      {typeof mensagem.content === 'string' ? (
+                        <>
+                          <motion.div
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="text-4xl mb-4"
+                          >
+                            {mensagem.emoji || "🎉"}
+                          </motion.div>
+                          <p className="text-xl font-medium">{mensagem.content}</p>
+                        </>
+                      ) : (
+                        mensagem.content
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Seção de Acompanhantes */}
-              <div className="mb-10">
+              <div className="mb-8 md:mb-10">
                 {limiteAcompanhantes > 0 && (
                   <motion.div 
-                    className="flex items-center justify-between p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl mb-8 border border-indigo-100 shadow-md"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-5 md:p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl mb-6 md:mb-8 border border-indigo-100 shadow-md"
                     whileHover={{ scale: 1.005 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
                   >
-                    <label className="flex items-center gap-4 cursor-pointer">
+                    <label className="flex items-center gap-4 cursor-pointer mb-4 sm:mb-0">
                       <div className="relative">
                         <motion.div
                           whileTap={{ scale: 0.9 }}
@@ -522,7 +582,7 @@ function EventCredential() {
                           }`} />
                         </motion.div>
                       </div>
-                      <span className="text-gray-800 font-semibold text-xl">
+                      <span className="text-gray-800 font-semibold text-lg md:text-xl">
                         Informar acompanhantes? ({acompanhantes.length}/{limiteAcompanhantes})
                       </span>
                     </label>
@@ -531,17 +591,17 @@ function EventCredential() {
                         onClick={handleAddAcompanhante}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="flex items-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-lg px-5 py-2 rounded-xl transition-all"
+                        className="flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium text-base md:text-lg px-5 py-3 rounded-xl transition-all shadow-lg hover:shadow-indigo-300/50"
                       >
                         <Plus size={20} />
-                        <span>Adicionar</span>
+                        <span>Adicionar Acompanhante</span>
                       </motion.button>
                     )}
                   </motion.div>
                 )}
 
                 {desejaInformarAcompanhante && (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6">
                     <AnimatePresence>
                       {acompanhantes.map((acompanhante, index) => (
                         <motion.div
@@ -550,12 +610,12 @@ function EventCredential() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, x: -100 }}
                           transition={{ duration: 0.3 }}
-                          className="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden"
+                          className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 to-purple-50 opacity-20" />
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-50/40 to-pink-50/40 opacity-30" />
                           <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-5">
-                              <h3 className="font-semibold text-gray-800 text-xl">
+                            <div className="flex justify-between items-start mb-4 md:mb-5">
+                              <h3 className="font-semibold text-gray-800 text-lg md:text-xl">
                                 Acompanhante {index + 1}
                               </h3>
                               {(!acompanhante.id || acompanhantes.length > 1) && (
@@ -571,16 +631,16 @@ function EventCredential() {
                               )}
                             </div>
                             
-                            <div className="space-y-5">
+                            <div className="space-y-4">
                               <div className="relative">
                                 <div className="absolute left-4 top-4 text-gray-400">
-                                  <User size={24} />
+                                  <User size={22} />
                                 </div>
                                 <input
-                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                                   type="text"
                                   placeholder="Nome completo"
-                                  value={acompanhante.nome}
+                                  value={acompanhante.nome || ""}
                                   onChange={(e) => handleChangeAcompanhante(index, "nome", e.target.value)}
                                   disabled={!!acompanhante.id}
                                 />
@@ -588,13 +648,13 @@ function EventCredential() {
                               
                               <div className="relative">
                                 <div className="absolute left-4 top-4 text-gray-400">
-                                  <Phone size={24} />
+                                  <Phone size={22} />
                                 </div>
                                 <input
-                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                                   type="tel"
                                   placeholder="Telefone com DDD (opcional)"
-                                  value={acompanhante.telefone}
+                                  value={acompanhante.telefone || ""}
                                   onChange={(e) => handleChangeAcompanhante(index, "telefone", e.target.value)}
                                   disabled={!!acompanhante.id}
                                 />
@@ -602,21 +662,20 @@ function EventCredential() {
                               
                               <div className="relative">
                                 <div className="absolute left-4 top-4 text-gray-400">
-                                  <Mail size={24} />
+                                  <Mail size={22} />
                                 </div>
                                 <input
-                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                                   type="email"
                                   placeholder="E-mail (opcional)"
-                                  value={acompanhante.email}
+                                  value={acompanhante.email || ""}
                                   onChange={(e) => handleChangeAcompanhante(index, "email", e.target.value)}
                                   disabled={!!acompanhante.id}
                                 />
                               </div>
 
-                              {/* Botão de confirmação premium */}
                               <div className="flex items-center gap-4 pt-2">
-                                <span className="text-gray-700 font-medium">Confirmar presença:</span>
+                                <span className="text-gray-700 font-medium text-base md:text-lg">Confirmar presença:</span>
                                 <ConfirmacaoButton
                                   confirmed={acompanhante.confirmado}
                                   onClick={() => toggleConfirmacaoAcompanhante(index)}
@@ -639,7 +698,7 @@ function EventCredential() {
                         disabled={isLoading}
                         whileHover={{ scale: isLoading ? 1 : 1.03 }}
                         whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-all disabled:opacity-70 text-xl shadow-lg hover:shadow-indigo-200/50"
+                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-purple-200/50"
                       >
                         {isLoading ? (
                           <>
@@ -650,6 +709,12 @@ function EventCredential() {
                           <>
                             <Check size={24} />
                             <span>Salvar Acompanhantes</span>
+                            <motion.span
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                              💾
+                            </motion.span>
                           </>
                         )}
                       </motion.button>
@@ -658,21 +723,27 @@ function EventCredential() {
                 )}
               </div>
 
-              {/* Botões de Confirmação */}
+              {/* Confirmation Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button
                   onClick={() => confirmarPresenca("sim")}
                   disabled={isLoading}
-                  whileHover={{ scale: isLoading ? 1 : 1.03 }}
+                  whileHover={{ scale: isLoading ? 1 : 1.05, boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.3)" }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-xl shadow-lg hover:shadow-emerald-200/50"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50"
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
                     <>
-                      <Check size={28} />
+                      <Check size={26} />
                       <span>Confirmar Presença</span>
+                      <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        🎉
+                      </motion.span>
                     </>
                   )}
                 </motion.button>
@@ -680,16 +751,22 @@ function EventCredential() {
                 <motion.button
                   onClick={() => confirmarPresenca("nao")}
                   disabled={isLoading}
-                  whileHover={{ scale: isLoading ? 1 : 1.03 }}
+                  whileHover={{ scale: isLoading ? 1 : 1.05, boxShadow: "0 10px 25px -5px rgba(156, 163, 175, 0.3)" }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-xl shadow-lg hover:shadow-gray-200/50"
+                  className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-gray-300/50"
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
                     <>
-                      <X size={28} />
+                      <X size={26} />
                       <span>Não Poderei Ir</span>
+                      <motion.span
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        😢
+                      </motion.span>
                     </>
                   )}
                 </motion.button>

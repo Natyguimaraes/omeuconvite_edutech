@@ -4,8 +4,8 @@ import {
   Routes,
 } from "react-router-dom";
 import LoginAdministrador from "./pages/login";
-import CadastroAdministrador from "./pages/cadastroAdm";
-import Menu from "./pages/menu";
+import CadastroAdministrador from "./pages/cadastroAdm"; 
+import NavBar from "../../frontend/src/components/menu";
 import CadastroConvidados from "./pages/cadastroConvidado";
 import CadastroEventos from "./pages/cadastroEvento";
 import Confirmacao from "./pages/confirmacao";
@@ -20,9 +20,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<PaginaInicial />} />
-
-        <Route
+        <Route path="/" element={<LoginAdministrador />} />
+        
+        {/* Rotas de superadmin (mantidas, mas não acessíveis diretamente) */}
+       <Route
           path="/superadmin/SuperAdminDashboard"
           element={<SuperAdminDashboard />}
         >
@@ -33,9 +34,9 @@ function App() {
           />
         </Route>
 
-        <Route path="/login" element={<LoginAdministrador />} />
-        <Route path="/cadastroAdm" element={<CadastroAdministrador />} />
-        <Route path="/menu" element={<Menu />} />
+        <Route path="/cadastroAdm" element={<CadastroAdministrador />}/>
+        <Route path="/PaginaInicial" element={<PaginaInicial />} />
+        <Route path="/menu" element={<NavBar />} />
         <Route path="/cadastroConvidado" element={<CadastroConvidados />} />
         <Route path="/cadastroEvento" element={<CadastroEventos />} />
         <Route path="/confirmacao" element={<Confirmacao />} />
