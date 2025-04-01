@@ -477,9 +477,9 @@ const Confirmacao = () => {
     }&text=${encodeURIComponent(mensagem)}`;
 
     try {
-      setConvidados(prev => prev.map(c => 
-        c.id === convidado.id ? { ...c, confirmado: true } : c
-      ));
+      // setConvidados(prev => prev.map(c => 
+      //   c.id === convidado.id ? { ...c, confirmado: true } : c
+      // ));
 
       const resposta = await fetch(`${apiConvidados}/${convidado.id}/confirmar`, {
         method: "PUT",
