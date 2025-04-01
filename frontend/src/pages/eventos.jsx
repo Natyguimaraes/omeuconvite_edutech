@@ -287,7 +287,7 @@ function Eventos() {
                     
                         <div className="cursor-pointer group">
                           <div className="mb-3 sm:mb-4">
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                            <h3 className="mt-10 text-lg sm:text-xl font-bold text-gray-800 group-hover:text-indigo-600 transition-colors line-clamp-2">
                               {evento.nome}
                             </h3>
                             <p className="text-gray-500 text-xs sm:text-sm mt-1 sm:mt-2 mb-2 sm:mb-3 line-clamp-2">
