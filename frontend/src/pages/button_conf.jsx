@@ -1,7 +1,18 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Check, X, Clock, User, MapPin, Plus, Mail, Phone, Loader2, Sparkles } from "lucide-react";
-import Confetti from 'react-confetti';
+import {
+  Check,
+  X,
+  Clock,
+  User,
+  MapPin,
+  Plus,
+  Mail,
+  Phone,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
+import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 
 function EventCredential() {
@@ -11,13 +22,14 @@ function EventCredential() {
   const [mensagem, setMensagem] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [acompanhantes, setAcompanhantes] = useState([]);
-  const [desejaInformarAcompanhante, setDesejaInformarAcompanhante] = useState(false);
+  const [desejaInformarAcompanhante, setDesejaInformarAcompanhante] =
+    useState(false);
   const [error, setError] = useState("");
   const [limiteAcompanhantes, setLimiteAcompanhantes] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
-    height: window.innerHeight
+    height: window.innerHeight,
   });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -28,12 +40,12 @@ function EventCredential() {
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const ConfirmacaoButton = ({ confirmed, onClick, disabled }) => {
@@ -43,22 +55,24 @@ function EventCredential() {
         disabled={disabled}
         whileTap={{ scale: disabled ? 1 : 0.95 }}
         className={`relative overflow-hidden w-28 h-14 rounded-full flex items-center justify-center transition-all duration-300 ${
-          confirmed 
-            ? 'bg-gradient-to-r from-emerald-500 to-green-600 shadow-lg shadow-emerald-200/50' 
-            : 'bg-gradient-to-r from-gray-300 to-gray-400 shadow-lg shadow-gray-200/50'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          confirmed
+            ? "bg-gradient-to-r from-emerald-500 to-green-600 shadow-lg shadow-emerald-200/50"
+            : "bg-gradient-to-r from-gray-300 to-gray-400 shadow-lg shadow-gray-200/50"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
-        <motion.span 
+        <motion.span
           className={`absolute left-2 w-10 h-10 bg-white rounded-full shadow-md transition-all duration-300 ${
-            confirmed ? 'transform translate-x-14' : 'transform translate-x-0'
+            confirmed ? "transform translate-x-14" : "transform translate-x-0"
           }`}
           layout
           transition={{ type: "spring", stiffness: 700, damping: 30 }}
         />
-        <span className={`absolute text-white font-bold text-sm ${
-          confirmed ? 'left-3' : 'right-3'
-        }`}>
-          {confirmed ? 'SIM' : 'NÃO'}
+        <span
+          className={`absolute text-white font-bold text-sm ${
+            confirmed ? "left-3" : "right-3"
+          }`}
+        >
+          {confirmed ? "SIM" : "NÃO"}
         </span>
       </motion.button>
     );
@@ -68,35 +82,41 @@ function EventCredential() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
+        const convidadoResponse = await fetch(
+          `${API_CONVIDADOS}/${convidadoId}`
+        );
         const convidadoData = await convidadoResponse.json();
-        
+
         const dadosConvidado = convidadoData.data || convidadoData;
-        
+
         if (!dadosConvidado?.evento_id) {
           throw new Error("Convidado não associado a evento");
         }
-    
+
         setConvidado(dadosConvidado);
         setLimiteAcompanhantes(dadosConvidado.limite_acompanhante || 0);
-    
-        const eventoResponse = await fetch(`${API_EVENTOS}/${dadosConvidado.evento_id}`);
+
+        const eventoResponse = await fetch(
+          `${API_EVENTOS}/${dadosConvidado.evento_id}`
+        );
         const eventoData = await eventoResponse.json();
-        
+
         const eventoFormatado = eventoData.data || eventoData;
         setEvento({
           ...eventoFormatado,
-          imagem_evento: eventoFormatado.imagem_url || eventoFormatado.imagem_evento
+          imagem_evento:
+            eventoFormatado.imagem_url || eventoFormatado.imagem_evento,
         });
-    
+
         if (dadosConvidado.acompanhantes?.length > 0) {
-          setAcompanhantes(dadosConvidado.acompanhantes.map(a => ({
-            ...a,
-            confirmado: a.confirmado === 1
-          })));
+          setAcompanhantes(
+            dadosConvidado.acompanhantes.map((a) => ({
+              ...a,
+              confirmado: a.confirmado === 1,
+            }))
+          );
           setDesejaInformarAcompanhante(true);
         }
-    
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
         setError(error.message);
@@ -111,14 +131,14 @@ function EventCredential() {
   const handleToggleAcompanhante = () => {
     const newValue = !desejaInformarAcompanhante;
     setDesejaInformarAcompanhante(newValue);
-    
+
     if (!newValue) {
       setAcompanhantes([]);
     } else if (convidado?.acompanhantes) {
       setAcompanhantes(
-        convidado.acompanhantes.map(a => ({ 
-          ...a, 
-          confirmado: a.confirmado === 1 
+        convidado.acompanhantes.map((a) => ({
+          ...a,
+          confirmado: a.confirmado === 1,
         }))
       );
     }
@@ -129,28 +149,31 @@ function EventCredential() {
       setError(`Limite de ${limiteAcompanhantes} acompanhantes atingido`);
       return;
     }
-    setAcompanhantes([...acompanhantes, { nome: "", telefone: "", email: "", confirmado: true }]);
+    setAcompanhantes([
+      ...acompanhantes,
+      { nome: "", telefone: "", email: "", confirmado: true },
+    ]);
   };
 
   const handleRemoveAcompanhante = (index) => {
     const updatedAcompanhantes = [...acompanhantes];
     const removed = updatedAcompanhantes.splice(index, 1);
-    
+
     if (removed[0]?.id) {
       setIsLoading(true);
       fetch(`${API_CONVIDADOS}/acompanhantes/${removed[0].id}`, {
-        method: 'DELETE'
+        method: "DELETE",
       })
-      .then(response => {
-        if (!response.ok) throw new Error("Erro ao remover acompanhante");
-        setAcompanhantes(updatedAcompanhantes);
-        setMensagem("Acompanhante removido com sucesso");
-      })
-      .catch(error => {
-        console.error("Erro ao remover acompanhante:", error);
-        setError("Erro ao remover acompanhante");
-      })
-      .finally(() => setIsLoading(false));
+        .then((response) => {
+          if (!response.ok) throw new Error("Erro ao remover acompanhante");
+          setAcompanhantes(updatedAcompanhantes);
+          setMensagem("Acompanhante removido com sucesso");
+        })
+        .catch((error) => {
+          console.error("Erro ao remover acompanhante:", error);
+          setError("Erro ao remover acompanhante");
+        })
+        .finally(() => setIsLoading(false));
     } else {
       setAcompanhantes(updatedAcompanhantes);
     }
@@ -164,29 +187,37 @@ function EventCredential() {
 
   const toggleConfirmacaoAcompanhante = (index) => {
     const updatedAcompanhantes = [...acompanhantes];
-    updatedAcompanhantes[index].confirmado = !updatedAcompanhantes[index].confirmado;
+    updatedAcompanhantes[index].confirmado =
+      !updatedAcompanhantes[index].confirmado;
     setAcompanhantes(updatedAcompanhantes);
   };
 
   const salvarAcompanhantes = async () => {
     setIsLoading(true);
     setError("");
-    
+
     try {
-      const novosAcompanhantes = acompanhantes.filter(a => !a.id);
-      
+      const novosAcompanhantes = acompanhantes.filter((a) => !a.id);
+
       if (novosAcompanhantes.length === 0) {
-        setMensagem("Nenhum novo acompanhante para salvar");
         return;
       }
 
-      const temAcompanhantesInvalidos = novosAcompanhantes.some(a => !a.nome);
+      const acompanhantesPreenchidos = novosAcompanhantes?.filter(        
+        (a) => a.nome && a.nome?.length
+      ) || [];
+
+      if (acompanhantesPreenchidos.length === 0) {
+        return;
+      }
+
+      const temAcompanhantesInvalidos = acompanhantesPreenchidos.some((a) => !a.nome);
       if (temAcompanhantesInvalidos) {
         throw new Error("Nome é obrigatório para todos os acompanhantes");
       }
 
       const resultados = await Promise.all(
-        novosAcompanhantes.map(async (acompanhante) => {
+        acompanhantesPreenchidos.map(async (acompanhante) => {
           const response = await fetch(
             `${API_CONVIDADOS}/${convidadoId}/acompanhantes`,
             {
@@ -196,8 +227,8 @@ function EventCredential() {
                 nome: acompanhante.nome,
                 telefone: acompanhante.telefone || null,
                 email: acompanhante.email || null,
-                confirmado: true
-              })
+                confirmado: true,
+              }),
             }
           );
 
@@ -210,20 +241,19 @@ function EventCredential() {
         })
       );
 
-      setAcompanhantes(prev => [
-        ...prev.filter(a => a.id),
-        ...resultados.map(r => ({
+      setAcompanhantes((prev) => [
+        ...prev.filter((a) => a.id),
+        ...resultados.map((r) => ({
           ...r.data,
-          confirmado: true
-        }))
+          confirmado: true,
+        })),
       ]);
 
-      setMensagem({
-        type: "success",
-        content: "Acompanhantes salvos com sucesso!",
-        emoji: "🎉"
-      });
-      
+      // setMensagem({
+      //   type: "success",
+      //   content: "Acompanhantes salvos com sucesso!",
+      //   emoji: "🎉",
+      // });
     } catch (error) {
       console.error("Erro ao salvar acompanhantes:", error);
       setError(error.message);
@@ -233,16 +263,19 @@ function EventCredential() {
   };
 
   const confirmarPresenca = async (status) => {
+
+    await salvarAcompanhantes();
+
     setIsLoading(true);
     setError("");
-    
+
     try {
       const responseConvidado = await fetch(
         `${API_CONVIDADOS}/${convidadoId}/confirmacao`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ confirmado: status === "sim" })
+          body: JSON.stringify({ confirmado: status === "sim" }),
         }
       );
 
@@ -252,10 +285,10 @@ function EventCredential() {
 
       if (status === "sim") {
         const acompanhantesParaEnviar = acompanhantes
-          .filter(a => a.id)
-          .map(a => ({
+          .filter((a) => a.id)
+          .map((a) => ({
             id: a.id,
-            confirmado: a.confirmado
+            confirmado: a.confirmado,
           }));
 
         if (acompanhantesParaEnviar.length > 0) {
@@ -265,20 +298,22 @@ function EventCredential() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                acompanhantes: acompanhantesParaEnviar
-              })
+                acompanhantes: acompanhantesParaEnviar,
+              }),
             }
           );
 
           if (!responseAcompanhantes.ok) {
             const errorData = await responseAcompanhantes.json();
-            throw new Error(errorData.erro || "Erro ao confirmar acompanhantes");
+            throw new Error(
+              errorData.erro || "Erro ao confirmar acompanhantes"
+            );
           }
         }
 
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
-        
+
         setMensagem({
           type: "success",
           content: (
@@ -293,7 +328,7 @@ function EventCredential() {
                 Contamos com sua presença na celebração!
               </p>
             </div>
-          )
+          ),
         });
       } else {
         setMensagem({
@@ -303,26 +338,24 @@ function EventCredential() {
               <h3 className="text-2xl md:text-3xl font-bold text-gray-700 mb-3">
                 Que pena! 😢
               </h3>
-              <p className="text-lg md:text-xl">
-                Sua ausência será sentida!
-              </p>
+              <p className="text-lg md:text-xl">Sua ausência será sentida!</p>
               <p className="mt-2 text-gray-600">
                 Caso mude de ideia, você pode confirmar depois.
               </p>
             </div>
-          )
+          ),
         });
       }
-      
+
       const response = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       if (response.ok) {
         const data = await response.json();
         setConvidado(data);
         if (data.acompanhantes) {
           setAcompanhantes(
-            data.acompanhantes.map(a => ({ 
-              ...a, 
-              confirmado: a.confirmado === 1 
+            data.acompanhantes.map((a) => ({
+              ...a,
+              confirmado: a.confirmado === 1,
             }))
           );
         }
@@ -334,7 +367,26 @@ function EventCredential() {
       setIsLoading(false);
     }
   };
-  
+
+  const fillAcompanhantePlaceholder = (limiteAcompanhantes) => {
+    if (limiteAcompanhantes) {
+      setDesejaInformarAcompanhante(true);
+      setAcompanhantes([])
+      Array.from({ length: limiteAcompanhantes }).forEach(() => {
+        setAcompanhantes((prev) => [
+          ...prev,
+          { nome: "", telefone: "", email: "", confirmado: true },
+        ]);
+      });
+    }
+  }
+
+  useEffect(() => {
+    if (limiteAcompanhantes > 0 && acompanhantes.length === 0 && desejaInformarAcompanhante) {
+      fillAcompanhantePlaceholder(limiteAcompanhantes);
+    }
+  }, [limiteAcompanhantes, desejaInformarAcompanhante])
+
   return (
     <>
       {showConfetti && (
@@ -345,8 +397,16 @@ function EventCredential() {
           numberOfPieces={800}
           gravity={0.15}
           tweenDuration={5000}
-          colors={['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#a855f7']}
-          style={{ position: 'fixed', zIndex: 9999 }}
+          colors={[
+            "#ec4899",
+            "#8b5cf6",
+            "#3b82f6",
+            "#10b981",
+            "#f59e0b",
+            "#ef4444",
+            "#a855f7",
+          ]}
+          style={{ position: "fixed", zIndex: 9999 }}
         />
       )}
 
@@ -378,7 +438,7 @@ function EventCredential() {
           ))}
         </div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -386,44 +446,42 @@ function EventCredential() {
         >
           {/* Event header with original image size */}
           <div className="relative rounded-3xl overflow-hidden shadow-2xl group mb-6 md:mb-8">
-  <div className="relative overflow-hidden">
-    <motion.div className="w-full overflow-hidden">
-      <motion.img
-        src={evento.imagem_evento || "/convite.jpg"}
-        alt={`Imagem do evento ${evento.nome}`}
-        className="w-full h-auto max-h-[700px] object-contain"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2 }}
-        loading="eager"
-        onError={(e) => {
-          console.error('Erro ao carregar imagem:', e);
-          e.target.src = "/convite.jpg"; // Força o fallback em caso de erro
-        }}
-      />
-                 
-                 </motion.div>
+            <div className="relative overflow-hidden">
+              <motion.div className="w-full overflow-hidden">
+                <motion.img
+                  src={evento.imagem_evento || "/convite.jpg"}
+                  alt={`Imagem do evento ${evento.nome}`}
+                  className="w-full h-auto max-h-[700px] object-contain"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2 }}
+                  loading="eager"
+                  onError={(e) => {
+                    console.error("Erro ao carregar imagem:", e);
+                    e.target.src = "/convite.jpg"; // Força o fallback em caso de erro
+                  }}
+                />
+              </motion.div>
 
-  <motion.div 
-    className="w-full h-auto"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.8 }}
-  >
-    <motion.div
-      initial={{ scale: 0 }}
-      animate={{ scale: 1, rotate: 360 }}
-      transition={{ type: "spring", stiffness: 260, damping: 20 }}
-    >
-      <Sparkles className="text-white w-16 h-16" />
-    </motion.div>
-  </motion.div>
-
-</div>
-</div>
+              <motion.div
+                className="w-full h-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1, rotate: 360 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                >
+                  <Sparkles className="text-white w-16 h-16" />
+                </motion.div>
+              </motion.div>
+            </div>
+          </div>
 
           {/* Event name section below the image */}
-          <motion.div 
+          <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -432,7 +490,7 @@ function EventCredential() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-gray-900 tracking-tight">
               {evento.nome || "Nome do Evento"}
             </h1>
-            <motion.div 
+            <motion.div
               className="w-24 h-1 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mx-auto mb-6 rounded-full"
               initial={{ scaleX: 0, opacity: 0 }}
               animate={{ scaleX: 1, opacity: 1 }}
@@ -441,51 +499,46 @@ function EventCredential() {
           </motion.div>
 
           <motion.p
-                className="text-lg md:text-xl text-gray-700 text-center mb-8 font-bold leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7, duration: 0.8 }}
-              >
-                Bem-vindo(a), {convidado.nome || "convidado"}
-              </motion.p>
+            className="text-lg md:text-xl text-gray-700 text-center mb-8 font-bold leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+          >
+            Bem-vindo(a), {convidado.nome || "convidado"}
+          </motion.p>
 
-           
-          <motion.p 
-                className="text-xl md:text-xl text-gray-700 text-center mb-8 font-light leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7, duration: 0.8 }}
-              >
-                {evento.descricao || "Descrição do evento"}
-              </motion.p>
+          <motion.p
+            className="text-xl md:text-xl text-gray-700 text-center mb-8 font-light leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+          >
+            {evento.descricao || "Descrição do evento"}
+          </motion.p>
 
           <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
-      className="mt-8 rounded-3xl overflow-hidden shadow-xl"
-    >
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.989312273572!2d-38.386530382556124!3d-12.112883599999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x716b9f273764e37%3A0xcd8de6c2e5963b66!2sHaras%20Bom%20Jesus%20Eventos!5e0!3m2!1spt-PT!2sbr!4v1743444753198!5m2!1spt-PT!2sbr"
-        width="100%"
-        height="450"
-        style={{ border: 0 }}
-        allowFullScreen
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        className="rounded-3xl"
-        title="Localização do Evento - Haras Bom Jesus Eventos"
-      />
-    </motion.div>
- 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="mt-8 rounded-3xl overflow-hidden shadow-xl"
+          >
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.989312273572!2d-38.386530382556124!3d-12.112883599999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x716b9f273764e37%3A0xcd8de6c2e5963b66!2sHaras%20Bom%20Jesus%20Eventos!5e0!3m2!1spt-PT!2sbr!4v1743444753198!5m2!1spt-PT!2sbr"
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="rounded-3xl"
+              title="Localização do Evento - Haras Bom Jesus Eventos"
+            />
+          </motion.div>
 
           <div className="backdrop-blur-md bg-white/90 rounded-3xl overflow-hidden border border-white/50 shadow-xl">
-           
             <div className="p-6 md:p-8">
-             
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <motion.div 
+                <motion.div
                   className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from-white to-pink-50 p-5 rounded-2xl border border-pink-100/70 shadow-md hover:shadow-lg transition-all"
                   whileHover={{ y: -5 }}
                   initial={{ opacity: 0, x: -20 }}
@@ -496,23 +549,25 @@ function EventCredential() {
                     <Clock className="w-7 h-7 text-pink-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg md:text-xl mb-1 text-gray-800">Data e Hora</h3>
+                    <h3 className="font-bold text-lg md:text-xl mb-1 text-gray-800">
+                      Data e Hora
+                    </h3>
                     <p className="text-base md:text-lg text-gray-600">
                       {evento.data_evento
                         ? new Date(evento.data_evento).toLocaleString("pt-BR", {
-                            weekday: 'long',
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
+                            weekday: "long",
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
                           })
                         : "Data não disponível"}
                     </p>
                   </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from-white to-indigo-50 p-5 rounded-2xl border border-indigo-100/70 shadow-md hover:shadow-lg transition-all"
                   whileHover={{ y: -5 }}
                   initial={{ opacity: 0, x: 20 }}
@@ -523,186 +578,210 @@ function EventCredential() {
                     <MapPin className="w-7 h-7 text-indigo-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg md:text-xl mb-1 text-gray-800">Localização</h3>
-                    <p className="text-base md:text-lg text-gray-600">{evento.local || "Local não informado"}</p>
+                    <h3 className="font-bold text-lg md:text-xl mb-1 text-gray-800">
+                      Localização
+                    </h3>
+                    <p className="text-base md:text-lg text-gray-600">
+                      {evento.local || "Local não informado"}
+                    </p>
                   </div>
                 </motion.div>
               </div>
             </div>
 
-          
-
-              <div className="mb-8 md:mb-10">
-                {limiteAcompanhantes > 0 && (
-                  <motion.div 
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-5 md:p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl mb-6 md:mb-8 border border-indigo-100 shadow-md"
-                    whileHover={{ scale: 1.005 }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <label className="flex items-center gap-4 cursor-pointer mb-4 sm:mb-0">
-                      <div className="relative">
-                        <motion.div
-                          whileTap={{ scale: 0.9 }}
-                          className="relative"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={desejaInformarAcompanhante}
-                            onChange={handleToggleAcompanhante}
-                            className="sr-only"
-                          />
-                          <div className={`block w-14 h-8 rounded-full transition-colors ${
-                            desejaInformarAcompanhante ? 'bg-indigo-600' : 'bg-gray-300'
-                          }`} />
-                          <div className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
-                            desejaInformarAcompanhante ? 'transform translate-x-6' : ''
-                          }`} />
-                        </motion.div>
-                      </div>
-                      <span className="text-gray-800 font-semibold text-lg md:text-xl">
-                        Informar acompanhantes? ({acompanhantes.length}/{limiteAcompanhantes})
-                      </span>
-                    </label>
-                    {desejaInformarAcompanhante && acompanhantes.length < limiteAcompanhantes && (
-                      <motion.button
-                        onClick={handleAddAcompanhante}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium text-base md:text-lg px-5 py-3 rounded-xl transition-all shadow-lg hover:shadow-indigo-300/50"
+            <div className="mb-8 md:mb-10">
+              {limiteAcompanhantes > 0 && (
+                <motion.div
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-5 md:p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl mb-6 md:mb-8 border border-indigo-100 shadow-md"
+                  whileHover={{ scale: 1.005 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <label className="flex items-center gap-4 cursor-pointer mb-4 sm:mb-0">
+                    <div className="relative">
+                      <motion.div
+                        whileTap={{ scale: 0.9 }}
+                        className="relative"
                       >
-                        <Plus size={20} />
-                        <span>Adicionar Acompanhante</span>
-                      </motion.button>
-                    )}
-                  </motion.div>
-                )}
+                        <input
+                          type="checkbox"
+                          checked={desejaInformarAcompanhante}
+                          onChange={handleToggleAcompanhante}
+                          className="sr-only"
+                        />
+                        <div
+                          className={`block w-14 h-8 rounded-full transition-colors ${
+                            desejaInformarAcompanhante
+                              ? "bg-indigo-600"
+                              : "bg-gray-300"
+                          }`}
+                        />
+                        <div
+                          className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
+                            desejaInformarAcompanhante
+                              ? "transform translate-x-6"
+                              : ""
+                          }`}
+                        />
+                      </motion.div>
+                    </div>
+                    <span className="text-gray-800 font-semibold text-lg md:text-xl">
+                      Informar acompanhantes? ({acompanhantes.length}/
+                      {limiteAcompanhantes})
+                    </span>
+                  </label>
+                </motion.div>
+              )}
 
-                {desejaInformarAcompanhante && (
-                  <div className="space-y-4 md:space-y-6">
-                    <AnimatePresence>
-                      {acompanhantes.map((acompanhante, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -100 }}
-                          transition={{ duration: 0.3 }}
-                          className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-purple-50/40 to-pink-50/40 opacity-30" />
-                          <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-4 md:mb-5">
-                              <h3 className="font-semibold text-gray-800 text-lg md:text-xl">
-                                Acompanhante {index + 1}
-                              </h3>
-                              {(!acompanhante.id || acompanhantes.length > 1) && (
-                                <motion.button 
-                                  onClick={() => handleRemoveAcompanhante(index)}
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                                  aria-label="Remover acompanhante"
-                                >
-                                  <X size={24} />
-                                </motion.button>
+              {desejaInformarAcompanhante && (
+                <div className="space-y-4 md:space-y-6">
+                  <AnimatePresence>
+                    {acompanhantes.map((acompanhante, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -100 }}
+                        transition={{ duration: 0.3 }}
+                        className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-50/40 to-pink-50/40 opacity-30" />
+                        <div className="relative z-10">
+                          <div className="flex justify-between items-start mb-4 md:mb-5">
+                            <h3 className="font-semibold text-gray-800 text-lg md:text-xl">
+                              Acompanhante {index + 1}
+                            </h3>
+                            {(!acompanhante.id || acompanhantes.length > 1) && (
+                              <motion.button
+                                onClick={() => handleRemoveAcompanhante(index)}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                aria-label="Remover acompanhante"
+                              >
+                                <X size={24} />
+                              </motion.button>
+                            )}
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="relative">
+                              <div className="absolute left-4 top-4 text-gray-400">
+                                <User size={22} />
+                              </div>
+                              <input
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                type="text"
+                                placeholder="Nome completo"
+                                value={acompanhante.nome || ""}
+                                onChange={(e) =>
+                                  handleChangeAcompanhante(
+                                    index,
+                                    "nome",
+                                    e.target.value
+                                  )
+                                }
+                                disabled={!!acompanhante.id}
+                              />
+                            </div>
+
+                            <div className="relative">
+                              <div className="absolute left-4 top-4 text-gray-400">
+                                <Phone size={22} />
+                              </div>
+                              <input
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                type="tel"
+                                placeholder="Telefone com DDD (opcional)"
+                                value={acompanhante.telefone || ""}
+                                onChange={(e) =>
+                                  handleChangeAcompanhante(
+                                    index,
+                                    "telefone",
+                                    e.target.value
+                                  )
+                                }
+                                disabled={!!acompanhante.id}
+                              />
+                            </div>
+
+                            <div className="relative">
+                              <div className="absolute left-4 top-4 text-gray-400">
+                                <Mail size={22} />
+                              </div>
+                              <input
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                type="email"
+                                placeholder="E-mail (opcional)"
+                                value={acompanhante.email || ""}
+                                onChange={(e) =>
+                                  handleChangeAcompanhante(
+                                    index,
+                                    "email",
+                                    e.target.value
+                                  )
+                                }
+                                disabled={!!acompanhante.id}
+                              />
+                            </div>
+
+                            <div className="flex items-center gap-4 pt-2">
+                              <span className="text-gray-700 font-medium text-base md:text-lg">
+                                Confirmar presença:
+                              </span>
+                              <ConfirmacaoButton
+                                confirmed={acompanhante.confirmado}
+                                onClick={() =>
+                                  toggleConfirmacaoAcompanhante(index)
+                                }
+                                disabled={!acompanhante.id}
+                              />
+                              {!acompanhante.id && (
+                                <span className="text-sm text-gray-500">
+                                  (Salve primeiro para confirmar)
+                                </span>
                               )}
                             </div>
-                            
-                            <div className="space-y-4">
-                              <div className="relative">
-                                <div className="absolute left-4 top-4 text-gray-400">
-                                  <User size={22} />
-                                </div>
-                                <input
-                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                                  type="text"
-                                  placeholder="Nome completo"
-                                  value={acompanhante.nome || ""}
-                                  onChange={(e) => handleChangeAcompanhante(index, "nome", e.target.value)}
-                                  disabled={!!acompanhante.id}
-                                />
-                              </div>
-                              
-                              <div className="relative">
-                                <div className="absolute left-4 top-4 text-gray-400">
-                                  <Phone size={22} />
-                                </div>
-                                <input
-                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                                  type="tel"
-                                  placeholder="Telefone com DDD (opcional)"
-                                  value={acompanhante.telefone || ""}
-                                  onChange={(e) => handleChangeAcompanhante(index, "telefone", e.target.value)}
-                                  disabled={!!acompanhante.id}
-                                />
-                              </div>
-                              
-                              <div className="relative">
-                                <div className="absolute left-4 top-4 text-gray-400">
-                                  <Mail size={22} />
-                                </div>
-                                <input
-                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                                  type="email"
-                                  placeholder="E-mail (opcional)"
-                                  value={acompanhante.email || ""}
-                                  onChange={(e) => handleChangeAcompanhante(index, "email", e.target.value)}
-                                  disabled={!!acompanhante.id}
-                                />
-                              </div>
-
-                              <div className="flex items-center gap-4 pt-2">
-                                <span className="text-gray-700 font-medium text-base md:text-lg">Confirmar presença:</span>
-                                <ConfirmacaoButton
-                                  confirmed={acompanhante.confirmado}
-                                  onClick={() => toggleConfirmacaoAcompanhante(index)}
-                                  disabled={!acompanhante.id}
-                                />
-                                {!acompanhante.id && (
-                                  <span className="text-sm text-gray-500">(Salve primeiro para confirmar)</span>
-                                )}
-                              </div>
-                            </div>
                           </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                    
-                    {acompanhantes.some(a => !a.id) && (
-                      <motion.button
-                        type="button"
-                        onClick={salvarAcompanhantes}
-                        disabled={isLoading}
-                        whileHover={{ scale: isLoading ? 1 : 1.03 }}
-                        whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-purple-200/50"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-6 h-6 animate-spin" />
-                            <span>Salvando...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Check size={24} />
-                            <span>Salvar Acompanhantes</span>
-                            <motion.span
-                              animate={{ scale: [1, 1.2, 1] }}
-                              transition={{ duration: 1.5, repeat: Infinity }}
-                            >
-                              💾
-                            </motion.span>
-                          </>
-                        )}
-                      </motion.button>
-                    )}
-                  </div>
-                )}
-              </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
 
-                {/* Form Section */}
+                  {/* {acompanhantes.some((a) => !a.id) && (
+                    <motion.button
+                      type="button"
+                      onClick={salvarAcompanhantes}
+                      disabled={isLoading}
+                      whileHover={{ scale: isLoading ? 1 : 1.03 }}
+                      whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-purple-200/50"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                          <span>Salvando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check size={24} />
+                          <span>Salvar Acompanhantes</span>
+                          <motion.span
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            💾
+                          </motion.span>
+                        </>
+                      )}
+                    </motion.button>
+                  )} */}
+                </div>
+              )}
+            </div>
+
+            {/* Form Section */}
             <div className="p-6 md:p-8 pt-4 pb-10 border-t border-indigo-100">
               <AnimatePresence>
                 {error && (
@@ -716,7 +795,9 @@ function EventCredential() {
                       <X size={20} className="text-red-600" />
                     </div>
                     <div>
-                      <h3 className="font-bold mb-1 text-lg">Ocorreu um erro</h3>
+                      <h3 className="font-bold mb-1 text-lg">
+                        Ocorreu um erro
+                      </h3>
                       <p>{error}</p>
                     </div>
                   </motion.div>
@@ -730,13 +811,13 @@ function EventCredential() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     className={`p-6 md:p-8 rounded-xl mb-6 md:mb-8 shadow-md ${
-                      mensagem.type === "success" 
+                      mensagem.type === "success"
                         ? "bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-100"
                         : "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100"
                     }`}
                   >
                     <div className="flex flex-col items-center text-center">
-                      {typeof mensagem.content === 'string' ? (
+                      {typeof mensagem.content === "string" ? (
                         <>
                           <motion.div
                             animate={{ scale: [1, 1.1, 1] }}
@@ -745,7 +826,9 @@ function EventCredential() {
                           >
                             {mensagem.emoji || "🎉"}
                           </motion.div>
-                          <p className="text-xl font-medium">{mensagem.content}</p>
+                          <p className="text-xl font-medium">
+                            {mensagem.content}
+                          </p>
                         </>
                       ) : (
                         mensagem.content
@@ -760,7 +843,10 @@ function EventCredential() {
                 <motion.button
                   onClick={() => confirmarPresenca("sim")}
                   disabled={isLoading}
-                  whileHover={{ scale: isLoading ? 1 : 1.05, boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.3)" }}
+                  whileHover={{
+                    scale: isLoading ? 1 : 1.05,
+                    boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
+                  }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50"
                 >
@@ -783,7 +869,10 @@ function EventCredential() {
                 <motion.button
                   onClick={() => confirmarPresenca("nao")}
                   disabled={isLoading}
-                  whileHover={{ scale: isLoading ? 1 : 1.05, boxShadow: "0 10px 25px -5px rgba(156, 163, 175, 0.3)" }}
+                  whileHover={{
+                    scale: isLoading ? 1 : 1.05,
+                    boxShadow: "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
+                  }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-gray-300/50"
                 >
