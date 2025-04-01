@@ -842,20 +842,22 @@ function EventCredential() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button
                   onClick={() => confirmarPresenca("sim")}
-                  disabled={isLoading}
+                  disabled={isLoading || convidado?.confirmado === 1}
                   whileHover={{
                     scale: isLoading ? 1 : 1.05,
                     boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
                   }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50"
+                  className="flex-1 cursor-pointer disabled:cursor-default disabled:bg-slate-300 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-20 text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50"
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
                     <>
                       <Check size={26} />
-                      <span>Confirmar Presença</span>
+                      <span>{convidado?.confirmado === 1 ? (
+                        "Já confirmado!"
+                      ) : "Confirmar Presença"}</span>
                       <motion.span
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
@@ -874,7 +876,7 @@ function EventCredential() {
                     boxShadow: "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
                   }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-gray-300/50"
+                  className="cursor-pointer flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-gray-300/50"
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
