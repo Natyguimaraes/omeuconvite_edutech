@@ -722,7 +722,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={!!acompanhante.id}
+                               // disabled={!!acompanhante.id}
                               />
                             </div>
 
@@ -735,13 +735,13 @@ function EventCredential() {
                                 onClick={() =>
                                   toggleConfirmacaoAcompanhante(index)
                                 }
-                                disabled={!acompanhante.id}
+                               // disabled={!acompanhante.id}
                               />
-                              {!acompanhante.id && (
-                                <span className="text-sm text-gray-500">
-                                  (Salve primeiro para confirmar)
-                                </span>
-                              )}
+                              {/*{!acompanhante.id && (
+                               // <span className="text-sm text-gray-500">
+                                  //(Salve primeiro para confirmar)
+                               // </span>
+                              )}*/}
                             </div>
                           </div>
                         </div>

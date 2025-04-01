@@ -70,7 +70,7 @@ export function createAcompanhanteModel(dados) {
     const { nome, telefone, email, convidado_id } = dados;
     conexao.query(
       "INSERT INTO acompanhante SET ?",
-      { nome, telefone, email, convidado_id, confirmado: 0 },
+      { nome, telefone, email, convidado_id, confirmado: 1 },
       (err, result) => {
         if (err) return reject(err);
         resolve(result);

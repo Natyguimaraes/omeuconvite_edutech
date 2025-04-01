@@ -229,7 +229,7 @@ export async function createAcompanhante(req, res) {
     const { convidadoId } = req.params; // Alterado de 'id' para 'convidadoId'
     const { nome, telefone, email } = req.body;
 
-    // Verifique se o convidado existe
+   
     const convidado = await getConvidadoByIdModel(convidadoId);
     if (!convidado) {
       return res.status(404).json({ 
@@ -238,7 +238,7 @@ export async function createAcompanhante(req, res) {
       });
     }
 
-    // Verifique o limite de acompanhantes
+    // Verifica o limite de acompanhantes
     const acompanhantes = await getAcompanhantesByConvidadoIdModel(convidadoId);
     if (acompanhantes.length >= convidado.limite_acompanhante) {
       return res.status(400).json({ 
@@ -247,14 +247,24 @@ export async function createAcompanhante(req, res) {
       });
     }
 
-    // Crie o acompanhante
+    // Cria o acompanhante
     const result = await createAcompanhanteModel({
       nome,
       telefone: telefone || null,
       email: email || null,
       convidado_id: convidadoId,
-      confirmado: false
+      confirmado: true
     });
+
+    if (result?.insertId){
+      await updateAcompanhanteModel (result?.insertId, {
+        nome,
+        telefone: telefone || null,
+        email: email || null,
+        convidado_id: convidadoId,
+        confirmado: 1
+      })
+    }
 
     res.status(201).json({ 
       success: true,
@@ -264,7 +274,7 @@ export async function createAcompanhante(req, res) {
         nome,
         telefone,
         email,
-        confirmado: false
+        confirmado: true
       }
     });
 
