@@ -685,6 +685,8 @@ const Confirmacao = () => {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1">
+                  <label htmlFor="nome_convidado">Nome</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 text-gray-400" size={18} />
                   <input
@@ -694,27 +696,36 @@ const Confirmacao = () => {
                     value={newGuest.nome}
                     onChange={(e) => setNewGuest({ ...newGuest, nome: e.target.value })} />
                 </div>
+                </div>
 
+                <div class="flex flex-col gap-1">
+                <label htmlFor="telefone_convidado">Telefone</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 text-gray-400" size={18} />
                   <input
                     type="text"
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Telefone"
+                    placeholder="0000000-0000"
                     value={newGuest.telefone}
                     onChange={(e) => setNewGuest({ ...newGuest, telefone: e.target.value })} />
                 </div>
+                </div>
 
+                <div class="flex flex-col gap-1">
+                <label htmlFor="email_convidado">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 text-gray-400" size={18} />
                   <input
                     type="email"
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Email (opcional)"
+                    placeholder="(Opcional)"
                     value={newGuest.email}
                     onChange={(e) => setNewGuest({ ...newGuest, email: e.target.value })} />
                 </div>
+                </div>
 
+                <div class="flex flex-col gap-1">
+                <label htmlFor="acompanhantes_convidado">Limite de acompanhantes</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 text-gray-400" size={18} />
                   <input
@@ -724,6 +735,7 @@ const Confirmacao = () => {
                     placeholder="Limite de acompanhantes"
                     value={newGuest.limite_acompanhante}
                     onChange={(e) => setNewGuest({ ...newGuest, limite_acompanhante: parseInt(e.target.value) || 0 })} />
+                </div>
                 </div>
 
                 {!eventoId && (
