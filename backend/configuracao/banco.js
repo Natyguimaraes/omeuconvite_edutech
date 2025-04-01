@@ -17,12 +17,15 @@ const conexao = mysql.createConnection({
   
   database: process.env.DB_NAME || "edutecconsult_omeuconvite",
 });
-conexao.connect((err) => {
-  if (err) {
-    console.error("Erro ao conectar ao banco de dados:", err);
-    return;
-  }
-  console.log("Conectado ao banco de dados MySQL");
-});
+
+setInterval(() => {
+  conexao.ping((err) => {
+    if (err) {
+      console.error("Erro ao manter conexão com o banco de dados:", err);
+    } else {
+      console.log("Conexão com o banco de dados mantida.");
+    }
+  });
+}, 60000); // 1 minuto
 
 export default conexao;
