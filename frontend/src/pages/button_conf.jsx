@@ -6,11 +6,11 @@ import {
   Clock,
   User,
   MapPin,
-  Plus,
   Mail,
   Phone,
   Loader2,
   Sparkles,
+  HeartCrack,
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,6 +35,8 @@ function EventCredential() {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
   const API_EVENTOS = `${API_URL}/api/eventos`;
+
+  const isConfirmed = convidado?.confirmado === 1;
 
   useEffect(() => {
     const handleResize = () => {
@@ -129,6 +131,8 @@ function EventCredential() {
   }, [convidadoId]);
 
   const handleToggleAcompanhante = () => {
+    if (isConfirmed) return;
+    
     const newValue = !desejaInformarAcompanhante;
     setDesejaInformarAcompanhante(newValue);
 
@@ -145,7 +149,7 @@ function EventCredential() {
   };
 
   const handleAddAcompanhante = () => {
-    if (acompanhantes.length >= limiteAcompanhantes) {
+    if (isConfirmed || acompanhantes.length >= limiteAcompanhantes) {
       setError(`Limite de ${limiteAcompanhantes} acompanhantes atingido`);
       return;
     }
@@ -156,6 +160,8 @@ function EventCredential() {
   };
 
   const handleRemoveAcompanhante = (index) => {
+    if (isConfirmed) return;
+    
     const updatedAcompanhantes = [...acompanhantes];
     const removed = updatedAcompanhantes.splice(index, 1);
 
@@ -180,19 +186,25 @@ function EventCredential() {
   };
 
   const handleChangeAcompanhante = (index, field, value) => {
+    if (isConfirmed) return;
+    
     const updatedAcompanhantes = [...acompanhantes];
     updatedAcompanhantes[index][field] = value;
     setAcompanhantes(updatedAcompanhantes);
   };
 
-  const toggleConfirmacaoAcompanhante = (index) => {
+  {/*const toggleConfirmacaoAcompanhante = (index) => {
+    if (isConfirmed) return;
+    
     const updatedAcompanhantes = [...acompanhantes];
     updatedAcompanhantes[index].confirmado =
       !updatedAcompanhantes[index].confirmado;
     setAcompanhantes(updatedAcompanhantes);
-  };
+  };*/}
 
   const salvarAcompanhantes = async () => {
+    if (isConfirmed) return;
+    
     setIsLoading(true);
     setError("");
 
@@ -249,11 +261,6 @@ function EventCredential() {
         })),
       ]);
 
-      // setMensagem({
-      //   type: "success",
-      //   content: "Acompanhantes salvos com sucesso!",
-      //   emoji: "🎉",
-      // });
     } catch (error) {
       console.error("Erro ao salvar acompanhantes:", error);
       setError(error.message);
@@ -263,6 +270,7 @@ function EventCredential() {
   };
 
   const confirmarPresenca = async (status) => {
+    if (isConfirmed) return;
 
     await salvarAcompanhantes();
 
@@ -317,32 +325,146 @@ function EventCredential() {
         setMensagem({
           type: "success",
           content: (
-            <div className="text-center">
-              <h3 className="text-3xl md:text-4xl font-bold text-emerald-600 mb-4 tracking-tight">
-                CONFIRMADO! 🎉
-              </h3>
-              <p className="text-xl md:text-2xl text-gray-700 mb-2">
-                Ficamos muito felizes com sua confirmação!
-              </p>
-              <p className="mt-4 text-gray-600">
-                Contamos com sua presença na celebração!
-              </p>
-            </div>
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
+              <div className="relative h-32 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute rounded-full bg-gradient-to-br from-pink-300 to-purple-400"
+                    style={{
+                      width: Math.random() * 60 + 40,
+                      height: Math.random() * 60 + 40,
+                      left: `${Math.random() * 80 + 10}%`,
+                      bottom: 0,
+                    }}
+                    animate={{
+                      y: [0, -100, -200],
+                      opacity: [1, 0.8, 0],
+                      scale: [1, 1.1, 1.2]
+                    }}
+                    transition={{
+                      duration: Math.random() * 3 + 2,
+                      ease: "easeOut",
+                      repeat: Infinity,
+                      repeatDelay: Math.random() * 5
+                    }}
+                  />
+                ))}
+              </div>
+
+              <motion.h3 
+                className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-600 mb-6 tracking-tight"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                PRESENÇA CONFIRMADA! 🎊
+              </motion.h3>
+
+              <motion.div
+                className="mb-6"
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 10, -10, 0],
+                  y: [0, -10, 0]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              >
+                <Sparkles className="w-16 h-16 mx-auto text-yellow-400" />
+              </motion.div>
+
+              <motion.p 
+                className="text-xl md:text-2xl text-gray-700 mb-4 font-medium"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.7 }}
+              >
+                Estou <span className="font-bold text-emerald-600">radiante</span> com sua confirmação!
+              </motion.p>
+
+              
+
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {[...Array(30)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute text-yellow-400 text-xl"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                    }}
+                    animate={{
+                      y: [0, Math.random() * 100 + 50],
+                      x: [0, Math.random() * 40 - 20],
+                      opacity: [1, 0],
+                      rotate: [0, 360]
+                    }}
+                    transition={{
+                      duration: Math.random() * 3 + 2,
+                      delay: Math.random() * 1.5
+                    }}
+                  >
+                    {['🎉', '✨', '🎊', '🥳', '🎈'][Math.floor(Math.random() * 5)]}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           ),
         });
       } else {
         setMensagem({
           type: "info",
           content: (
-            <div className="text-center">
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-700 mb-3">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+                className="mb-6"
+              >
+                <HeartCrack className="w-16 h-16 mx-auto text-rose-400" />
+              </motion.div>
+
+              <motion.h3 
+                className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600 mb-4 tracking-tight"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
                 Que pena! 😢
-              </h3>
-              <p className="text-lg md:text-xl">Sua ausência será sentida!</p>
-              <p className="mt-2 text-gray-600">
-                Caso mude de ideia, você pode confirmar depois.
-              </p>
-            </div>
+              </motion.h3>
+
+              <motion.p 
+                className="text-xl md:text-2xl text-gray-700 mb-4 font-medium"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.7 }}
+              >
+                Sua ausência será <span className="font-bold text-rose-600">muito sentida</span>!
+              </motion.p>
+
+            
+            </motion.div>
           ),
         });
       }
@@ -394,9 +516,9 @@ function EventCredential() {
           width={windowSize.width}
           height={windowSize.height}
           recycle={false}
-          numberOfPieces={800}
+          numberOfPieces={1000}
           gravity={0.15}
-          tweenDuration={5000}
+          tweenDuration={20000}
           colors={[
             "#ec4899",
             "#8b5cf6",
@@ -458,7 +580,7 @@ function EventCredential() {
                   loading="eager"
                   onError={(e) => {
                     console.error("Erro ao carregar imagem:", e);
-                    e.target.src = "/convite.jpg"; // Força o fallback em caso de erro
+                    e.target.src = "/convite.jpg";
                   }}
                 />
               </motion.div>
@@ -609,28 +731,30 @@ function EventCredential() {
                           checked={desejaInformarAcompanhante}
                           onChange={handleToggleAcompanhante}
                           className="sr-only"
+                          disabled={isConfirmed}
                         />
                         <div
                           className={`block w-14 h-8 rounded-full transition-colors ${
                             desejaInformarAcompanhante
                               ? "bg-indigo-600"
                               : "bg-gray-300"
-                          }`}
+                          } ${isConfirmed ? 'opacity-50' : ''}`}
                         />
                         <div
                           className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
                             desejaInformarAcompanhante
                               ? "transform translate-x-6"
                               : ""
-                          }`}
+                          } ${isConfirmed ? 'opacity-70' : ''}`}
                         />
                       </motion.div>
                     </div>
-                    <span className="text-gray-800 font-semibold text-lg md:text-xl">
+                    <span className={`text-gray-800 font-semibold text-lg md:text-xl ${isConfirmed ? 'opacity-70' : ''}`}>
                       Informar acompanhantes? ({acompanhantes.length}/
                       {limiteAcompanhantes})
                     </span>
                   </label>
+               
                 </motion.div>
               )}
 
@@ -644,7 +768,7 @@ function EventCredential() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: -100 }}
                         transition={{ duration: 0.3 }}
-                        className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden"
+                        className={`bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden ${isConfirmed ? 'opacity-80' : ''}`}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-50/40 to-pink-50/40 opacity-30" />
                         <div className="relative z-10">
@@ -652,7 +776,7 @@ function EventCredential() {
                             <h3 className="font-semibold text-gray-800 text-lg md:text-xl">
                               Acompanhante {index + 1}
                             </h3>
-                            {(!acompanhante.id || acompanhantes.length > 1) && (
+                            {(!acompanhante.id || acompanhantes.length > 1) && !isConfirmed && (
                               <motion.button
                                 onClick={() => handleRemoveAcompanhante(index)}
                                 whileHover={{ scale: 1.1 }}
@@ -671,7 +795,7 @@ function EventCredential() {
                                 <User size={22} />
                               </div>
                               <input
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${isConfirmed ? 'cursor-not-allowed' : ''}`}
                                 type="text"
                                 placeholder="Nome completo"
                                 value={acompanhante.nome || ""}
@@ -682,7 +806,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={!!acompanhante.id}
+                                disabled={!!acompanhante.id || isConfirmed}
                               />
                             </div>
 
@@ -691,7 +815,7 @@ function EventCredential() {
                                 <Phone size={22} />
                               </div>
                               <input
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${isConfirmed ? 'cursor-not-allowed' : ''}`}
                                 type="tel"
                                 placeholder="Telefone com DDD (opcional)"
                                 value={acompanhante.telefone || ""}
@@ -702,7 +826,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={!!acompanhante.id}
+                                disabled={!!acompanhante.id || isConfirmed}
                               />
                             </div>
 
@@ -711,7 +835,7 @@ function EventCredential() {
                                 <Mail size={22} />
                               </div>
                               <input
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${isConfirmed ? 'cursor-not-allowed' : ''}`}
                                 type="email"
                                 placeholder="E-mail (opcional)"
                                 value={acompanhante.email || ""}
@@ -722,61 +846,16 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={!!acompanhante.id}
+                                disabled={!!acompanhante.id || isConfirmed}
                               />
                             </div>
 
-                            <div className="flex items-center gap-4 pt-2">
-                              <span className="text-gray-700 font-medium text-base md:text-lg">
-                                Confirmar presença:
-                              </span>
-                              <ConfirmacaoButton
-                                confirmed={acompanhante.confirmado}
-                                onClick={() =>
-                                  toggleConfirmacaoAcompanhante(index)
-                                }
-                                disabled={!acompanhante.id}
-                              />
-                              {!acompanhante.id && (
-                                <span className="text-sm text-gray-500">
-                                  (Salve primeiro para confirmar)
-                                </span>
-                              )}
-                            </div>
+                        
                           </div>
                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
-
-                  {/* {acompanhantes.some((a) => !a.id) && (
-                    <motion.button
-                      type="button"
-                      onClick={salvarAcompanhantes}
-                      disabled={isLoading}
-                      whileHover={{ scale: isLoading ? 1 : 1.03 }}
-                      whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-purple-200/50"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-6 h-6 animate-spin" />
-                          <span>Salvando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Check size={24} />
-                          <span>Salvar Acompanhantes</span>
-                          <motion.span
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                          >
-                            💾
-                          </motion.span>
-                        </>
-                      )}
-                    </motion.button>
-                  )} */}
                 </div>
               )}
             </div>
@@ -842,7 +921,7 @@ function EventCredential() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button
                   onClick={() => confirmarPresenca("sim")}
-                  disabled={isLoading || convidado?.confirmado === 1}
+                  disabled={isLoading || isConfirmed}
                   whileHover={{
                     scale: isLoading ? 1 : 1.05,
                     boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
@@ -855,9 +934,7 @@ function EventCredential() {
                   ) : (
                     <>
                       <Check size={26} />
-                      <span>{convidado?.confirmado === 1 ? (
-                        "Já confirmado!"
-                      ) : "Confirmar Presença"}</span>
+                      <span>{isConfirmed ? "Já confirmado!" : "Confirmar Presença"}</span>
                       <motion.span
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
@@ -870,7 +947,7 @@ function EventCredential() {
 
                 <motion.button
                   onClick={() => confirmarPresenca("nao")}
-                  disabled={isLoading}
+                  disabled={isLoading || isConfirmed}
                   whileHover={{
                     scale: isLoading ? 1 : 1.05,
                     boxShadow: "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
