@@ -31,12 +31,13 @@ function EventCredential() {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+  const [confirmedStatus, setConfirmedStatus] = useState(null); // Novo estado para controlar a confirmação
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
   const API_EVENTOS = `${API_URL}/api/eventos`;
 
-  const isConfirmed = convidado?.confirmado === 1;
+  const isConfirmed = confirmedStatus !== null ? confirmedStatus : convidado?.confirmado === 1;
 
   useEffect(() => {
     const handleResize = () => {
@@ -193,15 +194,6 @@ function EventCredential() {
     setAcompanhantes(updatedAcompanhantes);
   };
 
-  {/*const toggleConfirmacaoAcompanhante = (index) => {
-    if (isConfirmed) return;
-    
-    const updatedAcompanhantes = [...acompanhantes];
-    updatedAcompanhantes[index].confirmado =
-      !updatedAcompanhantes[index].confirmado;
-    setAcompanhantes(updatedAcompanhantes);
-  };*/}
-
   const salvarAcompanhantes = async () => {
     if (isConfirmed) return;
     
@@ -270,7 +262,7 @@ function EventCredential() {
   };
 
   const confirmarPresenca = async (status) => {
-    if (isConfirmed) return;
+    if (isConfirmed && status === "sim") return; // Impede confirmação se já estiver confirmado
 
     await salvarAcompanhantes();
 
@@ -391,8 +383,6 @@ function EventCredential() {
                 Estou <span className="font-bold text-emerald-600">radiante</span> com sua confirmação!
               </motion.p>
 
-              
-
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {[...Array(30)].map((_, i) => (
                   <motion.div
@@ -462,13 +452,14 @@ function EventCredential() {
               >
                 Sua ausência será <span className="font-bold text-rose-600">muito sentida</span>!
               </motion.p>
-
-            
             </motion.div>
           ),
         });
       }
 
+      // Atualiza o estado local imediatamente
+      setConfirmedStatus(status === "sim");
+      
       const response = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       if (response.ok) {
         const data = await response.json();
@@ -849,8 +840,6 @@ function EventCredential() {
                                 disabled={!!acompanhante.id || isConfirmed}
                               />
                             </div>
-
-                        
                           </div>
                         </div>
                       </motion.div>
@@ -921,13 +910,15 @@ function EventCredential() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button
                   onClick={() => confirmarPresenca("sim")}
-                  disabled={isLoading || isConfirmed}
+                  disabled={isLoading || isConfirmed} // Desabilita se já estiver confirmado
                   whileHover={{
-                    scale: isLoading ? 1 : 1.05,
-                    boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
+                    scale: isLoading || isConfirmed ? 1 : 1.05,
+                    boxShadow: isLoading || isConfirmed ? "none" : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
                   }}
-                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className="flex-1 cursor-pointer disabled:cursor-default disabled:bg-slate-300 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-20 text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50"
+                  whileTap={{ scale: isLoading || isConfirmed ? 1 : 0.98 }}
+                  className={`flex-1 cursor-pointer disabled:cursor-default bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50
+                    ${isLoading ? 'opacity-70' : ''} 
+                    ${isConfirmed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
@@ -947,13 +938,14 @@ function EventCredential() {
 
                 <motion.button
                   onClick={() => confirmarPresenca("nao")}
-                  disabled={isLoading || isConfirmed}
+                  disabled={isLoading} // Permite clicar mesmo se já tiver confirmado presença
                   whileHover={{
                     scale: isLoading ? 1 : 1.05,
-                    boxShadow: "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
+                    boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
                   }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className="cursor-pointer flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all disabled:opacity-70 text-lg md:text-xl shadow-lg hover:shadow-gray-300/50"
+                  className={`flex-1 cursor-pointer bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
+                    ${isLoading ? 'opacity-70' : ''}`}
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
