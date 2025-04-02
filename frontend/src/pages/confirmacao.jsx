@@ -24,10 +24,21 @@ import { toast } from "sonner";
 import NavBar from "../components/menu"
 
 const Confirmacao = () => {
+  // 1. Hooks do React Router
   const navigate = useNavigate();
-  const [eventos, setEventos] = useState([]);
   const [searchParams] = useSearchParams();
   const eventoId = searchParams.get("eventoId");
+
+  // 2. Estados 
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem('convidadosFilters');
+    return savedFilters ? JSON.parse(savedFilters) : {
+      status: "all",
+      searchName: "",
+    };
+  });
+
+  const [eventos, setEventos] = useState([]);
   const [convidados, setConvidados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editIndex, setEditIndex] = useState(null);
@@ -42,13 +53,12 @@ const Confirmacao = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [addingGuest, setAddingGuest] = useState(false);
-
-  // Filtros
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    status: "all",
-    searchName: "",
-  });
+
+  // 3. para persistir filtros
+  useEffect(() => {
+    localStorage.setItem('convidadosFilters', JSON.stringify(filters));
+  }, [filters]);
 
   // Novo convidado
   const [showAddForm, setShowAddForm] = useState(false);
@@ -687,7 +697,7 @@ const Confirmacao = () => {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
                   <label htmlFor="nome_convidado">Nome</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 text-gray-400" size={18} />
@@ -700,7 +710,7 @@ const Confirmacao = () => {
                 </div>
                 </div>
 
-                <div class="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
                 <label htmlFor="telefone_convidado">Telefone</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 text-gray-400" size={18} />
@@ -713,7 +723,7 @@ const Confirmacao = () => {
                 </div>
                 </div>
 
-                <div class="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
                 <label htmlFor="email_convidado">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 text-gray-400" size={18} />
@@ -726,7 +736,7 @@ const Confirmacao = () => {
                 </div>
                 </div>
 
-                <div class="flex flex-col gap-1">
+                <div className="flex flex-col gap-1">
                 <label htmlFor="acompanhantes_convidado">Limite de acompanhantes</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 text-gray-400" size={18} />
