@@ -258,6 +258,7 @@ const Confirmacao = () => {
         limite_acompanhante: 0,
         evento_id: eventoId || "",
       });
+      fetchDados();
     } catch (error) {
       console.error("Erro ao adicionar:", error);
       toast.error(error.message);
@@ -305,33 +306,34 @@ const Confirmacao = () => {
       setLoading(false);
     }
   };
+
+  async function fetchDados() {
+    setLoading(true);
+    try {
+      const [eventosRes, convidadosRes] = await Promise.all([
+        fetch(apiEventos),
+        fetch(apiConvidados),
+      ]);
+
+      if (!eventosRes.ok || !convidadosRes.ok) {
+        throw new Error("Erro ao buscar dados");
+      }
+
+      const eventosData = await eventosRes.json();
+      const convidadosData = await convidadosRes.json();
+
+      setEventos(Array.isArray(eventosData) ? eventosData : []);
+      setConvidados(Array.isArray(convidadosData.data) ? convidadosData.data : []);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+      toast.error(`Erro ao buscar dados: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
   
   // Buscar dados iniciais
   useEffect(() => {
-    async function fetchDados() {
-      setLoading(true);
-      try {
-        const [eventosRes, convidadosRes] = await Promise.all([
-          fetch(apiEventos),
-          fetch(apiConvidados),
-        ]);
-
-        if (!eventosRes.ok || !convidadosRes.ok) {
-          throw new Error("Erro ao buscar dados");
-        }
-
-        const eventosData = await eventosRes.json();
-        const convidadosData = await convidadosRes.json();
-
-        setEventos(Array.isArray(eventosData) ? eventosData : []);
-        setConvidados(Array.isArray(convidadosData.data) ? convidadosData.data : []);
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        toast.error(`Erro ao buscar dados: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchDados();
   }, []);
 
