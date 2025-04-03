@@ -15,26 +15,26 @@ import PaginaInicial from "./pages/PaginaInicial";
 import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import CadastrarPlano from "./pages/superadmin/CadastrarPlano";
 import LiberarAdministrador from "./pages/superadmin/LiberarAdministrador";
+import Rodape from "././components/rodape"
 
 function App() {
   return (
-    <Router>
+    <><Router>
       <Routes>
         <Route path="/" element={<LoginAdministrador />} />
-        
+
         {/* Rotas de superadmin (mantidas, mas não acessíveis diretamente) */}
-       <Route
+        <Route
           path="/superadmin/SuperAdminDashboard"
           element={<SuperAdminDashboard />}
         >
           <Route path="CadastrarPlano" element={<CadastrarPlano />} />
           <Route
             path="LiberarAdministrador"
-            element={<LiberarAdministrador />}
-          />
+            element={<LiberarAdministrador />} />
         </Route>
 
-        <Route path="/cadastroAdm" element={<CadastroAdministrador />}/>
+        <Route path="/cadastroAdm" element={<CadastroAdministrador />} />
         <Route path="/PaginaInicial" element={<PaginaInicial />} />
         <Route path="/menu" element={<NavBar />} />
         <Route path="/cadastroConvidado" element={<CadastroConvidados />} />
@@ -45,6 +45,7 @@ function App() {
         <Route path="/ana_luiza/:convidadoId" element={<ButtonConf />} />
       </Routes>
     </Router>
+    <Rodape /></>
   );
 }
 

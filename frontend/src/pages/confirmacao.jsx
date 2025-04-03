@@ -4,7 +4,6 @@ import {
   Check,
   Trash2,
   Edit,
-  Send,
   Plus,
   ChevronLeft,
   Loader2,
@@ -20,6 +19,7 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import NavBar from "../components/menu"
 
@@ -50,6 +50,8 @@ const Confirmacao = () => {
     limite_acompanhante: 0,
     acompanhantes: [],
   });
+
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [addingGuest, setAddingGuest] = useState(false);
@@ -1127,7 +1129,7 @@ const Confirmacao = () => {
                                                 className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
                                                 title="Enviar WhatsApp"
                                               >
-                                                <Send className="h-4 w-4" />
+                                                <FaWhatsapp className="h-4 w-4" />
                                               </button>
                                               <button
                                                 onClick={() => handleEdit(convidado.id)}
