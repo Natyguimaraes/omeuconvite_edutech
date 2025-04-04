@@ -31,7 +31,7 @@ function EventCredential() {
     width: window.innerWidth,
     height: window.innerHeight,
   });
-  const [confirmedStatus, setConfirmedStatus] = useState(null); // Novo estado para controlar a confirmação
+  const [confirmedStatus, setConfirmedStatus] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
@@ -85,81 +85,165 @@ function EventCredential() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const convidadoResponse = await fetch(
-          `${API_CONVIDADOS}/${convidadoId}`
-        );
-        const convidadoData = await convidadoResponse.json();
-
-        const dadosConvidado = convidadoData.data || convidadoData;
-
-        if (!dadosConvidado?.evento_id) {
-          throw new Error("Convidado não associado a evento");
+        // 1. Busca dados do convidado
+        const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
+        if (!convidadoResponse.ok) {
+          throw new Error(`Erro ao buscar convidado: ${convidadoResponse.status}`);
         }
-
-        setConvidado(dadosConvidado);
-        setLimiteAcompanhantes(dadosConvidado.limite_acompanhante || 0);
-
-        const eventoResponse = await fetch(
-          `${API_EVENTOS}/${dadosConvidado.evento_id}`
-        );
-        const eventoData = await eventoResponse.json();
-
-        const eventoFormatado = eventoData.data || eventoData;
-        setEvento({
-          ...eventoFormatado,
-          imagem_evento:
-            eventoFormatado.imagem_url || eventoFormatado.imagem_evento,
-        });
-
-        if (dadosConvidado.acompanhantes?.length > 0) {
+        
+        const responseData = await convidadoResponse.json();
+        const dadosConvidado = responseData.data || responseData;
+  
+        // 2. Processa limite de acompanhantes (pega do evento se não tiver no convidado)
+        let limite = parseInt(dadosConvidado.limite_acompanhante) || 0;
+        
+        // Verifica se há limite definido na relação com o evento
+        if (dadosConvidado.eventos && dadosConvidado.eventos.length > 0) {
+          const limiteEvento = parseInt(dadosConvidado.eventos[0].limite_acompanhante) || 0;
+          if (limiteEvento > 0) {
+            limite = limiteEvento;
+          }
+        }
+        
+        setLimiteAcompanhantes(limite);
+  
+        // 3. Processa acompanhantes existentes (se houver)
+        const acompanhantesExistentes = Array.isArray(dadosConvidado.acompanhantes)
+          ? dadosConvidado.acompanhantes.map(a => ({
+              id: a.id,
+              nome: a.nome || "",
+              telefone: a.telefone || "",
+              email: a.email || "",
+              confirmado: a.confirmado === 1
+            }))
+          : [];
+  
+        // 4. Define estado dos acompanhantes
+        if (acompanhantesExistentes.length > 0) {
+          setAcompanhantes(acompanhantesExistentes);
+          setDesejaInformarAcompanhante(true);
+        } else if (limite > 0) {
+          setDesejaInformarAcompanhante(true);
           setAcompanhantes(
-            dadosConvidado.acompanhantes.map((a) => ({
-              ...a,
-              confirmado: a.confirmado === 1,
+            Array.from({ length: limite }, () => ({
+              nome: "",
+              telefone: "",
+              email: "",
+              confirmado: true
             }))
           );
-          setDesejaInformarAcompanhante(true);
         }
+        // 6. Processa evento associado
+        let eventoAssociado = null;
+        
+        // Verifica primeiro se há um evento_id direto
+        if (dadosConvidado.evento_id) {
+          eventoAssociado = { id: dadosConvidado.evento_id };
+        } 
+        // Caso contrário, verifica o array de eventos
+        else if (Array.isArray(dadosConvidado.eventos)) {
+          eventoAssociado = dadosConvidado.eventos.find(e => e.id) || null;
+        }
+  
+        if (!eventoAssociado) {
+          throw new Error("Convidado não possui evento associado");
+        }
+  
+        // 7. Busca dados completos do evento
+        const eventoResponse = await fetch(`${API_EVENTOS}/${eventoAssociado.id}`);
+        if (!eventoResponse.ok) {
+          throw new Error(`Erro ao buscar evento: ${eventoResponse.status}`);
+        }
+  
+        const eventoData = await eventoResponse.json();
+        const eventoFormatado = eventoData.data || eventoData;
+  
+        // 8. Atualiza estados
+        setConvidado({
+          id: dadosConvidado.id,
+          nome: dadosConvidado.nome || "Convidado",
+          telefone: dadosConvidado.telefone || "",
+          email: dadosConvidado.email || "",
+          confirmado: dadosConvidado.confirmado === 1,
+          limite_acompanhante: limite
+        });
+  
+        setEvento({
+          id: eventoFormatado.id,
+          nome: eventoFormatado.nome || "Evento",
+          descricao: eventoFormatado.descricao || "Descrição do evento",
+          data_evento: eventoFormatado.data_evento || new Date().toISOString(),
+          local: eventoFormatado.local || "Local não especificado",
+          imagem_evento: eventoFormatado.imagem_evento || "/convite.jpg"
+        });
+  
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
         setError(error.message);
+        
+        // Estado de fallback
+        setConvidado({
+          id: convidadoId,
+          nome: "Convidado",
+          confirmado: false,
+          limite_acompanhante: 0
+        });
+        
+        setEvento({
+          nome: "Evento",
+          descricao: "Descrição do evento",
+          data_evento: new Date().toISOString(),
+          local: "Local não especificado",
+          imagem_evento: "/convite.jpg"
+        });
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
   }, [convidadoId]);
+  
+  const handleAddAcompanhante = () => {
+    if (isConfirmed || acompanhantes.length >= limiteAcompanhantes) {
+      setError(`Limite de ${limiteAcompanhantes} acompanhantes atingido`);
+      return;
+    }
+    
+    setAcompanhantes([
+      ...acompanhantes,
+      { nome: "", telefone: "", email: "", confirmado: true }
+    ]);
+  };
 
   const handleToggleAcompanhante = () => {
     if (isConfirmed) return;
     
     const newValue = !desejaInformarAcompanhante;
     setDesejaInformarAcompanhante(newValue);
-
+  
     if (!newValue) {
       setAcompanhantes([]);
-    } else if (convidado?.acompanhantes) {
-      setAcompanhantes(
-        convidado.acompanhantes.map((a) => ({
+    } else {
+      // Inicializa com o número de acompanhantes permitidos
+      const novosAcompanhantes = Array.from({ length: limiteAcompanhantes }, () => ({
+        nome: "",
+        telefone: "",
+        email: "",
+        confirmado: true
+      }));
+      
+      // Mantém os acompanhantes existentes se houver
+      if (convidado?.acompanhantes?.length > 0) {
+        setAcompanhantes(convidado.acompanhantes.map(a => ({
           ...a,
-          confirmado: a.confirmado === 1,
-        }))
-      );
+          confirmado: a.confirmado === 1
+        })));
+      } else {
+        setAcompanhantes(novosAcompanhantes);
+      }
     }
   };
-
-  const handleAddAcompanhante = () => {
-    if (isConfirmed || acompanhantes.length >= limiteAcompanhantes) {
-      setError(`Limite de ${limiteAcompanhantes} acompanhantes atingido`);
-      return;
-    }
-    setAcompanhantes([
-      ...acompanhantes,
-      { nome: "", telefone: "", email: "", confirmado: true },
-    ]);
-  };
-
   const handleRemoveAcompanhante = (index) => {
     if (isConfirmed) return;
     
@@ -199,29 +283,33 @@ function EventCredential() {
     
     setIsLoading(true);
     setError("");
-
+  
     try {
-      const novosAcompanhantes = acompanhantes.filter((a) => !a.id);
-
-      if (novosAcompanhantes.length === 0) {
-        return;
+      // 1. Verifica se há limite disponível
+      const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
+      const convidadoData = await convidadoResponse.json();
+      const dadosConvidado = convidadoData.data || convidadoData;
+      
+      // Verifica se o limite foi atingido
+      const acompanhantesAtuais = dadosConvidado.acompanhantes?.length || 0;
+      const novosAcompanhantes = acompanhantes.filter(a => !a.id && a.nome).length;
+      
+      if (acompanhantesAtuais + novosAcompanhantes > limiteAcompanhantes) {
+        throw new Error(`Limite de ${limiteAcompanhantes} acompanhantes atingido para o evento: ${evento.nome}`);
       }
-
-      const acompanhantesPreenchidos = novosAcompanhantes?.filter(        
-        (a) => a.nome && a.nome?.length
-      ) || [];
-
-      if (acompanhantesPreenchidos.length === 0) {
-        return;
+  
+      // 2. Filtra apenas acompanhantes novos e válidos
+      const acompanhantesParaSalvar = acompanhantes
+        .filter(a => !a.id) // Apenas novos
+        .filter(a => a.nome && a.nome.trim()); // Com nome válido
+  
+      if (acompanhantesParaSalvar.length === 0) {
+        return; // Nada a salvar
       }
-
-      const temAcompanhantesInvalidos = acompanhantesPreenchidos.some((a) => !a.nome);
-      if (temAcompanhantesInvalidos) {
-        throw new Error("Nome é obrigatório para todos os acompanhantes");
-      }
-
+  
+      // 3. Envia para o backend
       const resultados = await Promise.all(
-        acompanhantesPreenchidos.map(async (acompanhante) => {
+        acompanhantesParaSalvar.map(async (acompanhante) => {
           const response = await fetch(
             `${API_CONVIDADOS}/${convidadoId}/acompanhantes`,
             {
@@ -235,85 +323,102 @@ function EventCredential() {
               }),
             }
           );
-
+  
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || "Erro ao salvar acompanhante");
           }
-
+  
           return await response.json();
         })
       );
-
-      setAcompanhantes((prev) => [
-        ...prev.filter((a) => a.id),
-        ...resultados.map((r) => ({
+  
+      // 4. Atualiza o estado local
+      setAcompanhantes(prev => [
+        ...prev.filter(a => a.id), // Mantém os existentes
+        ...resultados.map(r => ({
           ...r.data,
           confirmado: true,
         })),
       ]);
-
+  
     } catch (error) {
-      console.error("Erro ao salvar acompanhantes:", error);
+      console.error("Erro ao salvar acompanhantes:", {
+        error,
+        convidadoId,
+        limiteAcompanhantes,
+        acompanhantes
+      });
+      
       setError(error.message);
+      
+      // Mostra mensagem de erro específica
+      setMensagem({
+        type: "error",
+        content: (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-center text-red-500"
+          >
+            {error.message}
+          </motion.div>
+        )
+      });
+      
+      throw error; // Re-lança o erro para ser tratado na função principal
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   const confirmarPresenca = async (status) => {
-    if (isConfirmed && status === "sim") return; // Impede confirmação se já estiver confirmado
-
-    await salvarAcompanhantes();
-
-    setIsLoading(true);
-    setError("");
-
     try {
-      const responseConvidado = await fetch(
-        `${API_CONVIDADOS}/${convidadoId}/confirmacao`,
+      setIsLoading(true);
+      setError("");
+      setMensagem("");
+  
+      // 1. Verifica se o evento está carregado
+      if (!evento?.id) {
+        throw new Error("Dados do evento não carregados corretamente");
+      }
+  
+      // 2. Tenta salvar acompanhantes primeiro (se necessário)
+      try {
+        if (desejaInformarAcompanhante && acompanhantes.length > 0) {
+          await salvarAcompanhantes();
+        }
+      } catch (error) {
+        // Se der erro ao salvar acompanhantes, cancela a confirmação
+        return;
+      }
+  
+      // 3. Envia confirmação principal
+      const response = await fetch(
+        `${API_CONVIDADOS}/${convidadoId}/eventos/${evento.id}/confirmacao`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ confirmado: status === "sim" }),
+          body: JSON.stringify({
+            confirmado: status === "sim",
+            limite_acompanhante: limiteAcompanhantes,
+          }),
         }
       );
-
-      if (!responseConvidado.ok) {
-        throw new Error("Erro ao confirmar presença do convidado principal");
+  
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Erro ao confirmar presença");
       }
-
+  
+      // 3. Atualiza estado local
+      setConfirmedStatus(status === "sim");
+  
+      // 4. Efeitos visuais para confirmação positiva
       if (status === "sim") {
-        const acompanhantesParaEnviar = acompanhantes
-          .filter((a) => a.id)
-          .map((a) => ({
-            id: a.id,
-            confirmado: a.confirmado,
-          }));
-
-        if (acompanhantesParaEnviar.length > 0) {
-          const responseAcompanhantes = await fetch(
-            `${API_CONVIDADOS}/${convidadoId}/confirmar-acompanhantes`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                acompanhantes: acompanhantesParaEnviar,
-              }),
-            }
-          );
-
-          if (!responseAcompanhantes.ok) {
-            const errorData = await responseAcompanhantes.json();
-            throw new Error(
-              errorData.erro || "Erro ao confirmar acompanhantes"
-            );
-          }
-        }
-
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
-
+  
         setMensagem({
           type: "success",
           content: (
@@ -337,19 +442,19 @@ function EventCredential() {
                     animate={{
                       y: [0, -100, -200],
                       opacity: [1, 0.8, 0],
-                      scale: [1, 1.1, 1.2]
+                      scale: [1, 1.1, 1.2],
                     }}
                     transition={{
                       duration: Math.random() * 3 + 2,
                       ease: "easeOut",
                       repeat: Infinity,
-                      repeatDelay: Math.random() * 5
+                      repeatDelay: Math.random() * 5,
                     }}
                   />
                 ))}
               </div>
-
-              <motion.h3 
+  
+              <motion.h3
                 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-600 mb-6 tracking-tight"
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -357,24 +462,24 @@ function EventCredential() {
               >
                 PRESENÇA CONFIRMADA! 🎊
               </motion.h3>
-
+  
               <motion.div
                 className="mb-6"
                 animate={{ 
                   scale: [1, 1.1, 1],
                   rotate: [0, 10, -10, 0],
-                  y: [0, -10, 0]
+                  y: [0, -10, 0],
                 }}
                 transition={{ 
                   duration: 2,
                   repeat: Infinity,
-                  repeatType: "reverse"
+                  repeatType: "reverse",
                 }}
               >
                 <Sparkles className="w-16 h-16 mx-auto text-yellow-400" />
               </motion.div>
-
-              <motion.p 
+  
+              <motion.p
                 className="text-xl md:text-2xl text-gray-700 mb-4 font-medium"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -382,7 +487,7 @@ function EventCredential() {
               >
                 Estou <span className="font-bold text-emerald-600">radiante</span> com sua confirmação!
               </motion.p>
-
+  
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {[...Array(30)].map((_, i) => (
                   <motion.div
@@ -396,11 +501,11 @@ function EventCredential() {
                       y: [0, Math.random() * 100 + 50],
                       x: [0, Math.random() * 40 - 20],
                       opacity: [1, 0],
-                      rotate: [0, 360]
+                      rotate: [0, 360],
                     }}
                     transition={{
                       duration: Math.random() * 3 + 2,
-                      delay: Math.random() * 1.5
+                      delay: Math.random() * 1.5,
                     }}
                   >
                     {['🎉', '✨', '🎊', '🥳', '🎈'][Math.floor(Math.random() * 5)]}
@@ -411,6 +516,7 @@ function EventCredential() {
           ),
         });
       } else {
+        // Efeitos visuais para confirmação negativa
         setMensagem({
           type: "info",
           content: (
@@ -423,19 +529,19 @@ function EventCredential() {
               <motion.div
                 animate={{ 
                   scale: [1, 1.05, 1],
-                  rotate: [0, 5, -5, 0]
+                  rotate: [0, 5, -5, 0],
                 }}
                 transition={{ 
                   duration: 3,
                   repeat: Infinity,
-                  repeatType: "reverse"
+                  repeatType: "reverse",
                 }}
                 className="mb-6"
               >
                 <HeartCrack className="w-16 h-16 mx-auto text-rose-400" />
               </motion.div>
-
-              <motion.h3 
+  
+              <motion.h3
                 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600 mb-4 tracking-tight"
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -443,8 +549,8 @@ function EventCredential() {
               >
                 Que pena! 😢
               </motion.h3>
-
-              <motion.p 
+  
+              <motion.p
                 className="text-xl md:text-2xl text-gray-700 mb-4 font-medium"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -456,26 +562,62 @@ function EventCredential() {
           ),
         });
       }
-
-      // Atualiza o estado local imediatamente
-      setConfirmedStatus(status === "sim");
-      
-      const response = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setConvidado(data);
-        if (data.acompanhantes) {
+  
+      // 5. Atualiza dados do convidado após confirmação
+      const updatedResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
+      if (updatedResponse.ok) {
+        const updatedData = await updatedResponse.json();
+        setConvidado(updatedData);
+        if (updatedData.acompanhantes) {
           setAcompanhantes(
-            data.acompanhantes.map((a) => ({
+            updatedData.acompanhantes.map(a => ({
               ...a,
               confirmado: a.confirmado === 1,
             }))
           );
         }
       }
+  
     } catch (error) {
-      console.error("Erro:", error);
+      console.error("Erro na confirmação:", {
+        error: error.message,
+        convidadoId,
+        status,
+        eventoId: evento?.id,
+      });
+      
       setError(error.message || "Ocorreu um erro. Tente novamente.");
+      
+      // Animação de erro
+      setMensagem({
+        type: "error",
+        content: (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-center"
+          >
+            <motion.div
+              animate={{ 
+                x: [-10, 10, -10, 10, 0],
+              }}
+              transition={{ 
+                duration: 0.5,
+              }}
+              className="mb-4 text-red-500"
+            >
+              <X className="w-12 h-12 mx-auto" />
+            </motion.div>
+            <p className="text-xl font-medium text-red-600">
+              Ops! Algo deu errado
+            </p>
+            <p className="text-gray-600">
+              {error.message || "Tente novamente mais tarde"}
+            </p>
+          </motion.div>
+        ),
+      });
+  
     } finally {
       setIsLoading(false);
     }
@@ -484,13 +626,13 @@ function EventCredential() {
   const fillAcompanhantePlaceholder = (limiteAcompanhantes) => {
     if (limiteAcompanhantes) {
       setDesejaInformarAcompanhante(true);
-      setAcompanhantes([])
-      Array.from({ length: limiteAcompanhantes }).forEach(() => {
-        setAcompanhantes((prev) => [
-          ...prev,
-          { nome: "", telefone: "", email: "", confirmado: true },
-        ]);
-      });
+      const novosAcompanhantes = Array.from({ length: limiteAcompanhantes }, () => ({
+        nome: "",
+        telefone: "",
+        email: "",
+        confirmado: true
+      }));
+      setAcompanhantes(novosAcompanhantes);
     }
   }
 
@@ -498,7 +640,7 @@ function EventCredential() {
     if (limiteAcompanhantes > 0 && acompanhantes.length === 0 && desejaInformarAcompanhante) {
       fillAcompanhantePlaceholder(limiteAcompanhantes);
     }
-  }, [limiteAcompanhantes, desejaInformarAcompanhante])
+  }, [limiteAcompanhantes, desejaInformarAcompanhante]);
 
   return (
     <>
@@ -966,6 +1108,7 @@ function EventCredential() {
             </div>
           </div>
         </motion.div>
+      
       </div>
     </>
   );

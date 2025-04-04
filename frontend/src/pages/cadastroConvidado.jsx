@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { User, Phone, Mail, ChevronLeft, Loader2, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { User, Phone, Mail, ChevronLeft, Loader2, X, Users } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import NavBar from "../components/menu"
+import NavBar from "../components/menu";
+
 
 function CadastroConvidados() {
+  const { eventoId } = useParams();
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
-  const [limite_acompanhante, setLimiteAcomp] = useState(0);
+  const [limiteAcompanhantes, setLimiteAcompanhantes] = useState(0);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,37 +21,41 @@ function CadastroConvidados() {
 
   const handleCadastro = async () => {
     setError("");
-
+    
     if (!nome || !telefone) {
       setError("Nome e telefone são obrigatórios.");
       toast.error("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
-
+  
     setIsLoading(true);
     try {
+      const bodyData = {
+        nome,
+        telefone,
+        email: email || null,
+        limite_padrao: Number(limiteAcompanhantes) || 0
+      };
+  
       const resposta = await fetch(API_CONVIDADOS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome,
-          telefone,
-          email,
-          limite_acompanhante,
-        }),
+        body: JSON.stringify(bodyData),
       });
-
+  
       const dados = await resposta.json();
-
+  
       if (resposta.ok) {
         toast.success("Convidado cadastrado com sucesso!");
-        setNome("");
-        setTelefone("");
-        setEmail("");
-        setLimiteAcomp(0);
+        
+        setNome("")//serve limpa a lista após a confirmação dos dados
+        setTelefone("")
+          setEmail("")
+          setLimiteAcompanhantes(0);
+          setError("");
       } else {
-        setError(dados.erro || "Erro ao cadastrar convidado.");
-        toast.error(dados.erro || "Não foi possível cadastrar o convidado.");
+        setError(dados.error || "Erro ao cadastrar convidado.");
+        toast.error(dados.error || "Não foi possível cadastrar o convidado.");
       }
     } catch (err) {
       console.error("Erro na requisição:", err);
@@ -59,12 +65,11 @@ function CadastroConvidados() {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <>
-    <NavBar/>
+      <NavBar />
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50 py-16 px-4 sm:px-6 lg:px-8 pt-24 relative overflow-hidden">
-        {/* Animated background elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-20">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-purple-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "0s" }}></div>
           <div className="absolute top-40 right-20 w-72 h-72 rounded-full bg-pink-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
@@ -91,7 +96,7 @@ function CadastroConvidados() {
                   Adicionar Novo Convidado
                 </h1>
                 <p className="text-gray-600 max-w-lg mx-auto">
-                  Preencha os detalhes do convidado
+                  Preencha os detalhes do convidado e defina o limite padrão de acompanhantes
                 </p>
               </div>
               
@@ -109,7 +114,7 @@ function CadastroConvidados() {
                     <input
                       className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
                       type="text"
-                      placeholder="Nome completo"
+                      placeholder="Nome completo*"
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
                       required
@@ -120,8 +125,8 @@ function CadastroConvidados() {
                     <Phone className="absolute left-4 top-3.5 text-gray-400" size={18} />
                     <input
                       className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
-                      type="text"
-                      placeholder="Telefone"
+                      type="tel"
+                      placeholder="Telefone*"
                       value={telefone}
                       onChange={(e) => setTelefone(e.target.value)}
                       required
@@ -139,17 +144,25 @@ function CadastroConvidados() {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="relative">
-                  <User className="absolute left-4 top-3.5 text-gray-400" size={18} />
+                  <Users className="absolute left-4 top-3.5 text-gray-400" size={18} />
                   <input
                     className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
                     type="number"
                     min="0"
-                    placeholder="Limite de acompanhantes"
-                    value={limite_acompanhante}
-                    onChange={(e) => setLimiteAcomp(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="Limite padrão de acompanhantes"
+                    value={limiteAcompanhantes}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || (!isNaN(value) && parseInt(value) >= 0)) {
+                        setLimiteAcompanhantes(value === "" ? "" : parseInt(value));
+                      }
+                    }}
                   />
+                  <span className="absolute right-4 top-3.5 text-gray-400 text-sm">
+                    {limiteAcompanhantes === "" ? 0 : limiteAcompanhantes} permitidos
+                  </span>
                 </div>
 
                 <div className="pt-6">
