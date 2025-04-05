@@ -577,7 +577,13 @@ const Confirmacao = () => {
   const handleSendWhatsapp = async (convidado) => {
     const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
     const linkConfirmacao = `${frontendUrl}/confirmacao/${convidado.id}?eventoId=${eventoId}`;
-    const mensagem = `Olá ${convidado.nome}, confirme sua presença no evento acessando este link: ${linkConfirmacao}`;
+    
+    // Encontra o evento específico pelo ID
+    const evento = eventos.find(e => e.id === parseInt(eventoId));
+    
+    // Usa a mensagem do evento ou uma mensagem padrão
+    const mensagem = `${convidado.nome}! ${evento?.mensagem_whatsapp || "Você está convidado para nosso evento!"}: ${linkConfirmacao}`;
+    
     const linkWhatsapp = `https://api.whatsapp.com/send?phone=55${convidado.telefone}&text=${encodeURIComponent(mensagem)}`;
 
     try {
@@ -607,8 +613,7 @@ const Confirmacao = () => {
     }
 
     window.open(linkWhatsapp, "_blank");
-  };
-
+};
   // Toggle confirmação
   const toggleConfirmacao = async (convidadoId, acompanhanteId = null) => {
     try {

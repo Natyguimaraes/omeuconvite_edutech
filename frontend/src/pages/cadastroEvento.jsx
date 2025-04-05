@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, CalendarIcon, ImagePlus, MapPin, PenLine, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, CalendarIcon, ImagePlus, MapPin, PenLine, Sparkles, Loader2, MessageCircle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import NavBar from "../components/menu"
@@ -13,6 +13,7 @@ function CadastroEventos() {
     const [dataEvento, setDataEvento] = useState('');
     const [local, setLocal] = useState('');
     const [tipo, setTipoEvento] = useState('');
+    const [mensagem_whatsapp, setMensagemWhatsapp] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -68,15 +69,15 @@ function CadastroEventos() {
         formData.append('descricao', descricao);
         formData.append('data_evento', dataEvento);
         formData.append('local', local);
+        formData.append('mensagem_whatsapp', mensagem_whatsapp);
         formData.append('tipo', tipo);
+        
         formData.append('administrador_id', adminIdNumber);
 
         try {
             const resposta = await fetch(API_EVENTOS, {
                 method: 'POST',
                 body: formData,
-                // Não defina Content-Type - o navegador irá definir automaticamente
-                // com o boundary correto para FormData
             });
 
             const dados = await resposta.json();
@@ -104,7 +105,9 @@ function CadastroEventos() {
         setDescricao('');
         setDataEvento('');
         setLocal('');
+        setMensagemWhatsapp('');
         setTipoEvento('');
+       
     };
 
     return (
@@ -246,6 +249,23 @@ function CadastroEventos() {
                                 </div>
                             </div>
 
+                            {/* Mensagem WhatsApp */}
+                            <div className="space-y-2">
+                                <label className="flex items-center text-sm font-medium text-gray-700">
+                                    <MessageCircle className="h-4 w-4 mr-2 text-indigo-500" />
+                                    Mensagem para WhatsApp
+                                </label>
+                                <textarea
+                                    placeholder="Mensagem padrão que será enviada quando alguém clicar no botão do WhatsApp..."
+                                    value={mensagem_whatsapp}
+                                    onChange={e => setMensagemWhatsapp(e.target.value)}
+                                    rows={3}
+                                    className="w-full px-4 py-3 rounded-xl bg-white/90 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all resize-none" />
+                                <p className="text-xs text-gray-500">
+                                    Esta mensagem será usada como texto pré-definido quando os convidados clicarem no botão do WhatsApp
+                                </p>
+                            </div>
+
                             {/* Campo Tipo de Evento */}
                             <div className="space-y-2">
                                 <label className="flex items-center text-sm font-medium text-gray-700">
@@ -259,7 +279,6 @@ function CadastroEventos() {
                                     onChange={e => setTipoEvento(e.target.value)}
                                 >
                                     <option value="">Selecione o tipo de evento</option>
-
                                     {/* Aniversários */}
                                     <option value="Aniversário de adolescente">Aniversário de adolescente</option>
                                     <option value="Aniversário de adulto">Aniversário de adulto</option>
