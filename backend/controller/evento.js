@@ -20,9 +20,9 @@ export async function getAllEventos(req, res) {
 }
 
 export async function createEventoController(req, res) {
-  const { nome, descricao, data_evento, local, tipo, administrador_id } = req.body;
+  const { nome, descricao, data_evento, local, mensagem_whatsapp, tipo, administrador_id } = req.body;
 
-  if (!nome || !descricao || !data_evento || !local || !tipo) {
+  if (!nome || !descricao || !data_evento || !local ||!mensagem_whatsapp || !tipo ) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios." });
   }
 
@@ -61,6 +61,7 @@ export async function createEventoController(req, res) {
       descricao, 
       data_evento, 
       local, 
+      mensagem_whatsapp,
       tipo, 
       administrador_id
     );
