@@ -30,37 +30,63 @@ function CadastroConvidados() {
   
     setIsLoading(true);
     try {
-      const bodyData = {
+      // 1. Primeiro cadastra o convidado
+      const convidadoData = {
         nome,
         telefone,
         email: email || null,
         limite_padrao: Number(limiteAcompanhantes) || 0
       };
   
-      const resposta = await fetch(API_CONVIDADOS, {
+      const respostaConvidado = await fetch(API_CONVIDADOS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bodyData),
+        body: JSON.stringify(convidadoData),
       });
   
-      const dados = await resposta.json();
-  
-      if (resposta.ok) {
-        toast.success("Convidado cadastrado com sucesso!");
-        
-        setNome("")//serve limpa a lista após a confirmação dos dados
-        setTelefone("")
-          setEmail("")
-          setLimiteAcompanhantes(0);
-          setError("");
-      } else {
-        setError(dados.error || "Erro ao cadastrar convidado.");
-        toast.error(dados.error || "Não foi possível cadastrar o convidado.");
+      if (!respostaConvidado.ok) {
+        const error = await respostaConvidado.json();
+        throw new Error(error.message || "Erro ao cadastrar convidado");
       }
+  
+      const convidadoCriado = await respostaConvidado.json();
+      const convidadoId = convidadoCriado.id;
+  
+      // 2. Se houver eventoId, vincula o convidado ao evento
+      if (eventoId) {
+        const respostaVinculo = await fetch(`${API_CONVIDADOS}/${convidadoId}/eventos/${eventoId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            limite_padrao: Number(limiteAcompanhantes) || 0,
+            confirmado: false
+          }),
+        });
+  
+        if (!respostaVinculo.ok) {
+          // Rollback - remove o convidado se falhar o vínculo
+          await fetch(`${API_CONVIDADOS}/${convidadoId}`, { method: "DELETE" });
+          throw new Error("Erro ao vincular convidado ao evento");
+        }
+      }
+  
+      // 3. Feedback e limpeza
+      toast.success(
+        eventoId 
+          ? "Convidado cadastrado e vinculado ao evento com sucesso!" 
+          : "Convidado cadastrado com sucesso!"
+      );
+      
+      setNome("");
+      setTelefone("");
+      setEmail("");
+      setLimiteAcompanhantes(0);
+      setError("");
+  
     } catch (err) {
-      console.error("Erro na requisição:", err);
-      setError("Erro ao cadastrar convidado. Tente novamente mais tarde.");
-      toast.error("Falha na conexão com o servidor.");
+      console.error("Erro no cadastro:", err);
+      setError(err.message || "Erro ao cadastrar convidado.");
+      toast.error(err.message || "Falha no cadastro do convidado.");
     } finally {
       setIsLoading(false);
     }

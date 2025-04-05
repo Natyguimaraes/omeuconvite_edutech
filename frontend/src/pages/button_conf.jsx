@@ -85,8 +85,8 @@ function EventCredential() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // 1. Busca dados do convidado
-        const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
+        // 1. Busca dados do convidado incluindo eventos e acompanhantes
+        const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}?include=eventos,acompanhantes`);
         if (!convidadoResponse.ok) {
           throw new Error(`Erro ao buscar convidado: ${convidadoResponse.status}`);
         }
@@ -94,18 +94,13 @@ function EventCredential() {
         const responseData = await convidadoResponse.json();
         const dadosConvidado = responseData.data || responseData;
   
-        // 2. Processa limite de acompanhantes (pega do evento se não tiver no convidado)
-        let limite = parseInt(dadosConvidado.limite_acompanhante) || 0;
+        // 2. Determina o limite de acompanhantes (prioridade para o limite do evento)
+        const limiteEvento = dadosConvidado.eventos?.[0]?.limite_acompanhante;
+        const limiteConvidado = dadosConvidado.limite_acompanhante || 0;
         
-        // Verifica se há limite definido na relação com o evento
-        if (dadosConvidado.eventos && dadosConvidado.eventos.length > 0) {
-          const limiteEvento = parseInt(dadosConvidado.eventos[0].limite_acompanhante) || 0;
-          if (limiteEvento > 0) {
-            limite = limiteEvento;
-          }
-        }
-        
-        setLimiteAcompanhantes(limite);
+        // Prioridade: limite do evento > limite do convidado
+        const limiteFinal = limiteEvento !== undefined ? limiteEvento : limiteConvidado;
+        setLimiteAcompanhantes(limiteFinal);
   
         // 3. Processa acompanhantes existentes (se houver)
         const acompanhantesExistentes = Array.isArray(dadosConvidado.acompanhantes)
@@ -122,10 +117,11 @@ function EventCredential() {
         if (acompanhantesExistentes.length > 0) {
           setAcompanhantes(acompanhantesExistentes);
           setDesejaInformarAcompanhante(true);
-        } else if (limite > 0) {
+        } else if (limiteFinal > 0) {
+          // Mostra campos para novos acompanhantes se houver limite
           setDesejaInformarAcompanhante(true);
           setAcompanhantes(
-            Array.from({ length: limite }, () => ({
+            Array.from({ length: limiteFinal }, () => ({
               nome: "",
               telefone: "",
               email: "",
@@ -133,15 +129,13 @@ function EventCredential() {
             }))
           );
         }
-        // 6. Processa evento associado
+  
+        // 5. Processa evento associado
         let eventoAssociado = null;
         
-        // Verifica primeiro se há um evento_id direto
         if (dadosConvidado.evento_id) {
           eventoAssociado = { id: dadosConvidado.evento_id };
-        } 
-        // Caso contrário, verifica o array de eventos
-        else if (Array.isArray(dadosConvidado.eventos)) {
+        } else if (Array.isArray(dadosConvidado.eventos)) {
           eventoAssociado = dadosConvidado.eventos.find(e => e.id) || null;
         }
   
@@ -149,7 +143,7 @@ function EventCredential() {
           throw new Error("Convidado não possui evento associado");
         }
   
-        // 7. Busca dados completos do evento
+        // 6. Busca dados completos do evento
         const eventoResponse = await fetch(`${API_EVENTOS}/${eventoAssociado.id}`);
         if (!eventoResponse.ok) {
           throw new Error(`Erro ao buscar evento: ${eventoResponse.status}`);
@@ -158,14 +152,15 @@ function EventCredential() {
         const eventoData = await eventoResponse.json();
         const eventoFormatado = eventoData.data || eventoData;
   
-        // 8. Atualiza estados
+        // 7. Atualiza estados
         setConvidado({
           id: dadosConvidado.id,
           nome: dadosConvidado.nome || "Convidado",
           telefone: dadosConvidado.telefone || "",
           email: dadosConvidado.email || "",
           confirmado: dadosConvidado.confirmado === 1,
-          limite_acompanhante: limite
+          limite_acompanhante: limiteConvidado,
+          acompanhantes: acompanhantesExistentes
         });
   
         setEvento({
@@ -181,7 +176,6 @@ function EventCredential() {
         console.error("Erro ao buscar dados:", error);
         setError(error.message);
         
-        // Estado de fallback
         setConvidado({
           id: convidadoId,
           nome: "Convidado",
@@ -203,7 +197,21 @@ function EventCredential() {
   
     fetchData();
   }, [convidadoId]);
-  
+
+  useEffect(() => {
+    if (convidado?.limite_acompanhante > 0 && !desejaInformarAcompanhante && acompanhantes.length === 0) {
+      setDesejaInformarAcompanhante(true);
+      setAcompanhantes(
+        Array.from({ length: convidado.limite_acompanhante }, () => ({
+          nome: "",
+          telefone: "",
+          email: "",
+          confirmado: true
+        }))
+      );
+    }
+  }, [convidado]);
+
   const handleAddAcompanhante = () => {
     if (isConfirmed || acompanhantes.length >= limiteAcompanhantes) {
       setError(`Limite de ${limiteAcompanhantes} acompanhantes atingido`);
@@ -225,7 +233,6 @@ function EventCredential() {
     if (!newValue) {
       setAcompanhantes([]);
     } else {
-      // Inicializa com o número de acompanhantes permitidos
       const novosAcompanhantes = Array.from({ length: limiteAcompanhantes }, () => ({
         nome: "",
         telefone: "",
@@ -233,17 +240,14 @@ function EventCredential() {
         confirmado: true
       }));
       
-      // Mantém os acompanhantes existentes se houver
       if (convidado?.acompanhantes?.length > 0) {
-        setAcompanhantes(convidado.acompanhantes.map(a => ({
-          ...a,
-          confirmado: a.confirmado === 1
-        })));
+        setAcompanhantes(convidado.acompanhantes);
       } else {
         setAcompanhantes(novosAcompanhantes);
       }
     }
   };
+
   const handleRemoveAcompanhante = (index) => {
     if (isConfirmed) return;
     
@@ -285,12 +289,10 @@ function EventCredential() {
     setError("");
   
     try {
-      // 1. Verifica se há limite disponível
       const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       const convidadoData = await convidadoResponse.json();
       const dadosConvidado = convidadoData.data || convidadoData;
       
-      // Verifica se o limite foi atingido
       const acompanhantesAtuais = dadosConvidado.acompanhantes?.length || 0;
       const novosAcompanhantes = acompanhantes.filter(a => !a.id && a.nome).length;
       
@@ -298,16 +300,14 @@ function EventCredential() {
         throw new Error(`Limite de ${limiteAcompanhantes} acompanhantes atingido para o evento: ${evento.nome}`);
       }
   
-      // 2. Filtra apenas acompanhantes novos e válidos
       const acompanhantesParaSalvar = acompanhantes
-        .filter(a => !a.id) // Apenas novos
-        .filter(a => a.nome && a.nome.trim()); // Com nome válido
+        .filter(a => !a.id)
+        .filter(a => a.nome && a.nome.trim());
   
       if (acompanhantesParaSalvar.length === 0) {
-        return; // Nada a salvar
+        return;
       }
   
-      // 3. Envia para o backend
       const resultados = await Promise.all(
         acompanhantesParaSalvar.map(async (acompanhante) => {
           const response = await fetch(
@@ -323,36 +323,28 @@ function EventCredential() {
               }),
             }
           );
-  
+
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || "Erro ao salvar acompanhante");
           }
-  
+
           return await response.json();
         })
       );
-  
-      // 4. Atualiza o estado local
+
       setAcompanhantes(prev => [
-        ...prev.filter(a => a.id), // Mantém os existentes
+        ...prev.filter(a => a.id),
         ...resultados.map(r => ({
           ...r.data,
           confirmado: true,
         })),
       ]);
-  
+
     } catch (error) {
-      console.error("Erro ao salvar acompanhantes:", {
-        error,
-        convidadoId,
-        limiteAcompanhantes,
-        acompanhantes
-      });
-      
+      console.error("Erro ao salvar acompanhantes:", error);
       setError(error.message);
       
-      // Mostra mensagem de erro específica
       setMensagem({
         type: "error",
         content: (
@@ -366,7 +358,7 @@ function EventCredential() {
         )
       });
       
-      throw error; // Re-lança o erro para ser tratado na função principal
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -378,22 +370,18 @@ function EventCredential() {
       setError("");
       setMensagem("");
   
-      // 1. Verifica se o evento está carregado
       if (!evento?.id) {
         throw new Error("Dados do evento não carregados corretamente");
       }
   
-      // 2. Tenta salvar acompanhantes primeiro (se necessário)
       try {
         if (desejaInformarAcompanhante && acompanhantes.length > 0) {
           await salvarAcompanhantes();
         }
       } catch (error) {
-        // Se der erro ao salvar acompanhantes, cancela a confirmação
         return;
       }
   
-      // 3. Envia confirmação principal
       const response = await fetch(
         `${API_CONVIDADOS}/${convidadoId}/eventos/${evento.id}/confirmacao`,
         {
@@ -411,10 +399,8 @@ function EventCredential() {
         throw new Error(errorData.message || "Erro ao confirmar presença");
       }
   
-      // 3. Atualiza estado local
       setConfirmedStatus(status === "sim");
   
-      // 4. Efeitos visuais para confirmação positiva
       if (status === "sim") {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
@@ -516,7 +502,6 @@ function EventCredential() {
           ),
         });
       } else {
-        // Efeitos visuais para confirmação negativa
         setMensagem({
           type: "info",
           content: (
@@ -563,7 +548,6 @@ function EventCredential() {
         });
       }
   
-      // 5. Atualiza dados do convidado após confirmação
       const updatedResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       if (updatedResponse.ok) {
         const updatedData = await updatedResponse.json();
@@ -579,16 +563,9 @@ function EventCredential() {
       }
   
     } catch (error) {
-      console.error("Erro na confirmação:", {
-        error: error.message,
-        convidadoId,
-        status,
-        eventoId: evento?.id,
-      });
-      
+      console.error("Erro na confirmação:", error);
       setError(error.message || "Ocorreu um erro. Tente novamente.");
       
-      // Animação de erro
       setMensagem({
         type: "error",
         content: (
@@ -623,25 +600,6 @@ function EventCredential() {
     }
   };
 
-  const fillAcompanhantePlaceholder = (limiteAcompanhantes) => {
-    if (limiteAcompanhantes) {
-      setDesejaInformarAcompanhante(true);
-      const novosAcompanhantes = Array.from({ length: limiteAcompanhantes }, () => ({
-        nome: "",
-        telefone: "",
-        email: "",
-        confirmado: true
-      }));
-      setAcompanhantes(novosAcompanhantes);
-    }
-  }
-
-  useEffect(() => {
-    if (limiteAcompanhantes > 0 && acompanhantes.length === 0 && desejaInformarAcompanhante) {
-      fillAcompanhantePlaceholder(limiteAcompanhantes);
-    }
-  }, [limiteAcompanhantes, desejaInformarAcompanhante]);
-
   return (
     <>
       {showConfetti && (
@@ -666,7 +624,6 @@ function EventCredential() {
       )}
 
       <div className="min-h-screen bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50 pt-6 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           {[...Array(20)].map((_, i) => (
             <motion.div
@@ -699,7 +656,6 @@ function EventCredential() {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="max-w-3xl mx-auto relative z-10"
         >
-          {/* Event header with original image size */}
           <div className="relative rounded-3xl overflow-hidden shadow-2xl group mb-6 md:mb-8">
             <div className="relative overflow-hidden">
               <motion.div className="w-full overflow-hidden">
@@ -717,25 +673,9 @@ function EventCredential() {
                   }}
                 />
               </motion.div>
-
-              <motion.div
-                className="w-full h-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8 }}
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1, rotate: 360 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                >
-                  <Sparkles className="text-white w-16 h-16" />
-                </motion.div>
-              </motion.div>
             </div>
           </div>
 
-          {/* Event name section below the image */}
           <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
@@ -883,11 +823,10 @@ function EventCredential() {
                       </motion.div>
                     </div>
                     <span className={`text-gray-800 font-semibold text-lg md:text-xl ${isConfirmed ? 'opacity-70' : ''}`}>
-                      Informar acompanhantes? ({acompanhantes.length}/
+                      Informar acompanhantes? ({acompanhantes.filter(a => a.nome).length}/
                       {limiteAcompanhantes})
                     </span>
                   </label>
-               
                 </motion.div>
               )}
 
@@ -991,7 +930,6 @@ function EventCredential() {
               )}
             </div>
 
-            {/* Form Section */}
             <div className="p-6 md:p-8 pt-4 pb-10 border-t border-indigo-100">
               <AnimatePresence>
                 {error && (
@@ -1048,11 +986,10 @@ function EventCredential() {
                 )}
               </AnimatePresence>
 
-              {/* Confirmation Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.button
                   onClick={() => confirmarPresenca("sim")}
-                  disabled={isLoading || isConfirmed} // Desabilita se já estiver confirmado
+                  disabled={isLoading || isConfirmed}
                   whileHover={{
                     scale: isLoading || isConfirmed ? 1 : 1.05,
                     boxShadow: isLoading || isConfirmed ? "none" : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
@@ -1080,7 +1017,7 @@ function EventCredential() {
 
                 <motion.button
                   onClick={() => confirmarPresenca("nao")}
-                  disabled={isLoading} // Permite clicar mesmo se já tiver confirmado presença
+                  disabled={isLoading}
                   whileHover={{
                     scale: isLoading ? 1 : 1.05,
                     boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
@@ -1108,7 +1045,6 @@ function EventCredential() {
             </div>
           </div>
         </motion.div>
-      
       </div>
     </>
   );

@@ -7,6 +7,8 @@ import adminRoutes from "./rotas/administradores.js";
 import convidadoRoutes from "./rotas/convidados.js";
 import superadminRoutes from "./rotas/superadmin.js";
 import process from 'process';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 
 const app = express();
 app.use(cors({

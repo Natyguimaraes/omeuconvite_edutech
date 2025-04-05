@@ -13,10 +13,10 @@ function Rodape() {
         {/* Logo e texto */}
         <div className="mb-6 text-center">
           <p className="text-gray-600 text-sm">
-            Desenvolvido pelo <span className="font-semibold text-indigo-600">EduTec</span>
+            Desenvolvido por <span className="font-semibold text-indigo-600">EduTec</span>
           </p>
           <p className="text-gray-500 text-xs mt-1">
-            Soluções profissionais para gestão de eventos
+            Solução profissional para gestão de eventos
           </p>
         </div>
         
@@ -27,7 +27,7 @@ function Rodape() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-full shadow-md flex items-center transition-all duration-300"
+          className="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-6 rounded-full shadow-md flex items-center transition-all duration-300"
         >
           <FaWhatsapp className="mr-2 text-xl" />
           <div className="text-center">

@@ -78,14 +78,17 @@ const Confirmacao = () => {
       return [];
     }
   
+    const eventoIdNum = parseInt(eventoId);
+  
     return convidados
       .filter(convidado => {
         try {
+          // Verifica se o convidado está no evento
           const eventosConvidado = Array.isArray(convidado?.eventos) ? 
             convidado.eventos : [];
           
           return eventosConvidado.some(evento => 
-            evento?.id === parseInt(eventoId)
+            evento?.id === eventoIdNum
           );
         } catch (error) {
           console.error('Error filtering convidado:', error, convidado);
@@ -98,25 +101,36 @@ const Confirmacao = () => {
             convidado.eventos : [];
             
           const eventoRelacao = eventosConvidado.find(e => 
-            e?.id === parseInt(eventoId)
+            e?.id === eventoIdNum
           );
-          
+  
+          // Mostra acompanhantes APENAS se:
+          // 1. Não for um novo evento (novoEvento: true)
+          // 2. E for o PRIMEIRO evento do convidado
+          const mostrarAcompanhantes = (
+            !eventoRelacao?.novoEvento && 
+            eventosConvidado[0]?.id === eventoIdNum
+          );
+  
           return {
             ...convidado,
             confirmado: eventoRelacao?.confirmado || false,
-            limite_acompanhante: eventoRelacao?.limite_acompanhante || 0
+            limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
+            acompanhantes: mostrarAcompanhantes ? 
+              (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes : []) : 
+              []
           };
         } catch (error) {
           console.error('Error mapping convidado:', error, convidado);
           return {
             ...convidado,
             confirmado: false,
-            limite_acompanhante: 0
+            limite_acompanhante: 0,
+            acompanhantes: []
           };
         }
       });
   };
-
   const contarParticipantes = (convidadosEvento) => {
     if (!Array.isArray(convidadosEvento)) return 0;
     return convidadosEvento.reduce((acc, convidado) => {
@@ -156,63 +170,62 @@ const Confirmacao = () => {
   }, [searchTerm, convidados, eventoId]);
 
   // Adicionar convidado existente ao evento
-  const handleAddToEvent = async (convidado) => {
-    setAddingGuest(true);
-    try {
-      const response = await fetch(`${apiConvidados}/${convidado.id}/eventos/${eventoId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          limite_acompanhante: Number(convidado.limite_acompanhante) || 0,
-          confirmado: false
-        }),
-      });
-  
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erro ao adicionar convidado ao evento");
-      }
-  
-      // Atualiza o convidado na lista mantendo os dados existentes
-      setConvidados(prev => prev.map(c => {
-        if (c.id !== convidado.id) return c;
-        
-        const eventosAtualizados = Array.isArray(c.eventos) 
-          ? [...c.eventos, { 
-              id: parseInt(eventoId), 
-              limite_acompanhante: convidado.limite_acompanhante, 
-              confirmado: false,
-              // Adiciona uma flag para indicar que é um novo evento
-              novoEvento: true
-            }]
-          : [{ 
-              id: parseInt(eventoId), 
-              limite_acompanhante: convidado.limite_acompanhante, 
-              confirmado: false,
-              novoEvento: true
-            }];
-        
-        return {
-          ...c,
-          eventos: eventosAtualizados,
-          // Mantém os acompanhantes originais no objeto, mas não serão mostrados
-          // para o novo evento devido à verificação que faremos no render
-        };
-      }));
-      
-      // Remove da lista de resultados de busca
-      setSearchResults(prev => prev.filter(c => c.id !== convidado.id));
-      setSearchTerm("");
-      
-      toast.success(`${convidado.nome} adicionado ao evento com sucesso!`);
-    } catch (error) {
-      console.error("Erro ao adicionar:", error);
-      toast.error(error.message);
-    } finally {
-      setAddingGuest(false);
-    }
-  };
+ // Adicionar convidado existente ao evento
+ const handleAddToEvent = async (convidado) => {
+  setAddingGuest(true);
+  try {
+    const response = await fetch(`${apiConvidados}/${convidado.id}/eventos/${eventoId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        limite_acompanhante: Number(convidado.limite_acompanhante) || 
+                             Number(convidado.limite_padrao) || 0, // Tenta ambos os campos
+        confirmado: false
+      }),
+    });
 
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Erro ao adicionar convidado ao evento");
+    }
+
+    // Atualiza o convidado na lista
+    setConvidados(prev => prev.map(c => {
+      if (c.id !== convidado.id) return c;
+      
+      const eventosAtualizados = Array.isArray(c.eventos) 
+        ? [...c.eventos, { 
+            id: parseInt(eventoId), 
+            limite_acompanhante: Number(convidado.limite_acompanhante) || 
+                               Number(convidado.limite_padrao) || 0,
+            confirmado: false,
+            novoEvento: true
+          }]
+        : [{ 
+            id: parseInt(eventoId), 
+            limite_acompanhante: Number(convidado.limite_acompanhante) || 
+                               Number(convidado.limite_padrao) || 0,
+            confirmado: false,
+            novoEvento: true
+          }];
+      
+      return {
+        ...c,
+        eventos: eventosAtualizados
+      };
+    }));
+    
+    setSearchResults(prev => prev.filter(c => c.id !== convidado.id));
+    setSearchTerm("");
+    
+    toast.success(`${convidado.nome} adicionado ao evento com sucesso!`);
+  } catch (error) {
+    console.error("Erro ao adicionar:", error);
+    toast.error(error.message);
+  } finally {
+    setAddingGuest(false);
+  }
+};
   // Função para lidar com mudanças nos campos do formulário
   const handleNewGuestChange = (e) => {
     const { name, value } = e.target;
@@ -250,7 +263,7 @@ const Confirmacao = () => {
         nome: newGuest.nome.trim(),
         telefone: newGuest.telefone.trim(),
         email: newGuest.email.trim() || null,
-        limite_padrao: Number(newGuest.limite_acompanhante) || 0
+        limite_acompanhante: Number(newGuest.limite_acompanhante) || 0
       };
 
       // 1. Cria o convidado com tratamento de resposta melhorado
