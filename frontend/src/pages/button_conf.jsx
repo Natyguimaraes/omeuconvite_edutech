@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
+import GerarCredencialButton from "../components/GerarCredencialButton"
 
 function EventCredential() {
   const { convidadoId } = useParams();
@@ -168,6 +169,7 @@ function EventCredential() {
           nome: eventoFormatado.nome || "Evento",
           descricao: eventoFormatado.descricao || "Descrição do evento",
           data_evento: eventoFormatado.data_evento || new Date().toISOString(),
+          dataGerarQrCode: eventoFormatado.dataGerarQrCode || null,
           local: eventoFormatado.local || "Local não especificado",
           imagem_evento: eventoFormatado.imagem_evento || "/convite.jpg"
         });
@@ -1042,6 +1044,9 @@ function EventCredential() {
                   )}
                 </motion.button>
               </div>
+              {isConfirmed && (
+  <GerarCredencialButton data_gerar_qrcode={evento.data_gerar_qrcode} />
+)}
             </div>
           </div>
         </motion.div>

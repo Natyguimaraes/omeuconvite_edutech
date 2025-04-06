@@ -20,9 +20,13 @@ export async function getAllEventos(req, res) {
 }
 
 export async function createEventoController(req, res) {
-  const { nome, descricao, data_evento, local, mensagem_whatsapp, tipo, administrador_id } = req.body;
 
-  if (!nome || !descricao || !data_evento || !local ||!mensagem_whatsapp || !tipo ) {
+  console.log('Dados recebidos no body:', req.body);
+  console.log('Arquivo recebido:', req.file);
+  
+  const { nome, descricao, data_evento, data_gerar_qrcode, local, mensagem_whatsapp, tipo, administrador_id } = req.body;
+
+  if (!nome || !descricao || !data_evento ||!data_gerar_qrcode || !local ||!mensagem_whatsapp || !tipo ) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios." });
   }
 
@@ -60,6 +64,7 @@ export async function createEventoController(req, res) {
       nome, 
       descricao, 
       data_evento, 
+      data_gerar_qrcode,
       local, 
       mensagem_whatsapp,
       tipo, 

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, CalendarIcon, ImagePlus, MapPin, PenLine, Sparkles, Loader2, MessageCircle } from "lucide-react";
+import { ArrowLeft, CalendarIcon, ImagePlus, MapPin, PenLine, Sparkles, Loader2, MessageCircle, Clock } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
-import NavBar from "../components/menu"
+import NavBar from "../components/menu";
 
 function CadastroEventos() {
     const navigate = useNavigate();
@@ -11,6 +11,8 @@ function CadastroEventos() {
     const [nome, setNome] = useState('');
     const [descricao, setDescricao] = useState('');
     const [dataEvento, setDataEvento] = useState('');
+    // Data fixa para 10/04/2025 às 12:00
+    const [data_gerar_qrcode, setdata_gerar_qrcode] = useState('2025-04-10T12:00');
     const [local, setLocal] = useState('');
     const [tipo, setTipoEvento] = useState('');
     const [mensagem_whatsapp, setMensagemWhatsapp] = useState('');
@@ -23,7 +25,6 @@ function CadastroEventos() {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validação do tipo e tamanho do arquivo
             const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
             const maxSize = 10 * 1024 * 1024; // 10MB
             
@@ -43,10 +44,30 @@ function CadastroEventos() {
         }
     };
 
+    const formatarDataParaEnvio = (dataString) => {
+        try {
+            if (!dataString || dataString.trim() === '') {
+                return null;
+            }
+
+            const date = new Date(dataString);
+            
+            if (isNaN(date.getTime())) {
+                return null;
+            }
+            
+            return date.toISOString();
+        } catch (error) {
+            console.error("Erro ao formatar data:", error);
+            return null;
+        }
+    };
+
     const handleCadastro = async () => {
         setError('');
         setIsSubmitting(true);
-      
+    
+        // 1. Validação do adminId
         const adminId = localStorage.getItem("adminId");
         if (!adminId) {
             setError("ID do administrador não encontrado.");
@@ -54,7 +75,7 @@ function CadastroEventos() {
             setIsSubmitting(false);
             return;
         }
-      
+    
         const adminIdNumber = Number(adminId);
         if (isNaN(adminIdNumber)) {
             setError("ID do administrador inválido.");
@@ -62,33 +83,68 @@ function CadastroEventos() {
             setIsSubmitting(false);
             return;
         }
+    
+        // 2. Validação dos campos obrigatórios
+        if (!nome || !descricao || !dataEvento || !local || !mensagem_whatsapp || !tipo) {
+            setError("Todos os campos são obrigatórios.");
+            toast.error("Todos os campos são obrigatórios.");
+            setIsSubmitting(false);
+            return;
+        }
+    
+        // 3. Formatação das datas
+        const dataEventoFormatada = formatarDataParaEnvio(dataEvento);
+        // Data fixa para 10/04/2025
+        const dataQrCodeFormatada = "2025-04-10T12:00:00.000Z";
+    
+        // 4. Validação da lógica das datas
+        const dataQrCode = new Date(dataQrCodeFormatada);
+        const dataEventoObj = new Date(dataEventoFormatada);
 
+        if (dataQrCode > dataEventoObj) {
+            setError("A data para gerar QR Code deve ser anterior à data do evento.");
+            toast.error("A data para gerar QR Code deve ser anterior à data do evento.");
+            setIsSubmitting(false);
+            return;
+        }
+    
+        // 5. Preparação do FormData
         const formData = new FormData();
         if (imagem_evento) formData.append('imagem_evento', imagem_evento);
         formData.append('nome', nome);
         formData.append('descricao', descricao);
-        formData.append('data_evento', dataEvento);
+        formData.append('data_evento', dataEventoFormatada);
+        formData.append('data_gerar_qrcode', dataQrCodeFormatada);
         formData.append('local', local);
         formData.append('mensagem_whatsapp', mensagem_whatsapp);
         formData.append('tipo', tipo);
-        
         formData.append('administrador_id', adminIdNumber);
-
+    
+        // 6. Debug
+        console.log('Dados sendo enviados:', {
+            nome,
+            data_evento: dataEventoFormatada,
+            data_gerar_qrcode: dataQrCodeFormatada,
+            local,
+            tipo
+        });
+    
+        // 7. Envio para a API
         try {
             const resposta = await fetch(API_EVENTOS, {
                 method: 'POST',
                 body: formData,
             });
-
+    
             const dados = await resposta.json();
-
-            if (resposta.ok) {
-                toast.success('Evento cadastrado com sucesso!');
-                resetForm();
-                navigate('/eventos');
-            } else {
+    
+            if (!resposta.ok) {
                 throw new Error(dados.erro || 'Erro ao cadastrar evento');
             }
+    
+            toast.success('Evento cadastrado com sucesso!');
+            resetForm();
+            navigate('/eventos');
         } catch (err) {
             console.error("Erro na requisição:", err);
             setError(err.message || 'Erro ao cadastrar evento. Tente novamente mais tarde.');
@@ -104,15 +160,15 @@ function CadastroEventos() {
         setNome('');
         setDescricao('');
         setDataEvento('');
+        // Mantém a data fixa mesmo no reset
+        setdata_gerar_qrcode('2025-04-10T12:00');
         setLocal('');
         setMensagemWhatsapp('');
         setTipoEvento('');
-       
     };
 
     return (
         <><NavBar /><div className="min-h-screen bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50 py-16 px-4 sm:px-6 lg:px-8 pt-24 relative overflow-hidden">
-            {/* Fundo animado */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-20">
                 <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-purple-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "0s" }}></div>
                 <div className="absolute top-40 right-20 w-72 h-72 rounded-full bg-pink-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
@@ -224,12 +280,13 @@ function CadastroEventos() {
                                 <div className="space-y-2">
                                     <label className="flex items-center text-sm font-medium text-gray-700">
                                         <CalendarIcon className="h-4 w-4 mr-2 text-indigo-500" />
-                                        Data e Hora
+                                        Data e Hora do Evento
                                     </label>
                                     <input
                                         type="datetime-local"
                                         value={dataEvento}
                                         onChange={e => setDataEvento(e.target.value)}
+                                        min={new Date().toISOString().slice(0, 16)}
                                         className="w-full px-4 py-3 rounded-xl bg-white/90 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
                                         required />
                                 </div>
@@ -248,6 +305,41 @@ function CadastroEventos() {
                                         required />
                                 </div>
                             </div>
+
+                            {/* Data para liberação de credencial (FIXA) */}
+                            <div className="space-y-2">
+                                <label className="flex items-center text-sm font-medium text-gray-700">
+                                    <Clock className="h-4 w-4 mr-2 text-indigo-500" />
+                                    Data para liberação de credencial (FIXA: 10/04/2025)
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value="2025-04-10T12:00"
+                                    readOnly
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 cursor-not-allowed"
+                                />
+                                <p className="text-xs text-gray-500">
+                                    Data fixa para testes: 10 de abril de 2025 às 12:00
+                                </p>
+                            </div>
+
+                            {/* Mensagem WhatsApp */}
+                            <div className="space-y-2">
+                                <label className="flex items-center text-sm font-medium text-gray-700">
+                                    <MessageCircle className="h-4 w-4 mr-2 text-indigo-500" />
+                                    Mensagem para WhatsApp
+                                </label>
+                                <textarea
+                                    placeholder="Mensagem padrão que será enviada quando alguém clicar no botão do WhatsApp..."
+                                    value={mensagem_whatsapp}
+                                    onChange={e => setMensagemWhatsapp(e.target.value)}
+                                    rows={3}
+                                    className="w-full px-4 py-3 rounded-xl bg-white/90 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all resize-none" />
+                                <p className="text-xs text-gray-500">
+                                    Esta mensagem será usada como texto pré-definido quando os convidados clicarem no botão do WhatsApp
+                                </p>
+                            </div>
+
 
                             {/* Mensagem WhatsApp */}
                             <div className="space-y-2">
@@ -279,86 +371,100 @@ function CadastroEventos() {
                                     onChange={e => setTipoEvento(e.target.value)}
                                 >
                                     <option value="">Selecione o tipo de evento</option>
-                                    {/* Aniversários */}
-                                    <option value="Aniversário de adolescente">Aniversário de adolescente</option>
-                                    <option value="Aniversário de adulto">Aniversário de adulto</option>
-                                    <option value="Aniversário de debutante">Aniversário de debutante</option>
-                                    <option value="Aniversário de pet">Aniversário de pet</option>
-                                    <option value="Aniversário infantil">Aniversário infantil</option>
+                                    {/* ANIVERSÁRIOS */}
+    
+        <option value="Aniversário de adolescente">Aniversário de adolescente</option>
+        <option value="Aniversário de adulto">Aniversário de adulto</option>
+        <option value="Aniversário de debutante">Aniversário de debutante</option>
+        <option value="Aniversário de pet">Aniversário de pet</option>
+        <option value="Aniversário infantil">Aniversário infantil</option>
+    
 
-                                    {/* Bodas - Ordem Alfabética */}
-                                    <option value="Bodas de Algodão (1 ano)">Bodas de Algodão (1 ano)</option>
-                                    <option value="Bodas de Aço (11 anos)">Bodas de Aço (11 anos)</option>
-                                    <option value="Bodas de Barro (8 anos)">Bodas de Barro (8 anos)</option>
-                                    <option value="Bodas de Cerâmica (9 anos)">Bodas de Cerâmica (9 anos)</option>
-                                    <option value="Bodas de Coral (35 anos)">Bodas de Coral (35 anos)</option>
-                                    <option value="Bodas de Couro (3 anos)">Bodas de Couro (3 anos)</option>
-                                    <option value="Bodas de Cristal (15 anos)">Bodas de Cristal (15 anos)</option>
-                                    <option value="Bodas de Diamante (60 anos)">Bodas de Diamante (60 anos)</option>
-                                    <option value="Bodas de Esmeralda (40 anos)">Bodas de Esmeralda (40 anos)</option>
-                                    <option value="Bodas de Estanho (10 anos)">Bodas de Estanho (10 anos)</option>
-                                    <option value="Bodas de Lã (4 anos)">Bodas de Lã (4 anos)</option>
-                                    <option value="Bodas de Latão (7 anos)">Bodas de Latão (7 anos)</option>
-                                    <option value="Bodas de Madeira (5 anos)">Bodas de Madeira (5 anos)</option>
-                                    <option value="Bodas de Marfim (14 anos)">Bodas de Marfim (14 anos)</option>
-                                    <option value="Bodas de Ouro (50 anos)">Bodas de Ouro (50 anos)</option>
-                                    <option value="Bodas de Papel (2 anos)">Bodas de Papel (2 anos)</option>
-                                    <option value="Bodas de Pérola (30 anos)">Bodas de Pérola (30 anos)</option>
-                                    <option value="Bodas de Perfume (6 anos)">Bodas de Perfume (6 anos)</option>
-                                    <option value="Bodas de Platina (70 anos)">Bodas de Platina (70 anos)</option>
-                                    <option value="Bodas de Porcelana (20 anos)">Bodas de Porcelana (20 anos)</option>
-                                    <option value="Bodas de Prata (25 anos)">Bodas de Prata (25 anos)</option>
-                                    <option value="Bodas de Rendá (13 anos)">Bodas de Rendá (13 anos)</option>
-                                    <option value="Bodas de Rubi (45 anos)">Bodas de Rubi (45 anos)</option>
-                                    <option value="Bodas de Seda (12 anos)">Bodas de Seda (12 anos)</option>
+    {/* BODAS */}
+    
+        <option value="Bodas de Algodão (1 ano)">Bodas de Algodão (1 ano)</option>
+        <option value="Bodas de Aço (11 anos)">Bodas de Aço (11 anos)</option>
+        <option value="Bodas de Barro (8 anos)">Bodas de Barro (8 anos)</option>
+        <option value="Bodas de Cerâmica (9 anos)">Bodas de Cerâmica (9 anos)</option>
+        <option value="Bodas de Coral (35 anos)">Bodas de Coral (35 anos)</option>
+        <option value="Bodas de Couro (3 anos)">Bodas de Couro (3 anos)</option>
+        <option value="Bodas de Cristal (15 anos)">Bodas de Cristal (15 anos)</option>
+        <option value="Bodas de Diamante (60 anos)">Bodas de Diamante (60 anos)</option>
+        <option value="Bodas de Esmeralda (40 anos)">Bodas de Esmeralda (40 anos)</option>
+        <option value="Bodas de Estanho (10 anos)">Bodas de Estanho (10 anos)</option>
+        <option value="Bodas de Lã (4 anos)">Bodas de Lã (4 anos)</option>
+        <option value="Bodas de Latão (7 anos)">Bodas de Latão (7 anos)</option>
+        <option value="Bodas de Madeira (5 anos)">Bodas de Madeira (5 anos)</option>
+        <option value="Bodas de Marfim (14 anos)">Bodas de Marfim (14 anos)</option>
+        <option value="Bodas de Ouro (50 anos)">Bodas de Ouro (50 anos)</option>
+        <option value="Bodas de Papel (2 anos)">Bodas de Papel (2 anos)</option>
+        <option value="Bodas de Pérola (30 anos)">Bodas de Pérola (30 anos)</option>
+        <option value="Bodas de Perfume (6 anos)">Bodas de Perfume (6 anos)</option>
+        <option value="Bodas de Platina (70 anos)">Bodas de Platina (70 anos)</option>
+        <option value="Bodas de Porcelana (20 anos)">Bodas de Porcelana (20 anos)</option>
+        <option value="Bodas de Prata (25 anos)">Bodas de Prata (25 anos)</option>
+        <option value="Bodas de Rendá (13 anos)">Bodas de Rendá (13 anos)</option>
+        <option value="Bodas de Rubi (45 anos)">Bodas de Rubi (45 anos)</option>
+        <option value="Bodas de Seda (12 anos)">Bodas de Seda (12 anos)</option>
+  
 
-                                    {/* Casamentos */}
-                                    <option value="Casamento">Casamento</option>
-                                    <option value="Casamento Civil">Casamento Civil</option>
-                                    <option value="Casamento Religioso">Casamento Religioso</option>
+    {/* CASAMENTOS */}
+    
+        <option value="Casamento">Casamento</option>
+        <option value="Casamento Civil">Casamento Civil</option>
+        <option value="Casamento Religioso">Casamento Religioso</option>
+   
 
-                                    {/* Chás */}
-                                    <option value="Chá de bebê">Chá de bebê</option>
-                                    <option value="Chá de cozinha">Chá de cozinha</option>
-                                    <option value="Chá de fralda">Chá de fralda</option>
-                                    <option value="Chá de panela">Chá de panela</option>
-                                    <option value="Chá de revelação">Chá de revelação</option>
+    {/* CHÁS */}
+    
+        <option value="Chá de bebê">Chá de bebê</option>
+        <option value="Chá de cozinha">Chá de cozinha</option>
+        <option value="Chá de fralda">Chá de fralda</option>
+        <option value="Chá de panela">Chá de panela</option>
+        <option value="Chá de revelação">Chá de revelação</option>
+   
 
-                                    {/* Corporativos */}
-                                    <option value="Conferência">Conferência</option>
-                                    <option value="Congresso">Congresso</option>
-                                    <option value="Corporativo">Corporativo</option>
+    {/* CORPORATIVOS */}
+   
+        <option value="Conferência">Conferência</option>
+        <option value="Congresso">Congresso</option>
+        <option value="Corporativo">Corporativo</option>
+   
 
-                                    {/* Religiosos */}
-                                    <option value="Batizado">Batizado</option>
-                                    <option value="Culto">Culto</option>
-                                    <option value="Crisma">Crisma</option>
+    {/* RELIGIOSOS */}
+    
+        <option value="Batizado">Batizado</option>
+        <option value="Culto">Culto</option>
+        <option value="Crisma">Crisma</option>
+        <option value="Missa">Missa</option>
+    
 
-                                    {/* Sociais */}
-                                    <option value="Despedida de solteiro">Despedida de solteiro</option>
-                                    <option value="Encontro de amigos">Encontro de amigos</option>
-                                    <option value="Encontro de negócios">Encontro de negócios</option>
-                                    <option value="Encontro familiar">Encontro familiar</option>
-                                    <option value="Evento beneficente">Evento beneficente</option>
-                                    <option value="Evento cultural">Evento cultural</option>
-                                    <option value="Evento esportivo">Evento esportivo</option>
-                                    <option value="Evento religioso">Evento religioso</option>
-                                    <option value="Exposição">Exposição</option>
-                                    <option value="Feira">Feira</option>
-                                    <option value="Festa junina">Festa junina</option>
-                                    <option value="Festa temática">Festa temática</option>
-                                    <option value="Formatura">Formatura</option>
-                                    <option value="Inauguração">Inauguração</option>
-                                    <option value="Jantar">Jantar</option>
-                                    <option value="Lançamento de produto">Lançamento de produto</option>
-                                    <option value="Missa">Missa</option>
-                                    <option value="Noivado">Noivado</option>
-                                    <option value="Palestra">Palestra</option>
-                                    <option value="Reunião">Reunião</option>
-                                    <option value="Seminário">Seminário</option>
-                                    <option value="Show">Show</option>
-                                    <option value="Workshop">Workshop</option>
-                                    <option value="Outro">Outro</option>
+    {/* SOCIAIS */}
+   
+        <option value="Despedida de solteiro">Despedida de solteiro</option>
+        <option value="Encontro de amigos">Encontro de amigos</option>
+        <option value="Encontro de negócios">Encontro de negócios</option>
+        <option value="Encontro familiar">Encontro familiar</option>
+        <option value="Evento beneficente">Evento beneficente</option>
+        <option value="Evento cultural">Evento cultural</option>
+        <option value="Evento esportivo">Evento esportivo</option>
+        <option value="Evento religioso">Evento religioso</option>
+        <option value="Exposição">Exposição</option>
+        <option value="Feira">Feira</option>
+        <option value="Festa junina">Festa junina</option>
+        <option value="Festa temática">Festa temática</option>
+        <option value="Formatura">Formatura</option>
+        <option value="Inauguração">Inauguração</option>
+        <option value="Jantar">Jantar</option>
+        <option value="Lançamento de produto">Lançamento de produto</option>
+        <option value="Noivado">Noivado</option>
+        <option value="Palestra">Palestra</option>
+        <option value="Reunião">Reunião</option>
+        <option value="Seminário">Seminário</option>
+        <option value="Show">Show</option>
+        <option value="Workshop">Workshop</option>
+        <option value="Outro">Outro</option>
+       
                                 </select>
                             </div>
 
