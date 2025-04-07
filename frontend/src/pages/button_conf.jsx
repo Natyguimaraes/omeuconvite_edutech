@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
   Check,
@@ -38,7 +38,9 @@ function EventCredential() {
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
   const API_EVENTOS = `${API_URL}/api/eventos`;
 
-  const isConfirmed = confirmedStatus !== null ? confirmedStatus : convidado?.confirmado === 1;
+  const isConfirmed = useMemo(() => {
+    return confirmedStatus !== null ? confirmedStatus : convidado?.confirmado;
+  }, [confirmedStatus, convidado])
 
   useEffect(() => {
     const handleResize = () => {
@@ -152,6 +154,8 @@ function EventCredential() {
   
         const eventoData = await eventoResponse.json();
         const eventoFormatado = eventoData.data || eventoData;
+
+        console.log(eventoAssociado)
   
         // 7. Atualiza estados
         setConvidado({
@@ -159,7 +163,7 @@ function EventCredential() {
           nome: dadosConvidado.nome || "Convidado",
           telefone: dadosConvidado.telefone || "",
           email: dadosConvidado.email || "",
-          confirmado: dadosConvidado.confirmado === 1,
+          confirmado: eventoAssociado.confirmado === 1,
           limite_acompanhante: limiteConvidado,
           acompanhantes: acompanhantesExistentes
         });
