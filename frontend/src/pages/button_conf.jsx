@@ -11,6 +11,7 @@ import {
   Loader2,
   Sparkles,
   HeartCrack,
+  UserSearch
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
@@ -787,8 +788,83 @@ function EventCredential() {
                     </p>
                   </div>
                 </motion.div>
+
+                {/* exibir nome e telefone do convidado na tela de confirmação*/}
+
+                {/*<motion.div 
+                className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from white to-indigo-50 p-5 rounded 2xl border border-indigo-100/70 shadow-md hover:shadow-lg transition-all w-125"
+                > 
+                <div className="bg-gradient-to-br from-indigo-100 to-indigo-200 p-3 rounded-xl shadow-inner">
+                <UserSearch className="w-7 h-7 text-indigo-600" />
+                </div>
+
+                <div className="">
+                <h3 className="font-bold text-lg md:text-xl mb-1 text-gray-800"> Olá, {convidado.nome}! Você é nosso(a) convidado(a)</h3>
+              <p className="text-lg font-bold text-gray-600"> Seu telefone: {convidado.telefone}</p>
+              </div>
+               </motion.div>
+               */}
+
+                {/* inputs */}
+
+                {/* Forma 2 de exibição de convidado*/}
+                <div className="flex flex-col w-155">
+                <motion.div className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from white to-indigo-50 p-5 rounded 2xl border border-indigo-100/70 shadow-md hover:shadow-lg trasition -all">
+                  <div>
+                    <div className="bg-gradient-to-br frm-indigo-200 p-3 rounded-xl shadow-inner">
+                      <UserSearch className="w-7 h-7 text-indigo-600" />
+                    </div>
+
+                    <div className="w-50 md:w-32 lg:w-190">
+                      <h3 className=" w-55 md:w-32 lg:w-190 font-bold text-lg md:text-xl mb-4 text-gray-800">
+                        {" "}
+                        Olá, {convidado.nome}! Você é nosso(a) convidado(a)
+                      </h3>
+                    </div>
+                  </div>
+                </motion.div>
+                <div>
+                  <h1 className="font-semibold text-gray-800 text-lg md:text-xl ">
+                    Convidado
+                  </h1>
+                </div>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <div className=" relative left-4 top-9 text-gray-400">
+                      <User size={22} />
+                    </div>
+                    <input
+                      className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
+                      type="text"
+                      value={convidado.nome || ""}
+                      disabled
+                    />
+
+                    <div className="relative left-5 top-9 text-gray-400">
+                      <Phone size={22} />
+                    </div>
+                    <input
+                      className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all cursor-not-allowed}`}
+                      type="tel"
+                      value={convidado.telefone || ""}
+                      disabled
+                    />
+
+                    <div className="relative left-5 top-9 text-gray-400">
+                      <Mail size={22} />
+                    </div>
+                    <input
+                      className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
+                      type="text"
+                      value={convidado.email || "email"}
+                      disabled
+                    />
+                  </div>
+                </div>
               </div>
             </div>
+            </div>
+            {/* Forma 2 de exibição de convidado final*/}
 
             <div className="mb-8 md:mb-10">
               {limiteAcompanhantes > 0 && (
@@ -817,19 +893,24 @@ function EventCredential() {
                             desejaInformarAcompanhante
                               ? "bg-indigo-600"
                               : "bg-gray-300"
-                          } ${isConfirmed ? 'opacity-50' : ''}`}
+                          } ${isConfirmed ? "opacity-50" : ""}`}
                         />
                         <div
                           className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
                             desejaInformarAcompanhante
                               ? "transform translate-x-6"
                               : ""
-                          } ${isConfirmed ? 'opacity-70' : ''}`}
+                          } ${isConfirmed ? "opacity-70" : ""}`}
                         />
                       </motion.div>
                     </div>
-                    <span className={`text-gray-800 font-semibold text-lg md:text-xl ${isConfirmed ? 'opacity-70' : ''}`}>
-                      Informar acompanhantes? ({acompanhantes.filter(a => a.nome).length}/
+                    <span
+                      className={`text-gray-800 font-semibold text-lg md:text-xl ${
+                        isConfirmed ? "opacity-70" : ""
+                      }`}
+                    >
+                      Preencha os dados dos(as) acompanhante(s). (
+                      {acompanhantes.filter((a) => a.nome).length}/
                       {limiteAcompanhantes})
                     </span>
                   </label>
@@ -846,7 +927,9 @@ function EventCredential() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: -100 }}
                         transition={{ duration: 0.3 }}
-                        className={`bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden ${isConfirmed ? 'opacity-80' : ''}`}
+                        className={`bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-lg relative overflow-hidden ${
+                          isConfirmed ? "opacity-80" : ""
+                        }`}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-50/40 to-pink-50/40 opacity-30" />
                         <div className="relative z-10">
@@ -854,17 +937,20 @@ function EventCredential() {
                             <h3 className="font-semibold text-gray-800 text-lg md:text-xl">
                               Acompanhante {index + 1}
                             </h3>
-                            {(!acompanhante.id || acompanhantes.length > 1) && !isConfirmed && (
-                              <motion.button
-                                onClick={() => handleRemoveAcompanhante(index)}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                                aria-label="Remover acompanhante"
-                              >
-                                <X size={24} />
-                              </motion.button>
-                            )}
+                            {(!acompanhante.id || acompanhantes.length > 1) &&
+                              !isConfirmed && (
+                                <motion.button
+                                  onClick={() =>
+                                    handleRemoveAcompanhante(index)
+                                  }
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                  aria-label="Remover acompanhante"
+                                >
+                                  <X size={24} />
+                                </motion.button>
+                              )}
                           </div>
 
                           <div className="space-y-4">
@@ -873,7 +959,9 @@ function EventCredential() {
                                 <User size={22} />
                               </div>
                               <input
-                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${isConfirmed ? 'cursor-not-allowed' : ''}`}
+                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
+                                  isConfirmed ? "cursor-not-allowed" : ""
+                                }`}
                                 type="text"
                                 placeholder="Nome completo"
                                 value={acompanhante.nome || ""}
@@ -893,7 +981,9 @@ function EventCredential() {
                                 <Phone size={22} />
                               </div>
                               <input
-                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${isConfirmed ? 'cursor-not-allowed' : ''}`}
+                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
+                                  isConfirmed ? "cursor-not-allowed" : ""
+                                }`}
                                 type="tel"
                                 placeholder="Telefone com DDD (opcional)"
                                 value={acompanhante.telefone || ""}
@@ -913,7 +1003,9 @@ function EventCredential() {
                                 <Mail size={22} />
                               </div>
                               <input
-                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${isConfirmed ? 'cursor-not-allowed' : ''}`}
+                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
+                                  isConfirmed ? "cursor-not-allowed" : ""
+                                }`}
                                 type="email"
                                 placeholder="E-mail (opcional)"
                                 value={acompanhante.email || ""}
@@ -998,19 +1090,24 @@ function EventCredential() {
                   disabled={isLoading || isConfirmed}
                   whileHover={{
                     scale: isLoading || isConfirmed ? 1 : 1.05,
-                    boxShadow: isLoading || isConfirmed ? "none" : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
+                    boxShadow:
+                      isLoading || isConfirmed
+                        ? "none"
+                        : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
                   }}
                   whileTap={{ scale: isLoading || isConfirmed ? 1 : 0.98 }}
                   className={`flex-1 cursor-pointer disabled:cursor-default bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50
-                    ${isLoading ? 'opacity-70' : ''} 
-                    ${isConfirmed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    ${isLoading ? "opacity-70" : ""} 
+                    ${isConfirmed ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
                     <>
                       <Check size={26} />
-                      <span>{isConfirmed ? "Já confirmado!" : "Confirmar Presença"}</span>
+                      <span>
+                        {isConfirmed ? "Já confirmado!" : "Confirmar Presença"}
+                      </span>
                       <motion.span
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
@@ -1026,11 +1123,13 @@ function EventCredential() {
                   disabled={isLoading}
                   whileHover={{
                     scale: isLoading ? 1 : 1.05,
-                    boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
+                    boxShadow: isLoading
+                      ? "none"
+                      : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
                   }}
                   whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   className={`flex-1 cursor-pointer bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
-                    ${isLoading ? 'opacity-70' : ''}`}
+                    ${isLoading ? "opacity-70" : ""}`}
                 >
                   {isLoading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
@@ -1049,8 +1148,10 @@ function EventCredential() {
                 </motion.button>
               </div>
               {isConfirmed && (
-  <GerarCredencialButton data_gerar_qrcode={evento.data_gerar_qrcode} />
-)}
+                <GerarCredencialButton
+                  data_gerar_qrcode={evento.data_gerar_qrcode}
+                />
+              )}
             </div>
           </div>
         </motion.div>
