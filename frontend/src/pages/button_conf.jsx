@@ -610,7 +610,7 @@ function EventCredential() {
   
       const updatedResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       if (updatedResponse.ok) {
-        const updatedData = await updatedResponse.json();
+        const updatedData = (await updatedResponse.json()).data;
         setConvidado(updatedData);
         if (updatedData.acompanhantes) {
           setAcompanhantes(
