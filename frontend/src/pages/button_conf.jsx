@@ -315,9 +315,6 @@ function EventCredential() {
         .filter(a => !!a.id)
         .filter(a => a.nome && a.nome.trim());
 
-      console.log(acompanhantesParaSalvar)
-      console.log(acompanhantesComId)
-
       if (acompanhantesParaSalvar.length === 0 && acompanhantesComId.length === 0) {
         return;
       }
