@@ -10,7 +10,7 @@ import {
   Phone,
   Loader2,
   Sparkles,
-  HeartCrack,
+  HeartCrack, SquarePen,
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,6 +33,7 @@ function EventCredential() {
     height: window.innerHeight,
   });
   const [confirmedStatus, setConfirmedStatus] = useState(null);
+  const [permiteAlterarDados, setPermiteAlterarDados] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
@@ -289,7 +290,7 @@ function EventCredential() {
   };
 
   const salvarAcompanhantes = async () => {
-    if (isConfirmed) return;
+    // if (isConfirmed) return;
     
     setIsLoading(true);
     setError("");
@@ -309,8 +310,15 @@ function EventCredential() {
       const acompanhantesParaSalvar = acompanhantes
         .filter(a => !a.id)
         .filter(a => a.nome && a.nome.trim());
-  
-      if (acompanhantesParaSalvar.length === 0) {
+
+      const acompanhantesComId = acompanhantes
+        .filter(a => !!a.id)
+        .filter(a => a.nome && a.nome.trim());
+
+      console.log(acompanhantesParaSalvar)
+      console.log(acompanhantesComId)
+
+      if (acompanhantesParaSalvar.length === 0 && acompanhantesComId.length === 0) {
         return;
       }
   
@@ -338,6 +346,31 @@ function EventCredential() {
           return await response.json();
         })
       );
+
+      const resultadoAcompanhanteComId = await Promise.all(
+        acompanhantesComId.map(async (acompanhante) => {
+          const response = await fetch(
+            `${API_CONVIDADOS}/${convidadoId}/acompanhantes/${acompanhante.id}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                nome: acompanhante.nome,
+                telefone: acompanhante.telefone || null,
+                email: acompanhante.email || null,
+                confirmado: true,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Erro ao salvar acompanhante");
+          }
+
+          return await response.json();
+        })
+      )
 
       setAcompanhantes(prev => [
         ...prev.filter(a => a.id),
@@ -884,7 +917,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={!!acompanhante.id || isConfirmed}
+                                disabled={(!!acompanhante.id || isConfirmed) && !permiteAlterarDados ? true : false}
                               />
                             </div>
 
@@ -904,7 +937,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={!!acompanhante.id || isConfirmed}
+                                disabled={(!!acompanhante.id || isConfirmed) && !permiteAlterarDados ? true : false}
                               />
                             </div>
 
@@ -924,7 +957,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={!!acompanhante.id || isConfirmed}
+                                disabled={(!!acompanhante.id || isConfirmed) && !permiteAlterarDados ? true : false}
                               />
                             </div>
                           </div>
@@ -993,64 +1026,102 @@ function EventCredential() {
               </AnimatePresence>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <motion.button
-                  onClick={() => confirmarPresenca("sim")}
-                  disabled={isLoading || isConfirmed}
-                  whileHover={{
-                    scale: isLoading || isConfirmed ? 1 : 1.05,
-                    boxShadow: isLoading || isConfirmed ? "none" : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
-                  }}
-                  whileTap={{ scale: isLoading || isConfirmed ? 1 : 0.98 }}
-                  className={`flex-1 cursor-pointer disabled:cursor-default bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50
+                {!isConfirmed && (
+                  <motion.button
+                    onClick={() => confirmarPresenca("sim")}
+                    disabled={isLoading || isConfirmed}
+                    whileHover={{
+                      scale: isLoading || isConfirmed ? 1 : 1.05,
+                      boxShadow: isLoading || isConfirmed ? "none" : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
+                    }}
+                    whileTap={{scale: isLoading || isConfirmed ? 1 : 0.98}}
+                    className={`flex-1 cursor-pointer disabled:cursor-default bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50
                     ${isLoading ? 'opacity-70' : ''} 
                     ${isConfirmed ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-7 h-7 animate-spin" />
-                  ) : (
-                    <>
-                      <Check size={26} />
-                      <span>{isConfirmed ? "Já confirmado!" : "Confirmar Presença"}</span>
-                      <motion.span
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        🎉
-                      </motion.span>
-                    </>
-                  )}
-                </motion.button>
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-7 h-7 animate-spin"/>
+                    ) : (
+                      <>
+                        <Check size={26}/>
+                        <span>{isConfirmed ? "Já confirmado!" : "Confirmar Presença"}</span>
+                        <motion.span
+                          animate={{scale: [1, 1.2, 1]}}
+                          transition={{duration: 1.5, repeat: Infinity}}
+                        >
+                          🎉
+                        </motion.span>
+                      </>
+                    )}
+                  </motion.button>
+                )}
 
-                <motion.button
-                  onClick={() => confirmarPresenca("nao")}
-                  disabled={isLoading}
-                  whileHover={{
-                    scale: isLoading ? 1 : 1.05,
-                    boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
-                  }}
-                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                  className={`flex-1 cursor-pointer bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
+                {isConfirmed && (
+                  <GerarCredencialButton data_gerar_qrcode={evento.data_gerar_qrcode}/>
+                )}
+
+                {!isConfirmed ? (
+                    <motion.button
+                      onClick={() => {
+                        confirmarPresenca("nao")
+                        setPermiteAlterarDados(false)
+                      }}
+                      disabled={isLoading}
+                      whileHover={{
+                        scale: isLoading ? 1 : 1.05,
+                        boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
+                      }}
+                      whileTap={{scale: isLoading ? 1 : 0.98}}
+                      className={`flex-1 cursor-pointer bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
                     ${isLoading ? 'opacity-70' : ''}`}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-7 h-7 animate-spin" />
-                  ) : (
-                    <>
-                      <X size={26} />
-                      <span>Não Poderei Ir</span>
-                      <motion.span
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        😢
-                      </motion.span>
-                    </>
-                  )}
-                </motion.button>
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-7 h-7 animate-spin"/>
+                      ) : (
+                        <>
+                          <X size={26}/>
+                          <span>Não Poderei Ir</span>
+                          <motion.span
+                            animate={{rotate: [0, 10, -10, 0]}}
+                            transition={{duration: 1.5, repeat: Infinity}}
+                          >
+                            😢
+                          </motion.span>
+                        </>
+                      )}
+                    </motion.button> )
+                    : (
+                  <motion.button
+                    onClick={() => {
+                      setConfirmedStatus(false)
+                      setPermiteAlterarDados(true)
+                    }}
+                    disabled={isLoading}
+                    whileHover={{
+                      scale: isLoading ? 1 : 1.05,
+                      boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
+                    }}
+                    whileTap={{scale: isLoading ? 1 : 0.98}}
+                    className={`flex-1 p-3 p-none cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
+                    ${isLoading ? 'opacity-70' : ''}`}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-7 h-7 animate-spin"/>
+                    ) : (
+                      <>
+                        <SquarePen size={26}/>
+                        <span>Alterar Dados</span>
+                        <motion.span
+                          animate={{rotate: [0, 10, -10, 0]}}
+                          transition={{duration: 1.5, repeat: Infinity}}
+                        >
+                          🔄
+                        </motion.span>
+                      </>
+                    )}
+                  </motion.button>
+                )}
               </div>
-              {isConfirmed && (
-  <GerarCredencialButton data_gerar_qrcode={evento.data_gerar_qrcode} />
-)}
             </div>
           </div>
         </motion.div>

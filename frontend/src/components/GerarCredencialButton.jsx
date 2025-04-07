@@ -59,11 +59,11 @@ function GerarCredencialButton({ data_gerar_qrcode }) {
   }
 
   return (
-    <div className="mt-8">
+    <div className="">
       <motion.button
         whileHover={isAvailable ? { scale: 1.02 } : {}}
         whileTap={isAvailable ? { scale: 0.98 } : {}}
-        className={`bg-gradient-to-r from-purple-500 to-indigo-600  text-white  w-full max-w-md mx-auto flex flex-col items-center justify-center p-6 rounded-2xl shadow-lg transition-all ${
+        className={`bg-gradient-to-r from-purple-500 to-indigo-600  text-white  w-full max-w-md mx-auto flex flex-col items-center justify-center p-3 px-6 rounded-2xl shadow-lg transition-all ${
           isAvailable
             ? "cursor-pointer hover:shadow-purple-300/50"
             : " cursor-not-allowed"
