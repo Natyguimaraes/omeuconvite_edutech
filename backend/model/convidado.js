@@ -258,3 +258,16 @@ export function removeConvidadoFromAllEventosModel(convidadoId) {
   });
 }
 
+export function inativaAcompanhanteModel(id) {
+  return new Promise((resolve, reject) => {
+
+    conexao.query(
+      "UPDATE acompanhante SET ? WHERE convidado_id = ?",
+      [{confirmado: 2}, id],
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+  });
+}

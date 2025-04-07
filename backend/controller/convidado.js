@@ -1,4 +1,4 @@
-import { 
+import {
   createConvidadoModel,
   getConvidadosModel,
   updateConvidadoModel,
@@ -12,7 +12,7 @@ import {
   addConvidadoToEventoModel,
   updateConvidadoEventoModel,
   removeConvidadoFromEventoModel,
-  removeConvidadoFromAllEventosModel
+  removeConvidadoFromAllEventosModel, inativaAcompanhanteModel
 } from "../model/convidado.js";
 
 export async function createConvidado(req, res) {
@@ -291,6 +291,10 @@ export async function confirmarPresencaConvidado(req, res) {
         limite_acompanhante: convidado.limite_acompanhante 
       }
     );
+
+    if (confirmado == 2) {
+      await inativaAcompanhanteByIdConvidado(convidadoId)
+    }
     
     if (!result.affectedRows) {
       return res.status(404).json({ 
@@ -484,5 +488,13 @@ export async function deleteAcompanhanteById(req, res) {
       success: false,
       error: "Erro ao remover acompanhante"
     });
+  }
+}
+
+export async function inativaAcompanhanteByIdConvidado(convidadoId) {
+  try {
+    await inativaAcompanhanteModel(convidadoId);
+  } catch (err) {
+    console.error("Erro ao atualizar acompanhante:", err);
   }
 }

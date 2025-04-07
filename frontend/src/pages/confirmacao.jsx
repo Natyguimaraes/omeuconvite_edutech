@@ -1401,21 +1401,28 @@ const Confirmacao = () => {
                                                 convidado.id,
                                                 acompanhante.id
                                               )}
-                                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${acompanhante.confirmado
-                                                  ? "bg-green-100 text-green-800"
-                                                  : "bg-red-100 text-red-800"}`}
+                                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${acompanhante.confirmado == 0
+                                                  ? "bg-red-100 text-red-800" :
+                                                  acompanhante.confirmado == 1
+                                                  ?  "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}
                                             >
-                                              {acompanhante.confirmado ? (
+                                              {acompanhante.confirmado == 0 ? (
                                                 <>
                                                   <CheckCircle className="h-3 w-3 mr-1" />
+                                                   Pendente
+                                                </>
+                                              ) : acompanhante.confirmado == 1 ? (
+                                                <>
+                                                  <XCircle className="h-3 w-3 mr-1" />
                                                   Confirmado
                                                 </>
                                               ) : (
                                                 <>
                                                   <XCircle className="h-3 w-3 mr-1" />
-                                                  Pendente
+                                                  Não comparecerá
                                                 </>
-                                              )}
+                                              )
+                                              }
                                             </button>
                                           </td>
                                           <td className="px-4 py-3 text-right whitespace-nowrap">
