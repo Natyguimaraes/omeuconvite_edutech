@@ -11,14 +11,14 @@ function GerarCredencialButton({ data_gerar_qrcode }) {
 
   useEffect(() => {
     // Data fixa para 10/04/2025
-    const DATA_QRCODE_FIXA = new Date('2025-04-10T00:00:00');
+    const DATA_QRCODE_FIXA = new Date('2025-04-20T00:00:00');
     
     // Valida e formata a data recebida
     const validateAndFormatDate = () => {
       // Usa a data fixa independentemente do que receber
       const date = DATA_QRCODE_FIXA;
       
-      // Formata para exibição (10/04/2025)
+      // Formata para exibição (20/04/2025)
       setFormattedDate(date.toLocaleDateString('pt-BR'));
       return date;
     };
@@ -63,15 +63,15 @@ function GerarCredencialButton({ data_gerar_qrcode }) {
       <motion.button
         whileHover={isAvailable ? { scale: 1.02 } : {}}
         whileTap={isAvailable ? { scale: 0.98 } : {}}
-        className={`w-full max-w-md mx-auto flex flex-col items-center justify-center p-6 rounded-2xl shadow-lg transition-all ${
+        className={`bg-gradient-to-r from-purple-500 to-indigo-600  text-white  w-full max-w-md mx-auto flex flex-col items-center justify-center p-6 rounded-2xl shadow-lg transition-all ${
           isAvailable
-            ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white cursor-pointer hover:shadow-purple-300/50"
-            : "bg-gray-100 text-gray-500 cursor-not-allowed"
+            ? "cursor-pointer hover:shadow-purple-300/50"
+            : " cursor-not-allowed"
         }`}
         disabled={!isAvailable}
       >
         <div className="flex items-center gap-3 mb-2">
-          <Ticket size={24} className={isAvailable ? "text-white" : "text-gray-400"} />
+          <Ticket size={24} className={"text-white"} />
           <span className="text-lg font-bold">
             {isAvailable ? "Gerar Credencial" : "Gerar Credencial"}
           </span>
@@ -83,9 +83,9 @@ function GerarCredencialButton({ data_gerar_qrcode }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center gap-2 mt-2 text-sm bg-white/20 px-3 py-1 rounded-full"
           >
-            <Calendar size={16} className="text-gray-500" />
-            <span className="text-gray-600">
-              Disponível a partir de 10/04/2025 {/* Texto fixo */}
+            <Calendar size={16} className="text-white" />
+            <span className="text-white">
+              Disponível a partir de <span className="font-semibold">{formattedDate}</span> {/* Texto fixo */}
             </span>
           </motion.div>
         )}

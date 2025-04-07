@@ -11,8 +11,8 @@ function CadastroEventos() {
     const [nome, setNome] = useState('');
     const [descricao, setDescricao] = useState('');
     const [dataEvento, setDataEvento] = useState('');
-    // Data fixa para 10/04/2025 às 12:00
-    const [data_gerar_qrcode, setdata_gerar_qrcode] = useState('2025-04-10T12:00');
+    // Data fixa para 20/04/2025 às 12:00
+    const [data_gerar_qrcode, setdata_gerar_qrcode] = useState('2025-04-20T12:00');
     const [local, setLocal] = useState('');
     const [tipo, setTipoEvento] = useState('');
     const [mensagem_whatsapp, setMensagemWhatsapp] = useState('');
@@ -94,8 +94,8 @@ function CadastroEventos() {
     
         // 3. Formatação das datas
         const dataEventoFormatada = formatarDataParaEnvio(dataEvento);
-        // Data fixa para 10/04/2025
-        const dataQrCodeFormatada = "2025-04-10T12:00:00.000Z";
+        // Data fixa para 20/04/2025
+        const dataQrCodeFormatada = "2025-04-20T12:00:00.000Z";
     
         // 4. Validação da lógica das datas
         const dataQrCode = new Date(dataQrCodeFormatada);
@@ -161,7 +161,7 @@ function CadastroEventos() {
         setDescricao('');
         setDataEvento('');
         // Mantém a data fixa mesmo no reset
-        setdata_gerar_qrcode('2025-04-10T12:00');
+        setdata_gerar_qrcode('2025-04-20T12:00');
         setLocal('');
         setMensagemWhatsapp('');
         setTipoEvento('');
@@ -310,16 +310,16 @@ function CadastroEventos() {
                             <div className="space-y-2">
                                 <label className="flex items-center text-sm font-medium text-gray-700">
                                     <Clock className="h-4 w-4 mr-2 text-indigo-500" />
-                                    Data para liberação de credencial (FIXA: 10/04/2025)
+                                    Data para liberação de credencial (FIXA: 20/04/2025)
                                 </label>
                                 <input
                                     type="datetime-local"
-                                    value="2025-04-10T12:00"
+                                    value="2025-04-20T12:00"
                                     readOnly
                                     className="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 cursor-not-allowed"
                                 />
                                 <p className="text-xs text-gray-500">
-                                    Data fixa para testes: 10 de abril de 2025 às 12:00
+                                    Data fixa para testes: 20 de abril de 2025 às 12:00
                                 </p>
                             </div>
 
