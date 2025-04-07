@@ -19,9 +19,10 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaSadCry, FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import NavBar from "../components/menu";
+import BadgeConvidadoStatus from "../components/BadgeConvidadoStatus";
 
 const Confirmacao = () => {
   const navigate = useNavigate();
@@ -687,10 +688,13 @@ const Confirmacao = () => {
       const confirmadoNoEvento = convidado.eventos?.find(e => e.id === parseInt(eventoId))?.confirmado;
       
       // Filtro por status
-      if (filters.status === "confirmed" && !confirmadoNoEvento) {
+      if (filters.status === "confirmed" && confirmadoNoEvento !== 1) {
         return false;
       }
-      if (filters.status === "pending" && confirmadoNoEvento) {
+      if (filters.status === "pending" && confirmadoNoEvento !== 0) {
+        return false;
+      }
+      if (filters.status === "cancelled" && confirmadoNoEvento !== 2) {
         return false;
       }
   
@@ -751,6 +755,7 @@ const Confirmacao = () => {
               <option value="all">Todos</option>
               <option value="confirmed">Confirmados</option>
               <option value="pending">Pendentes</option>
+              <option value="cancelled">Não comparecerá</option>
             </select>
           </div>
           
@@ -1286,24 +1291,7 @@ const Confirmacao = () => {
                                             </div>
                                           </td>
                                           <td className="px-4 py-4">
-                                            <button
-                                              onClick={() => toggleConfirmacao(convidado.id)}
-                                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${convidado.confirmado
-                                                  ? "bg-green-100 text-green-800"
-                                                  : "bg-red-100 text-red-800"}`}
-                                            >
-                                              {convidado.confirmado ? (
-                                                <>
-                                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                                  Confirmado
-                                                </>
-                                              ) : (
-                                                <>
-                                                  <XCircle className="h-3 w-3 mr-1" />
-                                                  Pendente
-                                                </>
-                                              )}
-                                            </button>
+                                            <BadgeConvidadoStatus status={convidado.confirmado || 0}/>
                                           </td>
                                           <td className="px-4 py-4 text-right whitespace-nowrap">
                                             <div className="flex justify-end space-x-1">
