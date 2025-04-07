@@ -862,20 +862,18 @@ function EventCredential() {
 
                 {/* Forma 2 de exibição de convidado*/}
                 <div className="flex flex-col w-155">
-                <motion.div className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from white to-indigo-50 p-5 rounded 2xl border border-indigo-100/70 shadow-md hover:shadow-lg trasition -all">
+              
                   <div>
-                    <div className="bg-gradient-to-br frm-indigo-200 p-3 rounded-xl shadow-inner">
-                      <UserSearch className="w-7 h-7 text-indigo-600" />
-                    </div>
+                   
 
-                    <div className="w-50 md:w-32 lg:w-190">
-                      <h3 className=" w-55 md:w-32 lg:w-190 font-bold text-lg md:text-xl mb-4 text-gray-800">
+                    <div className="w-68 md:w-32 lg:w-190">
+                      <h3 className=" text-center m-auto md:w-32 lg:w-190 font-bold md:text-xl mb-4 text-gray-800 text-2xl">
                         {" "}
                         Olá, {convidado.nome}! Você é nosso(a) convidado(a)
                       </h3>
                     </div>
                   </div>
-                </motion.div>
+               
                 <div>
                   <h1 className="font-semibold text-gray-800 text-lg md:text-xl ">
                     Convidado
