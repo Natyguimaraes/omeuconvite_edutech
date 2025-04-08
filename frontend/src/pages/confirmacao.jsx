@@ -357,6 +357,8 @@ const Confirmacao = () => {
   const handleUpdate = async () => {
     if (!editIndex) return;
 
+    console.log(editData)
+
     try {
       setLoading(true);
       
@@ -392,8 +394,8 @@ const Confirmacao = () => {
         );
       }
 
-      setConvidados(prev => prev.map(c => 
-        c.id === editIndex ? { ...updatedConvidado, acompanhantes: editData.acompanhantes } : c
+      setConvidados(prev => prev.map(c =>
+        c.id === editIndex ? {...c, ...editData} : c
       ));
 
       setEditIndex(null);
