@@ -147,9 +147,9 @@ const Confirmacao = () => {
     
     let count = 0;
     convidadosEvento.forEach(convidado => {
-      if (convidado.confirmado) count++;
+      if (convidado.confirmado === 1) count++;
       if (Array.isArray(convidado.acompanhantes)) {
-        count += convidado.acompanhantes.filter(a => a.confirmado).length;
+        count += convidado.acompanhantes.filter(a => a.confirmado === 1).length;
       }
     });
     return count;
