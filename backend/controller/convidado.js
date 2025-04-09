@@ -1,6 +1,5 @@
 import {
   createConvidadoModel,
-  getConvidadosModel,
   updateConvidadoModel,
   deleteConvidadoModel,
   createAcompanhanteModel,
@@ -12,7 +11,7 @@ import {
   addConvidadoToEventoModel,
   updateConvidadoEventoModel,
   removeConvidadoFromEventoModel,
-  removeConvidadoFromAllEventosModel, inativaAcompanhanteModel
+  removeConvidadoFromAllEventosModel, inativaAcompanhanteModel, getConvidadosModelOtimized
 } from "../model/convidado.js";
 
 export async function createConvidado(req, res) {
@@ -69,8 +68,9 @@ export async function createConvidado(req, res) {
 }
 export async function getAllConvidados(req, res) {
   try {
-    const convidados = await getConvidadosModel();
-    res.json({ 
+    // const convidados = await getConvidadosModel();
+    const convidados = await getConvidadosModelOtimized();
+    res.json({
       success: true,
       data: convidados 
     });

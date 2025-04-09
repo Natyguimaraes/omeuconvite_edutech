@@ -51,6 +51,78 @@ export async function getConvidadosModel() {
     });
   });
 }
+export async function getConvidadosModelOtimized() {
+  return new Promise((resolve, reject) => {
+    conexao.query(`
+      SELECT id, nome, telefone, email,
+        (
+          SELECT
+            CONCAT('[',
+              GROUP_CONCAT(
+                    DISTINCT CONCAT(
+                        '{',
+                            '"id": ', acompanhante.id,
+                            ', "convidado_id": ', acompanhante.convidado_id,
+                            ', "nome": "', IFNULL(acompanhante.nome, ''), '"',
+                            ', "telefone": "', IFNULL(acompanhante.telefone, ''), '"',
+                            ', "email": "', IFNULL(acompanhante.email, ''), '"',
+                            ', "confirmado": ', IFNULL(acompanhante.confirmado, ''),
+                        '}'
+                    )
+                SEPARATOR ", ")
+            ,"]")
+          FROM acompanhante WHERE convidado_id = convidados.id
+        ) AS acompanhantes,
+
+        (
+            SELECT
+                CONCAT('[',
+                    GROUP_CONCAT(
+                        DISTINCT CONCAT(
+                            '{',
+                                '"id": ', e.id,
+                                ', "imagem_evento": "', IFNULL(e.imagem_evento, ''), '"',
+                                ', "nome": "', IFNULL(e.nome, ''), '"',
+                                ', "descricao": "', IFNULL(e.descricao, ''), '"',
+                                ', "data_evento": "', IFNULL(e.data_evento, ''), '"',
+                                ', "data_gerar_qrcode": "', IFNULL(e.data_gerar_qrcode, ''), '"',
+                                ', "local": "', IFNULL(e.local, ''), '"',
+                                ', "mensagem_whatsapp": "', IFNULL(e.mensagem_whatsapp, ''), '"',
+                                ', "tipo": "', IFNULL(e.tipo, ''), '"',
+                                ', "administrador_id": "', IFNULL(e.administrador_id, ''), '"',
+                                ', "ativo": "', IFNULL(e.ativo, ''), '"',
+                                ', "data_criacao": "', IFNULL(e.data_criacao, ''), '"',
+                                ', "limite_acompanhante": ', IFNULL(ce.limite_acompanhante, ''),
+                                ', "confirmado": ', IFNULL(ce.confirmado, ''),
+                            '}'
+                        )
+                    )
+                ,']')
+            FROM eventos e
+            JOIN convidado_evento ce ON e.id = ce.evento_id
+            WHERE ce.convidado_id = convidados.id
+        ) AS eventos
+
+        FROM convidados;
+      `,
+      async (err, convidados) => {
+        if (err) return reject(err);
+
+        try {
+          const convidadosCompleto = await Promise.all(
+            convidados.map(async c => ({
+              ...c,
+              acompanhantes: JSON.parse(c.acompanhantes || "[]"),
+              eventos: JSON.parse(c.eventos || "[]"),
+            }))
+          );
+          resolve(convidadosCompleto);
+        } catch (error) {
+          reject(error);
+        }
+      });
+  });
+}
 // Modelo atualizado para getConvidadoById
 export async function getConvidadoByIdModel(id) {
   return new Promise((resolve, reject) => {
