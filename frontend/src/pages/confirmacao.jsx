@@ -378,6 +378,32 @@ const Confirmacao = () => {
         throw new Error(errorData.message || "Erro ao atualizar convidado");
       }
 
+      for (const acompanhante of editData.acompanhantes) {
+        console.log(acompanhante)
+
+        if (acompanhante.id) {
+          await fetch(`${apiConvidados}/${editIndex}/acompanhantes/${acompanhante.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nome: acompanhante.nome,
+              telefone: acompanhante.telefone || null,
+              email: acompanhante.email || null,
+            }),
+          });
+
+        } else
+          await fetch(`${apiConvidados}/${editIndex}/acompanhantes/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nome: acompanhante.nome,
+              telefone: acompanhante.telefone || null,
+              email: acompanhante.email || null,
+            }),
+          });
+      }
+
       const updatedConvidado = await response.json();
       
       // Atualiza também a relação com o evento se limite_acompanhante mudou

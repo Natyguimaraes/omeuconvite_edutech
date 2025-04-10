@@ -1024,7 +1024,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={(!!acompanhante.id || isConfirmed) && !permiteAlterarDados ? true : false}
+                                disabled={(isConfirmed) && !permiteAlterarDados ? true : false}
                               />
                             </div>
 
@@ -1046,7 +1046,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={(!!acompanhante.id || isConfirmed) && !permiteAlterarDados ? true : false}
+                                disabled={(isConfirmed) && !permiteAlterarDados ? true : false}
                               />
                             </div>
 
@@ -1068,7 +1068,7 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={(!!acompanhante.id || isConfirmed) && !permiteAlterarDados ? true : false}
+                                disabled={(isConfirmed) && !permiteAlterarDados ? true : false}
                               />
                             </div>
                           </div>
