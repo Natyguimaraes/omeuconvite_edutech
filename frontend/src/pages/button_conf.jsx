@@ -10,12 +10,12 @@ import {
   Phone,
   Loader2,
   Sparkles,
-  UserSearch,
   HeartCrack, SquarePen,
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import GerarCredencialButton from "../components/GerarCredencialButton"
+import NavBar from "../components/menu";
 
 function EventCredential() {
   const { convidadoId } = useParams();
@@ -662,6 +662,7 @@ function EventCredential() {
 
   return (
     <>
+    <NavBar />
       {showConfetti && (
         <Confetti
           width={windowSize.width}

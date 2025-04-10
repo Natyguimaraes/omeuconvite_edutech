@@ -323,23 +323,6 @@ function CadastroEventos() {
                                 </p>
                             </div>
 
-                            {/* Mensagem WhatsApp */}
-                            <div className="space-y-2">
-                                <label className="flex items-center text-sm font-medium text-gray-700">
-                                    <MessageCircle className="h-4 w-4 mr-2 text-indigo-500" />
-                                    Mensagem para WhatsApp
-                                </label>
-                                <textarea
-                                    placeholder="Mensagem padrão que será enviada quando alguém clicar no botão do WhatsApp..."
-                                    value={mensagem_whatsapp}
-                                    onChange={e => setMensagemWhatsapp(e.target.value)}
-                                    rows={3}
-                                    className="w-full px-4 py-3 rounded-xl bg-white/90 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all resize-none" />
-                                <p className="text-xs text-gray-500">
-                                    Esta mensagem será usada como texto pré-definido quando os convidados clicarem no botão do WhatsApp
-                                </p>
-                            </div>
-
 
                             {/* Mensagem WhatsApp */}
                             <div className="space-y-2">
