@@ -46,7 +46,7 @@ const Navbar = () => {
   return (
     <>
       {/* Espaço reservado para evitar que o conteúdo fique atrás da navbar fixa */}
-      <div className={`h-[120px] transition-all duration-300`}></div>
+      <div className={`h-[150px] transition-all duration-300`}></div>
       
       {/* Navbar principal */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 overflow-hidden ${
