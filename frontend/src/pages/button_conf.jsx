@@ -205,10 +205,11 @@ function EventCredential() {
         nome: eventoFormatado.nome || "Evento",
         descricao: eventoFormatado.descricao || "Descrição do evento",
         data_evento: eventoFormatado.data_evento || new Date().toISOString(),
-        dataGerarQrCode: eventoFormatado.dataGerarQrCode || null,
+        data_gerar_qrcode: eventoFormatado.data_gerar_qrcode || eventoFormatado.dataGerarQrCode || null,
         local: eventoFormatado.local || "Local não especificado",
         imagem_evento: eventoFormatado.imagem_evento || "/convite.jpg"
       });
+
 
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
@@ -677,7 +678,7 @@ function EventCredential() {
 
   return (
     <>
-    <NavBar />
+      <NavBar />
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -699,7 +700,7 @@ function EventCredential() {
         />
       )}
 
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50 pt-6 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="min-h-screen pt-20 bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50 pt-6 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           {[...Array(20)].map((_, i) => (
             <motion.div
@@ -736,7 +737,7 @@ function EventCredential() {
             <div className="relative overflow-hidden">
               <motion.div className="w-full overflow-hidden">
                 <motion.img
-                  src={evento.imagem_evento || "/convite.jpg"}
+                  src={evento.imagem_evento}
                   alt={`Imagem do evento ${evento.nome}`}
                   className="w-full h-auto max-h-[700px] object-contain"
                   initial={{ opacity: 0 }}
@@ -878,10 +879,7 @@ function EventCredential() {
 
                 {/* Forma 2 de exibição de convidado*/}
                 <div className="flex flex-col w-155">
-              
                   <div>
-                   
-
                     <div className="w-68 md:w-32 lg:w-190">
                       <h3 className=" text-center m-auto md:w-32 lg:w-190 font-bold md:text-xl mb-4 text-gray-800 text-2xl">
                         {" "}
@@ -889,47 +887,47 @@ function EventCredential() {
                       </h3>
                     </div>
                   </div>
-               
-                <div>
-                  <h1 className="font-semibold text-gray-800 text-lg md:text-xl ">
-                    Convidado
-                  </h1>
-                </div>
-                <div className="space-y-4">
-                  <div className="relative">
-                    <div className=" relative left-4 top-9 text-gray-400">
-                      <User size={22} />
-                    </div>
-                    <input
-                      className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
-                      type="text"
-                      value={convidado.nome || ""}
-                      disabled
-                    />
 
-                    <div className="relative left-5 top-9 text-gray-400">
-                      <Phone size={22} />
-                    </div>
-                    <input
-                      className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all cursor-not-allowed}`}
-                      type="tel"
-                      value={convidado.telefone || ""}
-                      disabled
-                    />
+                  <div>
+                    <h1 className="font-semibold text-gray-800 text-lg md:text-xl ">
+                      Convidado
+                    </h1>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <div className=" relative left-4 top-9 text-gray-400">
+                        <User size={22} />
+                      </div>
+                      <input
+                        className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
+                        type="text"
+                        value={convidado.nome || ""}
+                        disabled
+                      />
 
-                    <div className="relative left-5 top-9 text-gray-400">
-                      <Mail size={22} />
+                      <div className="relative left-5 top-9 text-gray-400">
+                        <Phone size={22} />
+                      </div>
+                      <input
+                        className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all cursor-not-allowed}`}
+                        type="tel"
+                        value={convidado.telefone || ""}
+                        disabled
+                      />
+
+                      <div className="relative left-5 top-9 text-gray-400">
+                        <Mail size={22} />
+                      </div>
+                      <input
+                        className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
+                        type="text"
+                        value={convidado.email || "email"}
+                        disabled
+                      />
                     </div>
-                    <input
-                      className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
-                      type="text"
-                      value={convidado.email || "email"}
-                      disabled
-                    />
                   </div>
                 </div>
               </div>
-            </div>
             </div>
             {/* Forma 2 de exibição de convidado final*/}
 
@@ -1039,7 +1037,11 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={(isConfirmed) && !permiteAlterarDados ? true : false}
+                                disabled={
+                                  isConfirmed && !permiteAlterarDados
+                                    ? true
+                                    : false
+                                }
                               />
                             </div>
 
@@ -1061,7 +1063,11 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={(isConfirmed) && !permiteAlterarDados ? true : false}
+                                disabled={
+                                  isConfirmed && !permiteAlterarDados
+                                    ? true
+                                    : false
+                                }
                               />
                             </div>
 
@@ -1083,7 +1089,11 @@ function EventCredential() {
                                     e.target.value
                                   )
                                 }
-                                disabled={(isConfirmed) && !permiteAlterarDados ? true : false}
+                                disabled={
+                                  isConfirmed && !permiteAlterarDados
+                                    ? true
+                                    : false
+                                }
                               />
                             </div>
                           </div>
@@ -1158,22 +1168,29 @@ function EventCredential() {
                     disabled={isLoading || isConfirmed}
                     whileHover={{
                       scale: isLoading || isConfirmed ? 1 : 1.05,
-                      boxShadow: isLoading || isConfirmed ? "none" : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
+                      boxShadow:
+                        isLoading || isConfirmed
+                          ? "none"
+                          : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
                     }}
-                    whileTap={{scale: isLoading || isConfirmed ? 1 : 0.98}}
+                    whileTap={{ scale: isLoading || isConfirmed ? 1 : 0.98 }}
                     className={`flex-1 cursor-pointer disabled:cursor-default bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50
-                    ${isLoading ? 'opacity-70' : ''} 
-                    ${isConfirmed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    ${isLoading ? "opacity-70" : ""} 
+                    ${isConfirmed ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {isLoading ? (
-                      <Loader2 className="w-7 h-7 animate-spin"/>
+                      <Loader2 className="w-7 h-7 animate-spin" />
                     ) : (
                       <>
-                        <Check size={26}/>
-                        <span>{isConfirmed ? "Já confirmado!" : "Confirmar Presença"}</span>
+                        <Check size={26} />
+                        <span>
+                          {isConfirmed
+                            ? "Já confirmado!"
+                            : "Confirmar Presença"}
+                        </span>
                         <motion.span
-                          animate={{scale: [1, 1.2, 1]}}
-                          transition={{duration: 1.5, repeat: Infinity}}
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
                         >
                           🎉
                         </motion.span>
@@ -1183,74 +1200,95 @@ function EventCredential() {
                 )}
 
                 {isConfirmed && (
-                  <GerarCredencialButton data_gerar_qrcode={evento.data_gerar_qrcode}/>
+                  <GerarCredencialButton
+                    data_gerar_qrcode={evento.data_gerar_qrcode} // Esta é a data que define quando o botão ficará disponível
+                    convidadoId={convidado.id}
+                    convidadoNome={convidado.nome}
+                    convidadoTelefone={convidado.telefone}
+                    convidadoEmail={convidado.email}
+                    eventoNome={evento.nome}
+                    eventoData={evento.data_evento} // Data do evento (apenas para exibição)
+                    eventoLocal={evento.local}
+                    acompanhantes={acompanhantes.filter((a) => a.nome)} // Passa apenas acompanhantes válidos
+                  />
                 )}
 
                 {!isConfirmed ? (
-                    <motion.button
-                      disabled={isLoading || convidadoStatus === 'NAO_IREI'}
-                      onClick={() => {
-                        confirmarPresenca("nao")
-                        setPermiteAlterarDados(false)
-                      }}
-                      whileHover={{
-                        scale: isLoading ? 1 : 1.05,
-                        boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
-                      }}
-                      whileTap={{scale: isLoading ? 1 : 0.98}}
-                      className={`flex-1 cursor-pointer bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
-                    ${isLoading ? 'opacity-70' : ''}
-                    ${convidadoStatus === 'NAO_IREI' ? 'opacity-50 cursor-not-allowed' : ''}
+                  <motion.button
+                    disabled={isLoading || convidadoStatus === "NAO_IREI"}
+                    onClick={() => {
+                      confirmarPresenca("nao");
+                      setPermiteAlterarDados(false);
+                    }}
+                    whileHover={{
+                      scale: isLoading ? 1 : 1.05,
+                      boxShadow: isLoading
+                        ? "none"
+                        : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
+                    }}
+                    whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                    className={`flex-1 cursor-pointer bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
+                    ${isLoading ? "opacity-70" : ""}
+                    ${
+                      convidadoStatus === "NAO_IREI"
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }
                     `}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-7 h-7 animate-spin"/>
-                      ) : (
-                        <>
-                          <X size={26}/>
-                          <span>{convidadoStatus === 'NAO_IREI' ? "Ausência confirmada" : "Não Poderei Ir"}</span>
-                          <motion.span
-                            animate={{rotate: [0, 10, -10, 0]}}
-                            transition={{duration: 1.5, repeat: Infinity}}
-                          >
-                            😢
-                          </motion.span>
-                        </>
-                      )}
-                    </motion.button>)
-                  : (
-                    <motion.button
-                      onClick={() => {
-                        setConfirmedStatus(false)
-                        setPermiteAlterarDados(true)
-                      }}
-                      disabled={isLoading}
-                      whileHover={{
-                        scale: isLoading ? 1 : 1.05,
-                        boxShadow: isLoading ? "none" : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
-                      }}
-                      whileTap={{scale: isLoading ? 1 : 0.98}}
-                      className={`flex-1 p-3 p-none cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
-                    ${isLoading ? 'opacity-70' : ''}`}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-7 h-7 animate-spin"/>
-                      ) : (
-                        <>
-                          <SquarePen size={26}/>
-                          <span>Alterar Dados</span>
-                          <motion.span
-                            animate={{rotate: [0, 10, -10, 0]}}
-                            transition={{duration: 1.5, repeat: Infinity}}
-                          >
-                            🔄
-                          </motion.span>
-                        </>
-                      )}
-                    </motion.button>
-                  )}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-7 h-7 animate-spin" />
+                    ) : (
+                      <>
+                        <X size={26} />
+                        <span>
+                          {convidadoStatus === "NAO_IREI"
+                            ? "Ausência confirmada"
+                            : "Não Poderei Ir"}
+                        </span>
+                        <motion.span
+                          animate={{ rotate: [0, 10, -10, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          😢
+                        </motion.span>
+                      </>
+                    )}
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    onClick={() => {
+                      setConfirmedStatus(false);
+                      setPermiteAlterarDados(true);
+                    }}
+                    disabled={isLoading}
+                    whileHover={{
+                      scale: isLoading ? 1 : 1.05,
+                      boxShadow: isLoading
+                        ? "none"
+                        : "0 10px 25px -5px rgba(156, 163, 175, 0.3)",
+                    }}
+                    whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                    className={`flex-1 p-3 p-none cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-lg md:text-xl shadow-lg hover:shadow-gray-300/50
+                    ${isLoading ? "opacity-70" : ""}`}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-7 h-7 animate-spin" />
+                    ) : (
+                      <>
+                        <SquarePen size={26} />
+                        <span>Alterar Dados</span>
+                        <motion.span
+                          animate={{ rotate: [0, 10, -10, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          🔄
+                        </motion.span>
+                      </>
+                    )}
+                  </motion.button>
+                )}
               </div>
-            
             </div>
           </div>
         </motion.div>

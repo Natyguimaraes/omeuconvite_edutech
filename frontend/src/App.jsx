@@ -16,6 +16,7 @@ import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
 import CadastrarPlano from "./pages/superadmin/CadastrarPlano";
 import LiberarAdministrador from "./pages/superadmin/LiberarAdministrador";
 import Rodape from "././components/rodape"
+import CredenciaisPage from "./pages/Credencialpage";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/eventos" element={<Eventos />} />
         <Route path="/confirmacao/:convidadoId" element={<ButtonConf />} />
         <Route path="/ana_luiza/:convidadoId" element={<ButtonConf />} />
+        <Route path="/credenciais" element={<CredenciaisPage />} />
       </Routes>
     </Router>
     <Rodape /></>
