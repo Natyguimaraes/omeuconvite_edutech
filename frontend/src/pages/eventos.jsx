@@ -11,6 +11,8 @@ import {
   Heart,
   PartyPopper,
   BarChart3,
+  Check,
+  X
 } from "lucide-react";
 
 import NavBar from "../components/menu";
@@ -24,6 +26,16 @@ function Eventos() {
   const [eventoExpandido, setEventoExpandido] = useState(null);
   const navigate = useNavigate();
 
+  const [editIndex, setEditIndex] = useState(null);
+  const [editData, setEditData] = useState({
+    nome: "",
+    descricao: "",
+    data_evento: "",
+    data_gerar_qrcode: "",
+    local: "",
+    mensagem_whatsapp: "",
+  });
+
   const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const apiUrlEventos = `${baseUrl}/api/eventos`;
   const apiUrlConvidados = `${baseUrl}/api/convidados`;
@@ -34,7 +46,6 @@ function Eventos() {
       setLoading(true);
       setError(null);
       try {
-        // Busca eventos e convidados
         const [eventosResponse, convidadosResponse] = await Promise.all([
           fetch(apiUrlEventos),
           fetch(apiUrlConvidados)
@@ -48,48 +59,44 @@ function Eventos() {
           convidadosResponse.json()
         ]);
 
-        // Normalização dos eventos
         const eventosProcessados = Array.isArray(eventosData)
           ? eventosData.map(e => ({
-              ...e,
-              id: Number(e.id),
-              data_evento: e.data_evento || new Date().toISOString()
-            }))
+            ...e,
+            id: Number(e.id),
+            data_evento: e.data_evento || new Date().toISOString()
+          }))
           : [];
 
-        // Normalização dos convidados com suporte a múltiplos eventos
         const convidadosProcessados = Array.isArray(convidadosData?.data)
           ? convidadosData.data.map(c => {
-              if (!c) return null;
-              
-              // Processa eventos do convidado
-              let eventosConvidado = [];
-              if (c.eventos) {
-                if (Array.isArray(c.eventos)) {
-                  eventosConvidado = c.eventos.map(e => ({
-                    ...e,
-                    id: Number(e.id),
-                    limite_acompanhante: e.limite_acompanhante || 0,
-                    confirmado: e.confirmado || false
-                  }));
-                }
+            if (!c) return null;
+            
+            let eventosConvidado = [];
+            if (c.eventos) {
+              if (Array.isArray(c.eventos)) {
+                eventosConvidado = c.eventos.map(e => ({
+                  ...e,
+                  id: Number(e.id),
+                  limite_acompanhante: e.limite_acompanhante || 0,
+                  confirmado: e.confirmado || false
+                }));
               }
+            }
 
-              // Processa acompanhantes
-              let acompanhantes = [];
-              if (c.acompanhantes) {
-                if (Array.isArray(c.acompanhantes)) {
-                  acompanhantes = c.acompanhantes;
-                }
+            let acompanhantes = [];
+            if (c.acompanhantes) {
+              if (Array.isArray(c.acompanhantes)) {
+                acompanhantes = c.acompanhantes;
               }
+            }
 
-              return {
-                ...c,
-                id: Number(c.id),
-                eventos: eventosConvidado,
-                acompanhantes
-              };
-            }).filter(Boolean)
+            return {
+              ...c,
+              id: Number(c.id),
+              eventos: eventosConvidado,
+              acompanhantes
+            };
+          }).filter(Boolean)
           : [];
 
         setEventos(eventosProcessados);
@@ -135,7 +142,6 @@ function Eventos() {
     return convidadosEvento.filter(c =>
       c.eventos?.find(e => e.id === eventoId)?.confirmado === 2
     ).length;
-    
   };
 
   const handleEventoClick = (eventoId, e) => {
@@ -147,9 +153,79 @@ function Eventos() {
     navigate(`/confirmacao?eventoId=${eventoId}`);
   };
 
+  const formatDataParaInput = (dataString) => {
+    if (!dataString) return "";
+    const data = new Date(dataString);
+    return data.toISOString().slice(0, 16); // pega até 'YYYY-MM-DDTHH:MM'
+  };
+  
   const handleEditarEvento = (eventoId, e) => {
     e.stopPropagation();
-    navigate(`/cadastroEvento/${eventoId}`);
+    const evento = eventos.find(e => e.id === eventoId);
+    setEditIndex(eventoId);
+    setEditData({
+      nome: evento.nome,
+      descricao: evento.descricao,
+      data_evento: formatDataParaInput(evento.data_evento),
+      data_gerar_qrcode: formatDataParaInput(evento.data_gerar_qrcode),
+      local: evento.local,
+      mensagem_whatsapp: evento.mensagem_whatsapp,
+    });
+  };
+  
+
+  const handleCancelarEdicao = () => {
+    setEditIndex(null);
+    setEditData({
+      nome: "",
+      descricao: "",
+      data_evento: "",
+      data_gerar_qrcode: "",
+      local: "",
+      mensagem_whatsapp: "",
+    });
+  };
+
+  const handleSalvarEdicao = async (eventoId) => {
+    const dataEvento = new Date(editData.data_evento);
+    const dataQRCode = new Date(editData.data_gerar_qrcode);
+  
+    if (dataQRCode >= dataEvento) {
+      alert("A data para gerar o QR Code deve ser anterior à data do evento.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${apiUrlEventos}/${eventoId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editData)
+      });
+      
+      if (!response.ok) throw new Error("Erro ao atualizar evento");
+  
+      const updatedEvento = await response.json();
+  
+      setEventos(eventos.map(evento =>
+        evento.id === eventoId ? { ...evento, ...updatedEvento } : evento
+      ));
+  
+      setEditIndex(null);
+    } catch (error) {
+      console.error("Erro ao atualizar evento:", error);
+      alert("Erro ao atualizar evento");
+    }
+  };
+  
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleExcluirEvento = async (eventoId, e) => {
@@ -202,7 +278,6 @@ function Eventos() {
     <>
       <NavBar />
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50 py-16 px-4 sm:px-6 lg:px-8 pt-24 relative overflow-hidden">
-        {/* Fundo animado */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-20">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-purple-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "0s" }}></div>
           <div className="absolute top-40 right-20 w-72 h-72 rounded-full bg-pink-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
@@ -210,7 +285,6 @@ function Eventos() {
         </div>
 
         <div className="max-w-6xl mx-auto relative z-10">
-          {/* Cabeçalho */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-purple-100 px-4 py-2 rounded-full text-purple-600 font-medium mb-4 shadow-sm">
               <PartyPopper className="w-4 h-4 mr-2" />
@@ -225,7 +299,6 @@ function Eventos() {
             </p>
           </div>
 
-          {/* Controles */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
             <div className="flex items-center">
               <div className="bg-purple-100 p-3 rounded-2xl mr-4">
@@ -253,7 +326,6 @@ function Eventos() {
             </div>
           </div>
 
-          {/* Lista de Eventos */}
           {loading ? (
             <div className="flex flex-col items-center justify-center p-16 glass-card rounded-3xl animate-pulse">
               <Loader2 className="h-12 w-12 text-indigo-500 animate-spin mb-4" />
@@ -268,19 +340,102 @@ function Eventos() {
                 {eventos.length > 0 ? (
                   <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {eventos.map((evento) => {
+                      const isEditing = editIndex === evento.id;
+                      
                       return (
-                        <EventCard evento={evento}
-                          convidados={getConvidadosPorEvento(evento.id)}
-                          totalAcompanhantes={getTotalAcompanhantes(getConvidadosPorEvento(evento.id))}
-                          totalConvidados={getConvidadosPorEvento(evento.id).length}
-                          totalConfirmados={getConfirmadosPorEvento(evento.id)}
-                          totalAusentes={getAusentesPorEvento(evento.id)}
-                          isExpanded={eventoExpandido === evento.id}
-                          onClick={(e) => handleEventoClick(evento.id, e)}
-                          onVerDetalhes={() => handleVerDetalhes(evento.id)}
-                          onEditar={(e) => handleEditarEvento(evento.id, e)}
-                          onExcluir={(e) => handleExcluirEvento(evento.id, e)}
-                        />
+                        <div 
+                          key={evento.id} 
+                          className={`bg-white rounded-2xl overflow-hidden border transition-all duration-200 ${eventoExpandido === evento.id ? 'border-indigo-300 shadow-lg' : 'border-gray-100 shadow-md hover:shadow-lg'}`}
+                        >
+                          {isEditing ? (
+                            <div className="p-6">
+                              <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                                <input
+                                  type="text"
+                                  name="nome"
+                                  value={editData.nome}
+                                  onChange={handleInputChange}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                              </div>
+                              
+                              <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                <textarea
+                                  name="descricao"
+                                  value={editData.descricao}
+                                  onChange={handleInputChange}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  rows="3"
+                                />
+                              </div>
+                              
+                              <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Data do Evento</label>
+                                <input
+                                  type="datetime-local"
+                                  name="data_evento"
+                                  value={editData.data_evento}
+                                  onChange={handleInputChange}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                              </div>
+
+                              <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Data para gerar QR Code</label>
+                                <input
+                                  type="datetime-local"
+                                  name="data_gerar_qrcode"
+                                  value={editData.data_gerar_qrcode}
+                                  onChange={handleInputChange}
+                                  min={new Date().toISOString().slice(0, 16)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                              </div>
+                              
+                              <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Local</label>
+                                <input
+                                  type="text"
+                                  name="local"
+                                  value={editData.local}
+                                  onChange={handleInputChange}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                              </div>
+                              
+                              <div className="flex justify-end space-x-2 mt-4">
+                                <button
+                                  onClick={() => handleCancelarEdicao()}
+                                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleSalvarEdicao(evento.id)}
+                                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <EventCard 
+                              evento={evento}
+                              convidados={getConvidadosPorEvento(evento.id)}
+                              totalAcompanhantes={getTotalAcompanhantes(getConvidadosPorEvento(evento.id))}
+                              totalConvidados={getConvidadosPorEvento(evento.id).length}
+                              totalConfirmados={getConfirmadosPorEvento(evento.id)}
+                              totalAusentes={getAusentesPorEvento(evento.id)}
+                              isExpanded={eventoExpandido === evento.id}
+                              onClick={(e) => handleEventoClick(evento.id, e)}
+                              onVerDetalhes={() => handleVerDetalhes(evento.id)}
+                              onEditar={(e) => handleEditarEvento(evento.id, e)}
+                              onExcluir={(e) => handleExcluirEvento(evento.id, e)}
+                            />
+                          )}
+                        </div>
                       )
                     })}
                   </div>
