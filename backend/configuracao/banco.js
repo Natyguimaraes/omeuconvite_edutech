@@ -12,7 +12,7 @@ const conexao = mysql.createConnection({
   user: process.env.DB_USER || "edutecconsult_omeuconvite",
 
   
-  password: process.env.DB_PASSWORD,// || "ArdkeLhQ5FPv",
+  password: process.env.DB_PASSWORD || "ArdkeLhQ5FPv",
 
   
   database: process.env.DB_NAME || "edutecconsult_omeuconvite",
