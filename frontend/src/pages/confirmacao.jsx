@@ -426,6 +426,8 @@ const Confirmacao = () => {
 
       setEditIndex(null);
       toast.success("Convidado atualizado com sucesso!");
+
+      window.location.reload()
     } catch (error) {
       console.error("Erro na atualização:", error);
       toast.error(`Falha ao atualizar: ${error.message}`);
