@@ -36,6 +36,8 @@ function EventCredential() {
   });
   const [confirmedStatus, setConfirmedStatus] = useState(null);
   const [permiteAlterarDados, setPermiteAlterarDados] = useState(false);
+  const [limiteAcompanhante, setLimiteAcompanhante] = useState(0)
+  const [quantidadeAcompanhante, setQuantidadeAcompanhante] = useState(0)
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
@@ -119,7 +121,17 @@ function EventCredential() {
 
       // 4. Define estado dos acompanhantes
       if (acompanhantesExistentes.length > 0) {
-        setAcompanhantes(acompanhantesExistentes);
+        const limiteMenosQtdConvidadosExistente = limiteFinal - acompanhantesExistentes.length
+
+        setAcompanhantes([
+          ...acompanhantesExistentes,
+          ...Array.from({ length: limiteMenosQtdConvidadosExistente }, () => ({
+            nome: "",
+            telefone: "",
+            email: "",
+            confirmado: true
+          }))
+        ]);
         setDesejaInformarAcompanhante(true);
       } else if (limiteFinal > 0) {
         // Mostra campos para novos acompanhantes se houver limite
@@ -168,6 +180,9 @@ function EventCredential() {
         limite_acompanhante: limiteConvidado,
         acompanhantes: acompanhantesExistentes
       });
+
+      setLimiteAcompanhante(eventoAssociado.limite_acompanhante || 0);
+      setQuantidadeAcompanhante(acompanhantes.length)
 
       switch (eventoAssociado.confirmado) {
         
