@@ -28,6 +28,7 @@ function Eventos() {
 
   const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState({
+    imagem_evento: "", 
     nome: "",
     descricao: "",
     data_evento: "",
@@ -132,10 +133,25 @@ function Eventos() {
 
   const getConfirmadosPorEvento = (eventoId) => {
     const convidadosEvento = getConvidadosPorEvento(eventoId);
-    return convidadosEvento.filter(c => 
-      c.eventos?.find(e => e.id === eventoId)?.confirmado === 1
-    ).length;
+  
+    let totalConfirmados = 0;
+  
+    convidadosEvento.forEach(convidado => {
+      const eventoConvidado = convidado.eventos?.find(e => e.id === eventoId);
+      if (eventoConvidado?.confirmado === 1) {
+        // Conta o convidado
+        totalConfirmados += 1;
+  
+        // Conta os acompanhantes (se houver)
+        if (Array.isArray(convidado.acompanhantes)) {
+          totalConfirmados += convidado.acompanhantes.length;
+        }
+      }
+    });
+  
+    return totalConfirmados;
   };
+  
 
   const getAusentesPorEvento = (eventoId) => {
     const convidadosEvento = getConvidadosPorEvento(eventoId);
@@ -164,6 +180,7 @@ function Eventos() {
     const evento = eventos.find(e => e.id === eventoId);
     setEditIndex(eventoId);
     setEditData({
+     
       nome: evento.nome,
       descricao: evento.descricao,
       data_evento: formatDataParaInput(evento.data_evento),
@@ -177,6 +194,7 @@ function Eventos() {
   const handleCancelarEdicao = () => {
     setEditIndex(null);
     setEditData({
+      
       nome: "",
       descricao: "",
       data_evento: "",
@@ -349,6 +367,8 @@ function Eventos() {
                         >
                           {isEditing ? (
                             <div className="p-6">
+                  
+
                               <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
                                 <input
@@ -400,6 +420,17 @@ function Eventos() {
                                   type="text"
                                   name="local"
                                   value={editData.local}
+                                  onChange={handleInputChange}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                              </div>
+
+                              <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem Whatsapp</label>
+                                <input
+                                  type="text"
+                                  name="mensagem_whatsapp"
+                                  value={editData.mensagem_whatsapp}
                                   onChange={handleInputChange}
                                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 />
