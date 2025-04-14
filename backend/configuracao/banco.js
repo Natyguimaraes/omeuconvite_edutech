@@ -16,6 +16,7 @@ const conexao = mysql.createConnection({
 
   
   database: process.env.DB_NAME || "edutecconsult_omeuconvite",
+  dateStrings: true
 });
 
 setInterval(() => {
