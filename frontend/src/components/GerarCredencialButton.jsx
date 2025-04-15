@@ -125,7 +125,7 @@ function GerarCredencialButton({
   const handleGerarCredencial = () => {
     if (!isAvailable) return;
     
-    navigate('/credenciais', {
+    navigate('', {
       state: {
         convidado: {
           id: convidadoId,
