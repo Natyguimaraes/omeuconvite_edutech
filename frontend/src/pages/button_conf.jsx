@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {
   Check,
   X,
@@ -18,6 +18,10 @@ import GerarCredencialButton from "../components/GerarCredencialButton"
 import NavBar from "../components/menu";
 
 function EventCredential() {
+
+  const [searchParams] = useSearchParams();
+  const eventoId = searchParams.get("eventoId");
+
   const { convidadoId } = useParams();
   const [evento, setEvento] = useState({});
   const [convidadoStatus, setConvidadoStatus] = useState(null);
@@ -100,6 +104,8 @@ function EventCredential() {
       const responseData = await convidadoResponse.json();
       const dadosConvidado = responseData.data || responseData;
 
+      dadosConvidado.eventos = dadosConvidado.eventos ? dadosConvidado.eventos.filter(e => String(e.id) === String(eventoId)) : []
+
       // 2. Determina o limite de acompanhantes (prioridade para o limite do evento)
       const limiteEvento = dadosConvidado.eventos?.[0]?.limite_acompanhante;
       const limiteConvidado = dadosConvidado.limite_acompanhante || 0;
@@ -110,7 +116,7 @@ function EventCredential() {
 
       // 3. Processa acompanhantes existentes (se houver)
       const acompanhantesExistentes = Array.isArray(dadosConvidado.acompanhantes)
-        ? dadosConvidado.acompanhantes.map(a => ({
+        ? dadosConvidado.acompanhantes.filter(a => String(a.eventoId) === String(eventoId)).map(a => ({
             id: a.id,
             nome: a.nome || "",
             telefone: a.telefone || "",

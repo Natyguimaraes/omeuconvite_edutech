@@ -460,7 +460,7 @@ const Confirmacao = () => {
         ? convidadosData.data.map(c => ({
             ...c,
             eventos: c.eventos || [],
-            acompanhantes: c.acompanhantes || []
+            acompanhantes: c.acompanhantes ? c.acompanhantes.filter(a => a.eventoId === eventoId) : []
           }))
         : [];
 
