@@ -104,6 +104,7 @@ function EventCredential() {
       const responseData = await convidadoResponse.json();
       const dadosConvidado = responseData.data || responseData;
 
+      console.log("dadosConvidado", dadosConvidado)
       dadosConvidado.eventos = dadosConvidado.eventos ? dadosConvidado.eventos.filter(e => String(e.id) === String(eventoId)) : []
 
       // 2. Determina o limite de acompanhantes (prioridade para o limite do evento)
@@ -116,7 +117,7 @@ function EventCredential() {
 
       // 3. Processa acompanhantes existentes (se houver)
       const acompanhantesExistentes = Array.isArray(dadosConvidado.acompanhantes)
-        ? dadosConvidado.acompanhantes.filter(a => String(a.eventoId) === String(eventoId)).map(a => ({
+        ? dadosConvidado.acompanhantes.filter(a => String(a.evento_id) === String(eventoId)).map(a => ({
             id: a.id,
             nome: a.nome || "",
             telefone: a.telefone || "",
