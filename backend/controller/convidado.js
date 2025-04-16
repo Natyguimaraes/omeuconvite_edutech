@@ -68,6 +68,7 @@ export async function createConvidado(req, res) {
 }
 export async function getAllConvidados(req, res) {
   try {
+    console.log()
     // const convidados = await getConvidadosModel();
     const convidados = await getConvidadosModelOtimized();
     res.json({

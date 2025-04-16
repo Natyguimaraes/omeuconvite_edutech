@@ -60,6 +60,8 @@ function Eventos() {
           convidadosResponse.json()
         ]);
 
+        console.log("convidadosData", convidadosData)
+
         const eventosProcessados = Array.isArray(eventosData)
           ? eventosData.map(e => ({
             ...e,
@@ -122,12 +124,14 @@ function Eventos() {
     );
   };
 
-  const getTotalAcompanhantes = (convidadosEvento) => {
+  const getTotalAcompanhantes = (convidadosEvento, eventoId) => {
     if (!Array.isArray(convidadosEvento)) return 0;
 
     return convidadosEvento.reduce((total, convidado) => {
       if (!convidado?.acompanhantes) return total;
-      return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.length : 0);
+
+      if (Array.isArray(convidado.acompanhantes))
+        return total + convidado.acompanhantes.filter(a => String(a.eventoId) === String(eventoId)).length;
     }, 0);
   };
 
@@ -455,7 +459,7 @@ function Eventos() {
                             <EventCard 
                               evento={evento}
                               convidados={getConvidadosPorEvento(evento.id)}
-                              totalAcompanhantes={getTotalAcompanhantes(getConvidadosPorEvento(evento.id))}
+                              totalAcompanhantes={getTotalAcompanhantes(getConvidadosPorEvento(evento.id), evento.id)}
                               totalConvidados={getConvidadosPorEvento(evento.id).length}
                               totalConfirmados={getConfirmadosPorEvento(evento.id)}
                               totalAusentes={getAusentesPorEvento(evento.id)}
