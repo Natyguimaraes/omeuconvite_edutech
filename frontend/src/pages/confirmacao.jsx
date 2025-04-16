@@ -393,15 +393,16 @@ const Confirmacao = () => {
           });
 
         } else
-          await fetch(`${apiConvidados}/${editIndex}/acompanhantes/`, {
+          console.log(await fetch(`${apiConvidados}/${editIndex}/acompanhantes/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               nome: acompanhante.nome,
               telefone: acompanhante.telefone || null,
               email: acompanhante.email || null,
+              eventoId: eventoId,
             }),
-          });
+          }));
       }
 
       const updatedConvidado = await response.json();

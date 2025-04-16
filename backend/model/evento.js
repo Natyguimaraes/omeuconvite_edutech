@@ -8,7 +8,7 @@ export function readEventos() {
         reject("Erro ao ler eventos do banco de dados");
         return;
       }
-      console.log("Eventos lidos do banco de dados:", result);
+      // console.log("Eventos lidos do banco de dados:", result);
       resolve(result);
     });
   });

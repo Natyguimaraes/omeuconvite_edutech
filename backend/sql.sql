@@ -143,4 +143,14 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
+ALTER TABLE acompanhante
+    ADD evento_id INT
+    ADD CONSTRAINT fk_acompanhante_evento
+        FOREIGN KEY (evento_id) REFERENCES eventos(id);
 
+UPDATE acompanhante
+
+INNER JOIN convidados ON acompanhante.convidado_id = convidados.id
+INNER JOIN convidado_evento ON convidados.id = convidado_evento.convidado_id
+
+SET acompanhante.evento_id = convidado_evento.evento_id;

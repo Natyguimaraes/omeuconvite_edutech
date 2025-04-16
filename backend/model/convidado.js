@@ -257,10 +257,10 @@ export function removeConvidadoFromEventoModel(convidado_id, evento_id) {
 // Funções para acompanhantes (permanecem as mesmas)
 export function createAcompanhanteModel(dados) {
   return new Promise((resolve, reject) => {
-    const { nome, telefone, email, convidado_id } = dados;
+    const { nome, telefone, email, convidado_id, evento_id } = dados;
     conexao.query(
       "INSERT INTO acompanhante SET ?",
-      { nome, telefone, email, convidado_id, confirmado: 1 },
+      { nome, telefone, email, convidado_id, confirmado: 1, evento_id },
       (err, result) => {
         if (err) return reject(err);
         resolve(result);
