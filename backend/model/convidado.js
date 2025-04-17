@@ -19,7 +19,7 @@ export async function getEventosByConvidadoId(convidado_id) {
 export async function getAcompanhantesByConvidadoIdModel(convidado_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "SELECT * FROM acompanhante WHERE convidado_id = ?",
+      "SELECT * FROM acompanhante WHERE convidado_id = ? AND ativo_acompanhante = 1",
       [convidado_id],
       (err, result) => {
         if (err) return reject(err);
@@ -73,7 +73,7 @@ export async function getConvidadosModelOtimized() {
                     )
                 SEPARATOR ", ")
             ,"]")
-          FROM acompanhante WHERE convidado_id = convidados.id
+          FROM acompanhante WHERE convidado_id = convidados.id AND ativo_acompanhante = 1
         ) AS acompanhantes,
 
         (
