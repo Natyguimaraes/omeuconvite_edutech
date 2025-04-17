@@ -148,7 +148,7 @@ function Eventos() {
   
         // Conta os acompanhantes (se houver)
         if (Array.isArray(convidado.acompanhantes)) {
-          totalConfirmados += convidado.acompanhantes.length;
+          totalConfirmados += convidado.acompanhantes.filter(a => String(a.eventoId) === String(eventoId)).length;
         }
       }
     });

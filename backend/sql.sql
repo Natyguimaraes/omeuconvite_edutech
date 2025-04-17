@@ -152,9 +152,9 @@ ALTER TABLE acompanhante
    ADD ativo_acompanhante TINYINT(1) NULL DEFAULT 1;
 
 
-UPDATE acompanhante
-
-INNER JOIN convidados ON acompanhante.convidado_id = convidados.id
-INNER JOIN convidado_evento ON convidados.id = convidado_evento.convidado_id
-
-SET acompanhante.evento_id = convidado_evento.evento_id;
+-- UPDATE acompanhante
+--
+-- INNER JOIN convidados ON acompanhante.convidado_id = convidados.id
+-- INNER JOIN convidado_evento ON convidados.id = convidado_evento.convidado_id
+--
+-- SET acompanhante.evento_id = convidado_evento.evento_id;
