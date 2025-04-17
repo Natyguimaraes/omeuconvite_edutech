@@ -100,6 +100,7 @@ export async function getConvidadosModelOtimized() {
       `,
       async (err, convidados) => {
         if (err) return reject(err);
+        console.log(convidados);
 
         try {
           const convidadosCompleto = await Promise.all(
