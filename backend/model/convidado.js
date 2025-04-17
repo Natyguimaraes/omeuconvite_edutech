@@ -66,7 +66,7 @@ export async function getConvidadosModelOtimized() {
                             ', "nome": "', IFNULL(acompanhante.nome, ''), '"',
                             ', "telefone": "', IFNULL(acompanhante.telefone, ''), '"',
                             ', "email": "', IFNULL(acompanhante.email, ''), '"',
-                            ', "confirmado": ', IFNULL(acompanhante.confirmado, ''),
+                            ', "confirmado": "', IFNULL(acompanhante.confirmado, ''), '"',
                             ', "eventoId": "', IFNULL(acompanhante.evento_id, ''), '"',
 
                         '}'
