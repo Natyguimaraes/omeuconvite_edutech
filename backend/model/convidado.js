@@ -51,6 +51,18 @@ export async function getConvidadosModel() {
     });
   });
 }
+// DISTINCT CONCAT(
+//   '{',
+//   '"id": ', acompanhante.id,
+//   ', "convidado_id": ', acompanhante.convidado_id,
+//   ', "nome": "', IFNULL(acompanhante.nome, ''), '"',
+//   ', "telefone": "', IFNULL(acompanhante.telefone, ''), '"',
+//   ', "email": "', IFNULL(acompanhante.email, ''), '"',
+//   ', "confirmado": ', IFNULL(acompanhante.confirmado, ''),
+//   ', "eventoId": "', IFNULL(acompanhante.evento_id, ''), '"',
+//
+//   '}'
+// )
 export async function getConvidadosModelOtimized() {
   return new Promise((resolve, reject) => {
     conexao.query(`
@@ -59,18 +71,8 @@ export async function getConvidadosModelOtimized() {
           SELECT
             CONCAT('[',
               GROUP_CONCAT(
-                    DISTINCT CONCAT(
-                        '{',
-                            '"id": ', acompanhante.id,
-                            ', "convidado_id": ', acompanhante.convidado_id,
-                            ', "nome": "', IFNULL(acompanhante.nome, ''), '"',
-                            ', "telefone": "', IFNULL(acompanhante.telefone, ''), '"',
-                            ', "email": "', IFNULL(acompanhante.email, ''), '"',
-                            ', "confirmado": ', IFNULL(acompanhante.confirmado, ''),
-                            ', "eventoId": "', IFNULL(acompanhante.evento_id, ''), '"',
-
-                        '}'
-                    )
+                JSON_OBJECT('id', acompanhante.id, 'convidado_id', acompanhante.convidado_id, 'nome', IFNULL(acompanhante.nome, ''), 'telefone', IFNULL(acompanhante.telefone, ''), 'email', IFNULL(acompanhante.email, ''), 'confirmado', IFNULL(acompanhante.confirmado, ''), 'eventoId', IFNULL(acompanhante.evento_id, ''))
+                    
                 SEPARATOR ", ")
             ,"]")
           FROM acompanhante WHERE convidado_id = convidados.id AND ativo_acompanhante = 1
