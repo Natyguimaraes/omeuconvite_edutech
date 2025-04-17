@@ -66,7 +66,7 @@ export async function getConvidadosModelOtimized() {
                             ', "nome": "', IFNULL(acompanhante.nome, ''), '"',
                             ', "telefone": "', IFNULL(acompanhante.telefone, ''), '"',
                             ', "email": "', IFNULL(acompanhante.email, ''), '"',
-                            ', "confirmado": "', IFNULL(acompanhante.confirmado, ''), '"',
+                            ', "confirmado": ', IFNULL(acompanhante.confirmado, ''),
                             ', "eventoId": "', IFNULL(acompanhante.evento_id, ''), '"',
 
                         '}'
@@ -104,14 +104,18 @@ export async function getConvidadosModelOtimized() {
 
         try {
           const convidadosCompleto = await Promise.all(
-            convidados.map(async c => ({
-              ...c,
-              acompanhantes: JSON.parse(c.acompanhantes || "[]"),
-              eventos: JSON.parse(c.eventos || "[]"),
-            }))
+            convidados.map(async c => {
+              console.log(c)
+              return {
+                ...c,
+                acompanhantes: JSON.parse(c.acompanhantes || "[]"),
+                eventos: JSON.parse(c.eventos || "[]"),
+              }
+            })
           );
           resolve(convidadosCompleto);
         } catch (error) {
+          console.log(error);
           reject(error);
         }
       });
