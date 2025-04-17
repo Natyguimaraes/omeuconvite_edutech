@@ -374,6 +374,7 @@ function EventCredential() {
                 telefone: acompanhante.telefone || null,
                 email: acompanhante.email || null,
                 confirmado: true,
+                eventoId: evento.id,
               }),
             }
           );
@@ -399,6 +400,7 @@ function EventCredential() {
                 telefone: acompanhante.telefone || null,
                 email: acompanhante.email || null,
                 confirmado: true,
+                evento_id: evento.id,
               }),
             }
           );

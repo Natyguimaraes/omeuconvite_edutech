@@ -282,7 +282,7 @@ export function deleteAcompanhanteModel(id) {
 
 export function updateAcompanhanteModel(id, novosDados) {
   return new Promise((resolve, reject) => {
-    const camposPermitidos = ['nome', 'telefone', 'email', 'confirmado'];
+    const camposPermitidos = ['nome', 'telefone', 'email', 'confirmado', 'evento_id'];
     const dadosAtualizacao = {};
     
     camposPermitidos.forEach(campo => {

@@ -144,7 +144,7 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 ALTER TABLE acompanhante
-    ADD evento_id INT
+    ADD evento_id INT,
     ADD CONSTRAINT fk_acompanhante_evento
         FOREIGN KEY (evento_id) REFERENCES eventos(id);
 

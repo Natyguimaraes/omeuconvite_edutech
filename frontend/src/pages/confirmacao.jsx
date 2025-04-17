@@ -56,6 +56,10 @@ const Confirmacao = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
+    console.log(convidados)
+  }, [convidados]);
+
+  useEffect(() => {
     localStorage.setItem('convidadosFilters', JSON.stringify(filters));
   }, [filters]);
 
