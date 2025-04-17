@@ -6,16 +6,16 @@ dotenv.config(); // carregar as variáveis do arquivo .env (banco de dados)
 
 const conexao = mysql.createConnection({
   
-  host: process.env.DB_HOST || "162.240.45.134",
+  host: process.env.DB_HOST,
 
   
-  user: process.env.DB_USER || "edutecconsult_omeuconvite",
+  user: process.env.DB_USER,
 
   
-  password: process.env.DB_PASSWORD,// || "ArdkeLhQ5FPv",
+  password: process.env.DB_PASSWORD,
 
   
-  database: process.env.DB_NAME || "edutecconsult_omeuconvite",
+  database: process.env.DB_NAME,
   dateStrings: true
 });
 
