@@ -105,7 +105,6 @@ export async function getConvidadosModelOtimized() {
         try {
           const convidadosCompleto = await Promise.all(
             convidados.map(async c => {
-              console.log(c)
               return {
                 ...c,
                 acompanhantes: JSON.parse(c.acompanhantes || "[]"),
