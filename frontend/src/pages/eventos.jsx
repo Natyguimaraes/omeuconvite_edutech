@@ -228,10 +228,8 @@ function Eventos() {
       
       if (!response.ok) throw new Error("Erro ao atualizar evento");
   
-      const updatedEvento = await response.json();
-  
       setEventos(eventos.map(evento =>
-        evento.id === eventoId ? { ...evento, ...updatedEvento } : evento
+        evento.id === eventoId ? { ...evento, ...editData } : evento
       ));
   
       setEditIndex(null);
