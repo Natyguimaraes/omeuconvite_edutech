@@ -115,7 +115,7 @@ export async function getConvidadosModelOtimized() {
           );
           resolve(convidadosCompleto);
         } catch (error) {
-          console.log(error);
+          console.error(error);
           reject(error);
         }
       });
