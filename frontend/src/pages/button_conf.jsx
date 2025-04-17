@@ -118,6 +118,7 @@ function EventCredential() {
       // 3. Processa acompanhantes existentes (se houver)
       const acompanhantesExistentes = Array.isArray(dadosConvidado.acompanhantes)
         ? dadosConvidado.acompanhantes.filter(a => String(a.evento_id) === String(eventoId)).map(a => ({
+            ...a,
             id: a.id,
             nome: a.nome || "",
             telefone: a.telefone || "",
@@ -339,7 +340,9 @@ function EventCredential() {
       const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       const convidadoData = await convidadoResponse.json();
       const dadosConvidado = convidadoData.data || convidadoData;
-      
+
+      dadosConvidado.acompanhantes = dadosConvidado.acompanhantes?.filter(a => String(a.evento_id) === String(evento.id))
+
       const acompanhantesAtuais = dadosConvidado.acompanhantes?.length || 0;
       const novosAcompanhantes = acompanhantes.filter(a => !a.id && a.nome).length;
       
@@ -682,6 +685,22 @@ function EventCredential() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+
+    if (!evento.id || !acompanhantes) return;
+
+    const acompanhantesDoEventoAtual = acompanhantes.filter(a => {
+      if (!a.evento_id && !a.eventoId) return true
+
+      const eventoId = a.evento_id ?? a.eventoId;
+      return String(eventoId) === String(evento.id)
+    })
+
+    if (JSON.stringify(acompanhantesDoEventoAtual) !== JSON.stringify(acompanhantes))
+      setAcompanhantes(acompanhantesDoEventoAtual)
+
+  }, [acompanhantes, evento.id]);
 
   return (
     <>
