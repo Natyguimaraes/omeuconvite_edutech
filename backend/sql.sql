@@ -148,6 +148,10 @@ ALTER TABLE acompanhante
     ADD CONSTRAINT fk_acompanhante_evento
         FOREIGN KEY (evento_id) REFERENCES eventos(id);
 
+ALTER TABLE acompanhante
+   ADD ativo_acompanhante TINYINT(1) NULL DEFAULT 1;
+
+
 UPDATE acompanhante
 
 INNER JOIN convidados ON acompanhante.convidado_id = convidados.id

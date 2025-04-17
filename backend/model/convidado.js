@@ -274,7 +274,7 @@ export function createAcompanhanteModel(dados) {
 export function deleteAcompanhanteModel(id) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "DELETE FROM acompanhante WHERE id = ?",
+      "UPDATE acompanhante SET ativo_acompanhante = 0 WHERE id = ?",
       [id],
       (err, result) => {
         if (err) return reject(err);
