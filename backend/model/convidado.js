@@ -83,13 +83,8 @@ export async function getConvidadosModelOtimized() {
                         DISTINCT CONCAT(
                             '{',
                                 '"id": ', e.id,
-                                ', "imagem_evento": "', IFNULL(e.imagem_evento, ''), '"',
-                                ', "data_evento": "', IFNULL(e.data_evento, ''), '"',
-                                ', "local": "', IFNULL(e.local, ''), '"',
-                                ', "tipo": "', IFNULL(e.tipo, ''), '"',
                                 ', "administrador_id": "', IFNULL(e.administrador_id, ''), '"',
                                 ', "ativo": "', IFNULL(e.ativo, ''), '"',
-                                ', "data_criacao": "', IFNULL(e.data_criacao, ''), '"',
                                 ', "limite_acompanhante": ', IFNULL(ce.limite_acompanhante, ''),
                                 ', "confirmado": ', IFNULL(ce.confirmado, ''),
                             '}'
