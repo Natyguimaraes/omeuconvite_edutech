@@ -16,6 +16,7 @@
         "@fullcalendar/react": "^6.1.15",
         "@tailwindcss/vite": "^4.0.13",
         "date-fns": "^4.1.0",
+        "dom-to-image-more": "^3.5.0",
         "framer-motion": "^12.6.2",
         "lucide-react": "^0.479.0",
         "prop-types": "^15.8.1",
