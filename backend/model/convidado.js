@@ -343,3 +343,88 @@ export function inativaAcompanhanteModel(id) {
     );
   });
 }
+
+export async function getConvidadoByTokenModel(token) {
+  return new Promise((resolve, reject) => {
+    conexao.query(
+      "SELECT * FROM convidados WHERE token = ?",
+      [token],
+      async (err, results) => {
+        if (err) return reject(err);
+        if (results.length === 0) return resolve(null);
+
+        const convidado = results[0];
+        try {
+          const [acompanhantes, eventos] = await Promise.all([
+            getAcompanhantesByConvidadoIdModel(convidado.id),
+            getEventosByConvidadoId(convidado.id)
+          ]);
+          
+          resolve({
+            ...convidado,
+            acompanhantes,
+            eventos
+          });
+        } catch (error) {
+          reject(error);
+        }
+      }
+    );
+  });
+}
+
+//presença
+export function confirmarPresencaPorTokenModel(token) {
+  return new Promise((resolve, reject) => {
+    conexao.query("SELECT * FROM convidado_evento WHERE token = ?", [token], (err, convidado) => {
+      if (err) return reject(err);
+
+      if (convidado.length > 0) {
+        conexao.query("UPDATE convidados SET presenca = 1 WHERE token = ?", [token], (errUpdate) => {
+          if (errUpdate) return reject(errUpdate);
+          return resolve({ tipo: 'convidado', nome: convidado[0].nome });
+        });
+      } else {
+        conexao.query("SELECT * FROM acompanhante WHERE token = ?", [token], (err2, acompanhante) => {
+          if (err2) return reject(err2);
+
+          if (acompanhante.length > 0) {
+            conexao.query("UPDATE acompanhante SET presenca = 1 WHERE token = ?", [token], (errUpdate2) => {
+              if (errUpdate2) return reject(errUpdate2);
+              return resolve({ tipo: 'acompanhante', nome: acompanhante[0].nome });
+            });
+          } else {
+            return resolve(null);
+          }
+        });
+      }
+    });
+  });
+}
+
+export function salvarTokenConvidado(convidadoId, token) {
+  return new Promise((resolve, reject) => {
+    conexao.query(
+      "UPDATE convidado_evento SET token = ? WHERE convidado_id = ?",
+      [token, convidadoId],
+      (err, result) => {
+        if (err) return reject(err);
+        return resolve(result);
+      }
+    );
+  });
+}
+
+
+export function salvarTokenAcompanhante(acompanhanteId, token) {
+  return new Promise((resolve, reject) => {
+    conexao.query(
+      "UPDATE acompanhante SET token = ? WHERE id = ?",
+      [token, acompanhanteId],
+      (err, result) => {
+        if (err) return reject(err);
+        return resolve(result);
+      }
+    );
+  });
+}
