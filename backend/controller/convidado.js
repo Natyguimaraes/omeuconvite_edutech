@@ -71,6 +71,7 @@ export async function createConvidado(req, res) {
 }
 export async function getAllConvidados(req, res) {
   try {
+    console.log()
     // const convidados = await getConvidadosModel();
     const convidados = await getConvidadosModelOtimized();
     res.json({
@@ -324,7 +325,10 @@ export async function confirmarPresencaConvidado(req, res) {
 export async function createAcompanhante(req, res) {
   try {
     const { convidadoId } = req.params;
-    const { nome, telefone, email } = req.body;
+    const { nome, telefone, email, eventoId } = req.body;
+
+    console.log("Dados do acompanhante:", req.params);
+    console.log("Dados do acompanhante:", req.body);
 
     // Verifica se o convidado existe
     const convidado = await getConvidadoByIdModel(convidadoId);
@@ -336,10 +340,14 @@ export async function createAcompanhante(req, res) {
     }
 
     // Verifica o limite de acompanhantes para cada evento
-    const acompanhantes = await getAcompanhantesByConvidadoIdModel(convidadoId);
+    const acompanhantes = (await getAcompanhantesByConvidadoIdModel(convidadoId, eventoId)).filter(a => String(a.evento_id) === String(eventoId));
     const eventosComLimiteExcedido = convidado.eventos?.filter(e => 
-      acompanhantes.length >= (e.limite_acompanhante || 0)
+      acompanhantes.length >= (e.limite_acompanhante || 0) && String(e.id) === String(eventoId)
     );
+
+    console.log("convidado", convidado)
+    console.log("eventosComLimiteExcedido", eventosComLimiteExcedido)
+    console.log("acompanhantes", acompanhantes)
 
     if (eventosComLimiteExcedido?.length > 0) {
       return res.status(400).json({ 
@@ -354,8 +362,10 @@ export async function createAcompanhante(req, res) {
       telefone: telefone || null,
       email: email || null,
       convidado_id: convidadoId,
-      confirmado: true
+      confirmado: true,
+      evento_id: eventoId
     });
+    console.log(result)
 
     res.status(201).json({ 
       success: true,
@@ -365,7 +375,8 @@ export async function createAcompanhante(req, res) {
         nome,
         telefone,
         email,
-        confirmado: true
+        confirmado: true,
+        evento_id: eventoId
       }
     });
   } catch (err) {

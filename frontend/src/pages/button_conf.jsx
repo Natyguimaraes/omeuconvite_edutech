@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {
   Check,
   X,
@@ -18,6 +18,10 @@ import GerarCredencialButton from "../components/GerarCredencialButton"
 import NavBar from "../components/menu";
 
 function EventCredential() {
+
+  const [searchParams] = useSearchParams();
+  const eventoId = searchParams.get("eventoId");
+
   const { convidadoId } = useParams();
   const [evento, setEvento] = useState({});
   const [convidadoStatus, setConvidadoStatus] = useState(null);
@@ -100,6 +104,9 @@ function EventCredential() {
       const responseData = await convidadoResponse.json();
       const dadosConvidado = responseData.data || responseData;
 
+      console.log("dadosConvidado", dadosConvidado)
+      dadosConvidado.eventos = dadosConvidado.eventos ? dadosConvidado.eventos.filter(e => String(e.id) === String(eventoId)) : []
+
       // 2. Determina o limite de acompanhantes (prioridade para o limite do evento)
       const limiteEvento = dadosConvidado.eventos?.[0]?.limite_acompanhante;
       const limiteConvidado = dadosConvidado.limite_acompanhante || 0;
@@ -110,7 +117,8 @@ function EventCredential() {
 
       // 3. Processa acompanhantes existentes (se houver)
       const acompanhantesExistentes = Array.isArray(dadosConvidado.acompanhantes)
-        ? dadosConvidado.acompanhantes.map(a => ({
+        ? dadosConvidado.acompanhantes.filter(a => String(a.evento_id) === String(eventoId)).map(a => ({
+            ...a,
             id: a.id,
             nome: a.nome || "",
             telefone: a.telefone || "",
@@ -332,7 +340,9 @@ function EventCredential() {
       const convidadoResponse = await fetch(`${API_CONVIDADOS}/${convidadoId}`);
       const convidadoData = await convidadoResponse.json();
       const dadosConvidado = convidadoData.data || convidadoData;
-      
+
+      dadosConvidado.acompanhantes = dadosConvidado.acompanhantes?.filter(a => String(a.evento_id) === String(evento.id))
+
       const acompanhantesAtuais = dadosConvidado.acompanhantes?.length || 0;
       const novosAcompanhantes = acompanhantes.filter(a => !a.id && a.nome).length;
       
@@ -364,6 +374,7 @@ function EventCredential() {
                 telefone: acompanhante.telefone || null,
                 email: acompanhante.email || null,
                 confirmado: true,
+                eventoId: evento.id,
               }),
             }
           );
@@ -389,6 +400,7 @@ function EventCredential() {
                 telefone: acompanhante.telefone || null,
                 email: acompanhante.email || null,
                 confirmado: true,
+                evento_id: evento.id,
               }),
             }
           );
@@ -675,6 +687,22 @@ function EventCredential() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+
+    if (!evento.id || !acompanhantes) return;
+
+    const acompanhantesDoEventoAtual = acompanhantes.filter(a => {
+      if (!a.evento_id && !a.eventoId) return true
+
+      const eventoId = a.evento_id ?? a.eventoId;
+      return String(eventoId) === String(evento.id)
+    })
+
+    if (JSON.stringify(acompanhantesDoEventoAtual) !== JSON.stringify(acompanhantes))
+      setAcompanhantes(acompanhantesDoEventoAtual)
+
+  }, [acompanhantes, evento.id]);
 
   return (
     <>

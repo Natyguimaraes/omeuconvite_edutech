@@ -57,6 +57,10 @@ const Confirmacao = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
+    console.log(convidados)
+  }, [convidados]);
+
+  useEffect(() => {
     localStorage.setItem('convidadosFilters', JSON.stringify(filters));
   }, [filters]);
 
@@ -397,15 +401,16 @@ const Confirmacao = () => {
           });
 
         } else
-          await fetch(`${apiConvidados}/${editIndex}/acompanhantes/`, {
+          console.log(await fetch(`${apiConvidados}/${editIndex}/acompanhantes/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               nome: acompanhante.nome,
               telefone: acompanhante.telefone || null,
               email: acompanhante.email || null,
+              eventoId: eventoId,
             }),
-          });
+          }));
       }
 
       const updatedConvidado = await response.json();
@@ -463,7 +468,7 @@ const Confirmacao = () => {
         ? convidadosData.data.map(c => ({
             ...c,
             eventos: c.eventos || [],
-            acompanhantes: c.acompanhantes || []
+            acompanhantes: c.acompanhantes ? c.acompanhantes.filter(a => a.eventoId === eventoId) : []
           }))
         : [];
 

@@ -19,7 +19,7 @@ export async function getEventosByConvidadoId(convidado_id) {
 export async function getAcompanhantesByConvidadoIdModel(convidado_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "SELECT * FROM acompanhante WHERE convidado_id = ?",
+      "SELECT * FROM acompanhante WHERE convidado_id = ? AND ativo_acompanhante = 1",
       [convidado_id],
       (err, result) => {
         if (err) return reject(err);
@@ -51,6 +51,18 @@ export async function getConvidadosModel() {
     });
   });
 }
+// DISTINCT CONCAT(
+//   '{',
+//   '"id": ', acompanhante.id,
+//   ', "convidado_id": ', acompanhante.convidado_id,
+//   ', "nome": "', IFNULL(acompanhante.nome, ''), '"',
+//   ', "telefone": "', IFNULL(acompanhante.telefone, ''), '"',
+//   ', "email": "', IFNULL(acompanhante.email, ''), '"',
+//   ', "confirmado": ', IFNULL(acompanhante.confirmado, ''),
+//   ', "eventoId": "', IFNULL(acompanhante.evento_id, ''), '"',
+//
+//   '}'
+// )
 export async function getConvidadosModelOtimized() {
   return new Promise((resolve, reject) => {
     conexao.query(`
@@ -59,19 +71,11 @@ export async function getConvidadosModelOtimized() {
           SELECT
             CONCAT('[',
               GROUP_CONCAT(
-                    DISTINCT CONCAT(
-                        '{',
-                            '"id": ', acompanhante.id,
-                            ', "convidado_id": ', acompanhante.convidado_id,
-                            ', "nome": "', IFNULL(acompanhante.nome, ''), '"',
-                            ', "telefone": "', IFNULL(acompanhante.telefone, ''), '"',
-                            ', "email": "', IFNULL(acompanhante.email, ''), '"',
-                            ', "confirmado": ', IFNULL(acompanhante.confirmado, ''),
-                        '}'
-                    )
+                JSON_OBJECT('id', acompanhante.id, 'convidado_id', acompanhante.convidado_id, 'nome', IFNULL(acompanhante.nome, ''), 'telefone', IFNULL(acompanhante.telefone, ''), 'email', IFNULL(acompanhante.email, ''), 'confirmado', IFNULL(acompanhante.confirmado, ''), 'eventoId', IFNULL(acompanhante.evento_id, ''))
+                    
                 SEPARATOR ", ")
             ,"]")
-          FROM acompanhante WHERE convidado_id = convidados.id
+          FROM acompanhante WHERE convidado_id = convidados.id AND ativo_acompanhante = 1
         ) AS acompanhantes,
 
         (
@@ -81,17 +85,8 @@ export async function getConvidadosModelOtimized() {
                         DISTINCT CONCAT(
                             '{',
                                 '"id": ', e.id,
-                                ', "imagem_evento": "', IFNULL(e.imagem_evento, ''), '"',
-                                ', "nome": "', IFNULL(e.nome, ''), '"',
-                                ', "descricao": "', IFNULL(e.descricao, ''), '"',
-                                ', "data_evento": "', IFNULL(e.data_evento, ''), '"',
-                                ', "data_gerar_qrcode": "', IFNULL(e.data_gerar_qrcode, ''), '"',
-                                ', "local": "', IFNULL(e.local, ''), '"',
-                                ', "mensagem_whatsapp": "', IFNULL(e.mensagem_whatsapp, ''), '"',
-                                ', "tipo": "', IFNULL(e.tipo, ''), '"',
                                 ', "administrador_id": "', IFNULL(e.administrador_id, ''), '"',
                                 ', "ativo": "', IFNULL(e.ativo, ''), '"',
-                                ', "data_criacao": "', IFNULL(e.data_criacao, ''), '"',
                                 ', "limite_acompanhante": ', IFNULL(ce.limite_acompanhante, ''),
                                 ', "confirmado": ', IFNULL(ce.confirmado, ''),
                             '}'
@@ -107,17 +102,21 @@ export async function getConvidadosModelOtimized() {
       `,
       async (err, convidados) => {
         if (err) return reject(err);
+        console.log(convidados);
 
         try {
           const convidadosCompleto = await Promise.all(
-            convidados.map(async c => ({
-              ...c,
-              acompanhantes: JSON.parse(c.acompanhantes || "[]"),
-              eventos: JSON.parse(c.eventos || "[]"),
-            }))
+            convidados.map(async c => {
+              return {
+                ...c,
+                acompanhantes: JSON.parse(c.acompanhantes || "[]"),
+                eventos: JSON.parse(c.eventos || "[]"),
+              }
+            })
           );
           resolve(convidadosCompleto);
         } catch (error) {
+          console.error(error);
           reject(error);
         }
       });
@@ -257,10 +256,10 @@ export function removeConvidadoFromEventoModel(convidado_id, evento_id) {
 // Funções para acompanhantes (permanecem as mesmas)
 export function createAcompanhanteModel(dados) {
   return new Promise((resolve, reject) => {
-    const { nome, telefone, email, convidado_id } = dados;
+    const { nome, telefone, email, convidado_id, evento_id } = dados;
     conexao.query(
       "INSERT INTO acompanhante SET ?",
-      { nome, telefone, email, convidado_id, confirmado: 1 },
+      { nome, telefone, email, convidado_id, confirmado: 1, evento_id },
       (err, result) => {
         if (err) return reject(err);
         resolve(result);
@@ -272,7 +271,7 @@ export function createAcompanhanteModel(dados) {
 export function deleteAcompanhanteModel(id) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "DELETE FROM acompanhante WHERE id = ?",
+      "UPDATE acompanhante SET ativo_acompanhante = 0 WHERE id = ?",
       [id],
       (err, result) => {
         if (err) return reject(err);
@@ -284,7 +283,7 @@ export function deleteAcompanhanteModel(id) {
 
 export function updateAcompanhanteModel(id, novosDados) {
   return new Promise((resolve, reject) => {
-    const camposPermitidos = ['nome', 'telefone', 'email', 'confirmado'];
+    const camposPermitidos = ['nome', 'telefone', 'email', 'confirmado', 'evento_id'];
     const dadosAtualizacao = {};
     
     camposPermitidos.forEach(campo => {
