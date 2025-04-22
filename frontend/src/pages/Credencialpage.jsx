@@ -8,6 +8,7 @@ import {
 import QRCode from 'react-qr-code';
 import domtoimage from 'dom-to-image-more';
 
+
 export default function CredenciaisPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -88,94 +89,114 @@ export default function CredenciaisPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
-          >
-            <ChevronLeft size={20} />
-            <span>Voltar</span>
-          </button>
-          <h1 className="text-2xl font-bold">Credenciais do Evento</h1>
-          <div className="w-8"></div>
+    <div className="max-w-4xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
+        >
+          <ChevronLeft size={20} />
+          <span>Voltar</span>
+        </button>
+        <div className="w-8"></div>
+      </div>
+  
+      <div className="text-center">
+        <h1 className="text-2xl font-bold">Credenciais do Evento</h1>
+      </div>
+  
+      <div className="mt-10 p-10 bg-purple-100 rounded-2xl">
+        <h2 className="text-xl font-bold mb-2">{credenciais.evento.nome}</h2>
+        <div className="space-y-2 text-gray-700">
+          <p><span className="font-medium">Data:</span> {formatarData(credenciais.evento.data_evento)}</p>
+          <p><span className="font-medium">Local:</span> {credenciais.evento.local}</p>
         </div>
+      </div>
+  
+      {/* Credencial principal com mesmo layout dos acompanhantes */}
+      <div className="flex flex-col items-center">
+      <div
+  ref={credencialRef}
+  id="convidado-principal"
+  className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 shadow-2xl flex flex-col items-center text-center w-full max-w-[300px]"
+>
+  <h2 className="text-3xl font-bold text-purple-800 mb-2">{credenciais.evento.nome}</h2>
+  <p className="text-xl text-gray-600 mb-1">{formatarData(credenciais.evento.data_evento)}</p>
+  <p className="text-xl text-gray-600 mb-2">{credenciais.evento.local}</p>
 
-        {/* Área estilizada da credencial */}
-        <div className="flex flex-col items-center">
-          <div
-            ref={credencialRef}
-            className="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-xl p-6 w-full max-w-md border border-purple-200"
-          >
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-white p-4 rounded-xl shadow-inner border-2 border-purple-200">
+  <div className="bg-white p-3 rounded-lg border border-gray-300 shadow-inner">
+    <QRCode
+      value={`${credenciais.convidado.token}`}
+      size={200}
+      level="H"
+      className="mb-2"
+    />
+  </div>
+
+  <p className="font-medium mt-2 text-gray-800">{credenciais.convidado.nome}</p>
+  <p className="text-xs text-gray-500">Convidado Principal</p>
+  <p className="text-lg text-gray-400 mt-3">Visite nosso site: www.omeuconvite.com</p>
+
+</div>
+
+        <button
+          onClick={downloadCredencial}
+          className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <Download size={18} />
+          Baixar Credencial
+        </button>
+      </div>
+  
+      {/* Acompanhantes */}
+      {credenciais.acompanhantes.length > 0 && (
+        <div className="bg-white rounded-xl shadow-2xl p-6 mt-6">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Users size={20} />
+            Acompanhantes ({credenciais.acompanhantes.length})
+          </h2>
+  
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {credenciais.acompanhantes.map(acomp => (
+              <div
+              key={acomp.id}
+              id={`acomp-${acomp.id}`}
+              className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 shadow-md flex flex-col items-center text-center"
+            >
+              <h2 className="text-3xl font-bold text-purple-800 mb-2">{credenciais.evento.nome}</h2>
+              <p className="text-xl text-gray-600 mb-1">{formatarData(credenciais.evento.data_evento)}</p>
+              <p className="text-xl text-gray-600 mb-2">{credenciais.evento.local}</p>
+            
+              <div className="bg-white p-3 rounded-lg border border-gray-300 shadow-inner">
                 <QRCode
-                  value={`${credenciais.convidado.token}`}
-                  size={160}
-                  className="mb-4"
+                  value={`${acomp.token}`}
+                  size={200}
+                  level="H"
+                  className="mb-2"
                 />
               </div>
-              <h2 className="mt-4 text-xl font-bold text-purple-800">{credenciais.convidado.nome}</h2>
-              <p className="text-sm text-gray-500 mt-1">Convidado Principal</p>
+            
+              <p className="font-medium mt-2 text-gray-800">{acomp.nome}</p>
+              <p className="text-xs text-gray-500">Acompanhante</p>
+              <p className="text-lg text-gray-400 mt-3">Visite nosso site: www.omeuconvite.com</p>
+
+            
+              <button
+                onClick={() => downloadQRCode(acomp.id, acomp.nome)}
+                className="mt-2 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+              >
+                <Download size={16} />
+                Baixar QR Code
+              </button>
+              
             </div>
-          </div>
-
-          <button
-            onClick={downloadCredencial}
-            className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Download size={18} />
-            Baixar Credencial
-          </button>
-        </div>
-
-        {/* Dados do evento */}
-        <div className="mt-10 bg-white rounded-xl shadow-md p-6">
-          <h2 className="text-xl font-bold mb-2">{credenciais.evento.nome}</h2>
-          <div className="space-y-2 text-gray-700">
-            <p><span className="font-medium">Data:</span> {formatarData(credenciais.evento.data_evento)}</p>
-            <p><span className="font-medium">Local:</span> {credenciais.evento.local}</p>
+            
+            ))}
           </div>
         </div>
-
-        {/* Acompanhantes */}
-        {credenciais.acompanhantes.length > 0 && (
-          <div className="bg-white rounded-xl shadow-md p-6 mt-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Users size={20} />
-              Acompanhantes ({credenciais.acompanhantes.length})
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {credenciais.acompanhantes.map(acomp => (
-                <div
-                  key={acomp.id}
-                  id={`acomp-${acomp.id}`}
-                  className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 shadow-md flex flex-col items-center text-center"
-                >
-                  <div className="bg-white p-3 rounded-lg border border-gray-300 shadow-inner">
-                    <QRCode
-                      value={`${window.location.origin}/validar/${acomp.token}`}
-                      size={120}
-                      level="H"
-                      className="mb-2"
-                    />
-                  </div>
-                  <p className="font-medium mt-2 text-gray-800">{acomp.nome}</p>
-                  <p className="text-xs text-gray-500">Acompanhante</p>
-                  <button
-                    onClick={() => downloadQRCode(acomp.id, acomp.nome)}
-                    className="mt-2 flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    <Download size={16} />
-                    Baixar QR Code
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
+  </div>
+  
   );
 }
