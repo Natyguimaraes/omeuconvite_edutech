@@ -15,6 +15,7 @@ import {
   getConvidadoByTokenModel,
   confirmarPresencaPorTokenModel
 } from "../model/convidado.js";
+import conexao from '../configuracao/banco.js'
 
 export async function createConvidado(req, res) {
   try {
@@ -552,13 +553,13 @@ export async function confirmarPresencaPorToken(req, res) {
 
     // Verifica se é um acompanhante
     const [acompanhanteResult] = await conexao.promise().query(
-      "SELECT * FROM acompanhantes WHERE token = ?",
+      "SELECT * FROM acompanhante WHERE token = ?",
       [token]
     );
 
     if (acompanhanteResult.length > 0) {
       await conexao.promise().query(
-        "UPDATE acompanhantes SET token_usado = 1 WHERE token = ?",
+        "UPDATE acompanhante SET token_usado = 1 WHERE token = ?",
         [token]
       );
 

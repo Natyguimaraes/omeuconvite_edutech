@@ -15,7 +15,6 @@ import {
   updateConvidadoEvento,
   removeConvidadoFromEvento,
   confirmarPresencaPorToken
-
 } from "../controller/convidado.js";
 
 const router = express.Router();
