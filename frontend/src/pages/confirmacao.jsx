@@ -124,13 +124,13 @@ const Confirmacao = () => {
             presente: Number(eventoRelacao?.token_usado) === 1, // Adiciona campo presente: para verificar se convidado está presente ou não
             limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
             acompanhantes: mostrarAcompanhantes ? 
-            (Array.isArray(convidado.acompanhantes) ? 
-              convidado.acompanhantes.map(a => ({
-                ...a,
-                presente: a.token_usado === 1
-              })) 
-            : []) 
-          : []
+  (Array.isArray(convidado.acompanhantes) ? 
+    convidado.acompanhantes.map(a => ({
+      ...a,
+      presente: Number(a.token_usado) === 1 // Corrigido aqui
+    })) 
+  : []) 
+: []
           };
          
         } catch (error) {
