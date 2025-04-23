@@ -25,8 +25,8 @@ export default function QRCodeScanButton() {
             .start(
               cameraId,
               {
-                fps: 10,
-                qrbox: 250,
+                fps: 5,
+                qrbox: 200,
                 aspectRatio: 1.777,
               },
               async (decodedText) => {
