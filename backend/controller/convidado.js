@@ -550,6 +550,10 @@ export async function confirmarPresencaPorToken(req, res) {
     );
 
     if (convidadoResult.length > 0) {
+      if (convidadoResult[0].token_usado === 1) {
+        return res.status(409).json({ mensagem: "Essa credencial já foi lida"})
+      }
+
       await conexao.promise().query(
         "UPDATE convidado_evento SET token_usado = 1 WHERE token = ?",
         [token]
@@ -569,6 +573,9 @@ export async function confirmarPresencaPorToken(req, res) {
     );
 
     if (acompanhanteResult.length > 0) {
+      if (acompanhanteResult[0].token_usado === 1) {
+        return res.status(409).json({ mensagem: "Essa credencial já foi lida"})
+      }
       await conexao.promise().query(
         "UPDATE acompanhante SET token_usado = 1 WHERE token = ?",
         [token]

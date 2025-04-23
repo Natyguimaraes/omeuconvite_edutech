@@ -109,6 +109,10 @@ const Confirmacao = () => {
             e?.id === eventoIdNum
           );
   
+          console.log('Convidado:', convidado.nome);
+          console.log('eventoRelacao:', eventoRelacao);
+          console.log('token_usado bruto:', eventoRelacao?.token_usado);
+          console.log('token_usado convertido:', Number(eventoRelacao?.token_usado));
           const mostrarAcompanhantes = (
             !eventoRelacao?.novoEvento && 
             eventosConvidado[0]?.id === eventoIdNum
@@ -117,7 +121,7 @@ const Confirmacao = () => {
           return {
             ...convidado,
             confirmado: eventoRelacao?.confirmado || false,
-            presente: eventoRelacao?.token_usado === 1, // Adiciona campo presente
+            presente: Number(eventoRelacao?.token_usado) === 1, // Adiciona campo presente: para verificar se convidado está presente ou não
             limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
             acompanhantes: mostrarAcompanhantes ? 
             (Array.isArray(convidado.acompanhantes) ? 
@@ -128,8 +132,10 @@ const Confirmacao = () => {
             : []) 
           : []
           };
+         
         } catch (error) {
           console.error('Error mapping convidado:', error, convidado);
+   
           return {
             ...convidado,
             confirmado: false,
@@ -267,7 +273,7 @@ const Confirmacao = () => {
     setAddingGuest(true);
 
     try {
-      // Dados básicos do convidado (mantido igual)
+      // Dados básicos do convidado
       const convidadoData = {
         nome: newGuest.nome.trim(),
         telefone: newGuest.telefone.trim(),
@@ -1356,18 +1362,23 @@ const Confirmacao = () => {
                                           </td>
 
                                           <td className="px-4 py-4">
-  {convidado.presente ? (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-      <CheckCircle className="h-3 w-3 mr-1" />
-      Presente
-    </span>
-  ) : (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-      <XCircle className="h-3 w-3 mr-1" />
-      Ausente
-    </span>
-  )}
+  {(() => {
+    console.log('Convidado:', convidado.nome);
+    console.log('Presente?', convidado.presente);
+    return convidado.presente ? (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-purple-800">
+        <CheckCircle className="h-3 w-3 mr-1" />
+        Presente
+      </span>
+    ) : (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+        <XCircle className="h-3 w-3 mr-1" />
+        Ausente
+      </span>
+    );
+  })()}
 </td>
+
 
                                           <td className="px-4 py-4 text-right whitespace-nowrap">
                                             <div className="flex justify-end space-x-1">

@@ -43,7 +43,7 @@ app.use('/api/credenciais', credenciaisRouter);
 
 //para confirmar presença
 
-app.use(presencaRouter);
+app.use("/api", presencaRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({ 

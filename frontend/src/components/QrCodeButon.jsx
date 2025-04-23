@@ -15,7 +15,7 @@ export default function QRCodeScanButton() {
           { fps: 10, qrbox: 250 },
           async (decodedText) => {
             try {
-              const response = await fetch(`${import.meta.env.VITE_API_URL}/presenca`, {
+              const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
