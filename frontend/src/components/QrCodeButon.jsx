@@ -8,53 +8,69 @@ export default function QRCodeScanButton() {
 
   useEffect(() => {
     if (showScanner && !scanner) {
-      const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: 250,
-          aspectRatio: 1.7777778,
-          disableFlip: true,
-          videoConstraints: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+      Html5Qrcode.getCameras()
+        .then((devices) => {
+          if (devices.length === 0) {
+            alert("Nenhuma câmera encontrada.");
+            return;
           }
-        },
-          async (decodedText) => {
-            try {
-              const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ token: decodedText }),
-              });
 
-              const data = await response.json();
+          const backCamera = devices.find((d) =>
+            d.label.toLowerCase().includes("back")
+          );
+          const cameraId = backCamera ? backCamera.id : devices[0].id;
 
-              if (response.ok) {
-                alert(data.mensagem || "Presença confirmada com sucesso!");
-              } else {
-                alert(data.mensagem || "Erro ao confirmar presença.");
+          const html5QrCode = new Html5Qrcode("reader");
+          html5QrCode
+            .start(
+              cameraId,
+              {
+                fps: 10,
+                qrbox: 250,
+                aspectRatio: 1.777,
+              },
+              async (decodedText) => {
+                try {
+                  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ token: decodedText }),
+                  });
+
+                  const data = await response.json();
+
+                  if (response.ok) {
+                    alert(data.mensagem || "Presença confirmada com sucesso!");
+                  } else {
+                    alert(data.mensagem || "Erro ao confirmar presença.");
+                  }
+                } catch (error) {
+                  console.error("Erro ao registrar presença:", error);
+                  alert("Erro ao registrar presença. Verifique sua conexão.");
+                }
+
+                html5QrCode.stop().then(() => {
+                  html5QrCode.clear();
+                  setShowScanner(false);
+                  setScanner(null);
+                });
+              },
+              (error) => {
+                // erros de leitura contínuos
               }
-            } catch (error) {
-              console.error("Erro ao registrar presença:", error);
-              alert("Erro ao registrar presença. Verifique sua conexão.");
-            }
-
-            html5QrCode.stop().then(() => {
-              html5QrCode.clear();
-              setShowScanner(false);
-              setScanner(null);
+            )
+            .then(() => setScanner(html5QrCode))
+            .catch((err) => {
+              console.error("Erro ao iniciar o scanner", err);
+              alert("Erro ao iniciar o scanner.");
             });
-          },
-          (error) => {
-            // erros de leitura contínuos podem ser ignorados ou logados se necessário
-          }
-        )
-        .then(() => setScanner(html5QrCode))
-        .catch((err) => console.error("Erro ao iniciar o scanner", err));
+        })
+        .catch((err) => {
+          console.error("Erro ao obter câmeras:", err);
+          alert("Erro ao acessar a câmera.");
+        });
     }
 
     return () => {
