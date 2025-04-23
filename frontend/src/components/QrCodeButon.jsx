@@ -9,10 +9,18 @@ export default function QRCodeScanButton() {
   useEffect(() => {
     if (showScanner && !scanner) {
       const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode
-        .start(
-          { facingMode: { exact: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
-  { fps: 10, qrbox: 250 },
+      html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: 250,
+          aspectRatio: 1.7777778,
+          disableFlip: true,
+          videoConstraints: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        },
           async (decodedText) => {
             try {
               const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
