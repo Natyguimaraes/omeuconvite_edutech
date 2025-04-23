@@ -11,8 +11,8 @@ export default function QRCodeScanButton() {
       const html5QrCode = new Html5Qrcode("reader");
       html5QrCode
         .start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: 250 },
+          { facingMode: { exact: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+  { fps: 10, qrbox: 250 },
           async (decodedText) => {
             try {
               const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
