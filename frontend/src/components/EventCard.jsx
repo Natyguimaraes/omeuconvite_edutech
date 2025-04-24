@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { BarChart3, CalendarIcon, Check, Edit, Heart, MapPin, PartyPopper, Trash2, Users, XCircle } from "lucide-react";
+import { BarChart3, CalendarIcon, Check, Edit, Heart, MapPin, PartyPopper, Trash2, Users, XCircle,  } from "lucide-react";
 
 export default function EventCard({
   evento,
@@ -13,6 +13,7 @@ export default function EventCard({
   onVerDetalhes,
   onEditar,
   onExcluir,
+	totalPendentes,
 }) {
   const totalParticipantes = totalConvidados + totalAcompanhantes;
 
@@ -89,7 +90,7 @@ export default function EventCard({
               </span>
             </div>
 
-            <div className="col-span-3 flex flex-col items-center justify-center bg-gray-50 rounded-lg p-1 sm:p-2">
+            <div className="col-span-2 flex flex-col items-center justify-center bg-gray-50 rounded-lg p-1 sm:p-2">
               <Check className="h-3 sm:h-4 w-3 sm:w-4 text-green-500 mb-0 sm:mb-1" />
               <span className="text-xs font-medium text-gray-600">
                 {totalConfirmados}
@@ -98,7 +99,7 @@ export default function EventCard({
                 Confirmado
               </span>
             </div>
-            <div className="col-span-3 flex flex-col items-center justify-center bg-gray-50 rounded-lg p-1 sm:p-2">
+            <div className="col-span-2 flex flex-col items-center justify-center bg-gray-50 rounded-lg p-1 sm:p-2">
               <XCircle className="h-3 sm:h-4 w-3 sm:w-4 text-yellow-500 mb-0 sm:mb-1" />
               <span className="text-xs font-medium text-gray-600">
                 {totalAusentes}
@@ -107,6 +108,17 @@ export default function EventCard({
                 Ausentes
               </span>
             </div>
+
+						<div className="col-span-2 flex flex-col items-center justify-center bg-gray-50 rounded-lg p-1 sm:p-2">
+							<XCircle className="h-3 sm:h-4 w-3 sm:w-4 text-red-500 mb-0 sm:mb-1" />
+							<span className="text-xs font-medium text-gray-600">
+                {totalPendentes}
+              </span>
+							<span className="text-[10px] sm:text-xs text-gray-500">
+                Pendentes
+              </span>
+						</div>
+
           </div>
 
           <div className="flex justify-between items-center text-gray-500 text-xs sm:text-sm border-t pt-3 sm:pt-4 border-gray-100">
