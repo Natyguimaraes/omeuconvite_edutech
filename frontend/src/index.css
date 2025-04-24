@@ -2,4 +2,8 @@
 @import "tailwindcss";
 @import 'react-toastify/dist/ReactToastify.css';
 
+.no-print {
+    display: none;
+  }
+  
 
