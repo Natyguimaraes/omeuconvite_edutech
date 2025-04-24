@@ -8,6 +8,7 @@ export default function QRCodeScanButton() {
   const [cameras, setCameras] = useState([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [leituraEmAndamento, setLeituraEmAndamento] = useState(false); // ⬅️ controle de leitura
 
   const stopScanner = async () => {
     if (scanner) {
@@ -21,6 +22,9 @@ export default function QRCodeScanButton() {
     const html5QrCode = new Html5Qrcode("reader");
 
     const handleScanSuccess = async (decodedText) => {
+      if (leituraEmAndamento) return; // ⬅️ bloqueia múltiplas leituras
+      setLeituraEmAndamento(true);
+
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
           method: "POST",
@@ -33,12 +37,13 @@ export default function QRCodeScanButton() {
       } catch (error) {
         console.error("Erro ao registrar presença:", error);
         alert("Erro ao registrar presença.");
+      } finally {
+        await html5QrCode.stop();
+        html5QrCode.clear();
+        setShowScanner(false);
+        setScanner(null);
+        setLeituraEmAndamento(false); // ⬅️ libera leitura para próxima vez
       }
-
-      await html5QrCode.stop();
-      html5QrCode.clear();
-      setShowScanner(false);
-      setScanner(null);
     };
 
     try {
