@@ -71,7 +71,7 @@ export async function getConvidadosModelOtimized() {
           SELECT
             CONCAT('[',
               GROUP_CONCAT(
-                JSON_OBJECT('id', acompanhante.id, 'convidado_id', acompanhante.convidado_id, 'nome', IFNULL(acompanhante.nome, ''), 'telefone', IFNULL(acompanhante.telefone, ''), 'email', IFNULL(acompanhante.email, ''), 'confirmado', IFNULL(acompanhante.confirmado, ''), 'eventoId', IFNULL(acompanhante.evento_id, ''))
+                JSON_OBJECT('id', acompanhante.id, 'convidado_id', acompanhante.convidado_id, 'nome', IFNULL(acompanhante.nome, ''), 'telefone', IFNULL(acompanhante.telefone, ''), 'email', IFNULL(acompanhante.email, ''), 'confirmado', IFNULL(acompanhante.confirmado, ''), 'eventoId', IFNULL(acompanhante.evento_id, ''), 'token_usado', IFNULL(acompanhante.token_usado, 0))
                     
                 SEPARATOR ", ")
             ,"]")

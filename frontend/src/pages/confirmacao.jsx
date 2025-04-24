@@ -125,10 +125,15 @@ const Confirmacao = () => {
             limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
             acompanhantes: mostrarAcompanhantes ? 
   (Array.isArray(convidado.acompanhantes) ? 
-    convidado.acompanhantes.map(a => ({
+    convidado.acompanhantes.map(a => {
+      console.log(`Acompanhante de ${convidado.nome}:`, a.nome);
+                console.log(`token_usado do acompanhante (bruto):`, a.token_usado);
+                console.log(`token_usado do acompanhante (convertido):`, Number(a.token_usado));
+      return {
       ...a,
       presente: Number(a.token_usado) === 1 // Corrigido aqui
-    })) 
+      }
+    })
   : []) 
 : []
           };
@@ -1515,7 +1520,7 @@ const Confirmacao = () => {
 
                                           <td className="px-4 py-3">
   {acompanhante.presente ? (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-purple-800">
       <CheckCircle className="h-3 w-3 mr-1" />
       Presente
     </span>
