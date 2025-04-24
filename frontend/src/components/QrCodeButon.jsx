@@ -7,45 +7,7 @@ export default function QRCodeScanButton() {
   const [scanner, setScanner] = useState(null);
   const [cameras, setCameras] = useState([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
-  const [isSwitching, setIsSwitching] = useState(false); // ✅ Controle de troca de câmera
-
-  const startScanner = async (cameraId) => {
-    const html5QrCode = new Html5Qrcode("reader");
-    try {
-      await html5QrCode.start(
-        cameraId,
-        {
-          fps: 5,
-          qrbox: 200,
-          aspectRatio: 1.777,
-        },
-        async (decodedText) => {
-          try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ token: decodedText }),
-            });
-
-            const data = await response.json();
-            alert(data.mensagem || (response.ok ? "Presença confirmada!" : "Erro ao confirmar presença."));
-          } catch (error) {
-            console.error("Erro ao registrar presença:", error);
-            alert("Erro ao registrar presença.");
-          }
-
-          await html5QrCode.stop();
-          html5QrCode.clear();
-          setShowScanner(false);
-          setScanner(null);
-        }
-      );
-      setScanner(html5QrCode);
-    } catch (err) {
-      console.error("Erro ao iniciar o scanner", err);
-      alert("Erro ao iniciar o scanner.");
-    }
-  };
+  const [isSwitching, setIsSwitching] = useState(false);
 
   const stopScanner = async () => {
     if (scanner) {
@@ -55,12 +17,75 @@ export default function QRCodeScanButton() {
     }
   };
 
+  const startScanner = async (cameraId) => {
+    const html5QrCode = new Html5Qrcode("reader");
+
+    const handleScanSuccess = async (decodedText) => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: decodedText }),
+        });
+
+        const data = await response.json();
+        alert(data.mensagem || (response.ok ? "Presença confirmada!" : "Erro ao confirmar presença."));
+      } catch (error) {
+        console.error("Erro ao registrar presença:", error);
+        alert("Erro ao registrar presença.");
+      }
+
+      await html5QrCode.stop();
+      html5QrCode.clear();
+      setShowScanner(false);
+      setScanner(null);
+    };
+
+    try {
+      await html5QrCode.start(
+        { deviceId: { exact: cameraId } },
+        {
+          fps: 10,
+          qrbox: 250,
+          aspectRatio: 1.777,
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true,
+          },
+          videoConstraints: {
+            deviceId: cameraId,
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: "environment",
+          },
+        },
+        handleScanSuccess
+      );
+
+      setScanner(html5QrCode);
+    } catch (err) {
+      console.warn("Tentando fallback com config padrão...");
+
+      try {
+        await html5QrCode.start(
+          cameraId,
+          { fps: 10, qrbox: 250, aspectRatio: 1.777 },
+          handleScanSuccess
+        );
+
+        setScanner(html5QrCode);
+      } catch (fallbackErr) {
+        console.error("Erro ao iniciar o scanner:", fallbackErr);
+        alert("Erro ao iniciar o scanner.");
+      }
+    }
+  };
+
   const switchCamera = async () => {
     if (cameras.length <= 1 || isSwitching) return;
 
-    setIsSwitching(true); 
+    setIsSwitching(true);
     try {
-      await stopScanner(); 
+      await stopScanner();
       const nextIndex = (currentCameraIndex + 1) % cameras.length;
       setCurrentCameraIndex(nextIndex);
     } finally {
@@ -147,4 +172,3 @@ export default function QRCodeScanButton() {
     </div>
   );
 }
-
