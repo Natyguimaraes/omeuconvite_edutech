@@ -7,11 +7,12 @@ export default function QRCodeScanButton() {
   const [scanner, setScanner] = useState(null);
   const [cameras, setCameras] = useState([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
+  const [isSwitching, setIsSwitching] = useState(false); // ✅ Controle de troca de câmera
 
-  const startScanner = (cameraId) => {
+  const startScanner = async (cameraId) => {
     const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode
-      .start(
+    try {
+      await html5QrCode.start(
         cameraId,
         {
           fps: 5,
@@ -27,25 +28,44 @@ export default function QRCodeScanButton() {
             });
 
             const data = await response.json();
-
             alert(data.mensagem || (response.ok ? "Presença confirmada!" : "Erro ao confirmar presença."));
           } catch (error) {
             console.error("Erro ao registrar presença:", error);
             alert("Erro ao registrar presença.");
           }
 
-          html5QrCode.stop().then(() => {
-            html5QrCode.clear();
-            setShowScanner(false);
-            setScanner(null);
-          });
+          await html5QrCode.stop();
+          html5QrCode.clear();
+          setShowScanner(false);
+          setScanner(null);
         }
-      )
-      .then(() => setScanner(html5QrCode))
-      .catch((err) => {
-        console.error("Erro ao iniciar o scanner", err);
-        alert("Erro ao iniciar o scanner.");
-      });
+      );
+      setScanner(html5QrCode);
+    } catch (err) {
+      console.error("Erro ao iniciar o scanner", err);
+      alert("Erro ao iniciar o scanner.");
+    }
+  };
+
+  const stopScanner = async () => {
+    if (scanner) {
+      await scanner.stop();
+      scanner.clear();
+      setScanner(null);
+    }
+  };
+
+  const switchCamera = async () => {
+    if (cameras.length <= 1 || isSwitching) return;
+
+    setIsSwitching(true); 
+    try {
+      await stopScanner(); 
+      const nextIndex = (currentCameraIndex + 1) % cameras.length;
+      setCurrentCameraIndex(nextIndex);
+    } finally {
+      setIsSwitching(false);
+    }
   };
 
   useEffect(() => {
@@ -57,7 +77,6 @@ export default function QRCodeScanButton() {
             return;
           }
 
-          // Prioriza câmera traseira
           const sortedDevices = [
             ...devices.filter((d) => d.label.toLowerCase().includes("back")),
             ...devices.filter((d) => !d.label.toLowerCase().includes("back")),
@@ -75,26 +94,13 @@ export default function QRCodeScanButton() {
 
   useEffect(() => {
     if (showScanner && cameras.length > 0) {
-      if (scanner) {
-        scanner.stop().then(() => {
-          scanner.clear();
-          startScanner(cameras[currentCameraIndex].id);
-        });
-      } else {
-        startScanner(cameras[currentCameraIndex].id);
-      }
+      startScanner(cameras[currentCameraIndex].id);
     }
 
     return () => {
-      if (scanner) {
-        scanner.stop().then(() => scanner.clear());
-      }
+      stopScanner();
     };
   }, [currentCameraIndex, cameras, showScanner]);
-
-  const switchCamera = () => {
-    setCurrentCameraIndex((prevIndex) => (prevIndex + 1) % cameras.length);
-  };
 
   return (
     <div>
@@ -110,12 +116,9 @@ export default function QRCodeScanButton() {
         <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-xl shadow-xl relative w-[340px]">
             <button
-              onClick={() => {
-                if (scanner) {
-                  scanner.stop().then(() => scanner.clear());
-                }
+              onClick={async () => {
+                await stopScanner();
                 setShowScanner(false);
-                setScanner(null);
               }}
               className="absolute top-2 right-2 text-gray-600 hover:text-black"
             >
@@ -131,9 +134,10 @@ export default function QRCodeScanButton() {
             {cameras.length > 1 && (
               <button
                 onClick={switchCamera}
+                disabled={isSwitching}
                 className="mt-3 w-full text-center text-blue-600 text-sm hover:underline flex items-center justify-center gap-1"
               >
-                <RefreshCcw size={14} />
+                <RefreshCcw size={14} className={isSwitching ? "animate-spin" : ""} />
                 Alternar câmera
               </button>
             )}
@@ -143,3 +147,4 @@ export default function QRCodeScanButton() {
     </div>
   );
 }
+
