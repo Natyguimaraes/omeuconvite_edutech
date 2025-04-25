@@ -22,8 +22,7 @@ export default function QRCodeScanButton() {
     const html5QrCode = new Html5Qrcode("reader");
 
     const handleScanSuccess = async (decodedText) => {
-      if (isScanning) return; //flag para evitar multiplas leituras
-      setIsScanning(true);
+      
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
           method: "POST",
