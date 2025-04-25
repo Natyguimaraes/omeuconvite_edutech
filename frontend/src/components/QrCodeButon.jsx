@@ -8,6 +8,7 @@ export default function QRCodeScanButton() {
   const [cameras, setCameras] = useState([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   const stopScanner = async () => {
     if (scanner) {
@@ -21,6 +22,8 @@ export default function QRCodeScanButton() {
     const html5QrCode = new Html5Qrcode("reader");
 
     const handleScanSuccess = async (decodedText) => {
+      if (isScanning) return; //flag para evitar multiplas leituras
+      setIsScanning(true);
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
           method: "POST",
