@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import NavBar from "../components/menu";
 import BadgeConvidadoStatus from "../components/BadgeConvidadoStatus";
 import QRCodeScanButton from '../components/QrCodeButon';
+import PrintGuestList from '../components/PrintGuestList';
 
 const Confirmacao = () => {
   const navigate = useNavigate();
@@ -129,9 +130,10 @@ const Confirmacao = () => {
       console.log(`Acompanhante de ${convidado.nome}:`, a.nome);
                 console.log(`token_usado do acompanhante (bruto):`, a.token_usado);
                 console.log(`token_usado do acompanhante (convertido):`, Number(a.token_usado));
+                console.log(`confirmado do acompanhante:`, a.confirmado);
       return {
       ...a,
-      presente: Number(a.token_usado) === 1 // Corrigido aqui
+      presente: Number(a.token_usado) === 1
       }
     })
   : []) 
@@ -161,19 +163,20 @@ const Confirmacao = () => {
       return acc + 1 + acompanhantesCount;
     }, 0);
   };
-
+  
   const contarConfirmados = (convidadosEvento) => {
     if (!Array.isArray(convidadosEvento)) return 0;
-    
+  
     let count = 0;
     convidadosEvento.forEach(convidado => {
-      if (convidado.confirmado === 1) count++;
+      if (Number(convidado.confirmado) === 1) count++;
       if (Array.isArray(convidado.acompanhantes)) {
-        count += convidado.acompanhantes.filter(a => a.confirmado === 1).length;
+        count += convidado.acompanhantes.filter(a => Number(a.confirmado) === 1).length;
       }
     });
     return count;
   };
+  
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -1101,6 +1104,12 @@ const Confirmacao = () => {
         {/* Filtros */}
         {renderFilters()}
 
+        <PrintGuestList 
+  eventos={eventos} 
+  eventoId={eventoId} 
+  getConvidadosPorEvento={getConvidadosPorEvento} 
+  aplicarFiltros={aplicarFiltros} 
+/>
         <div className="space-y-6">
           {Array.isArray(eventos) &&
   eventos
