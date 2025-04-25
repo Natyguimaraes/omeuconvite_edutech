@@ -21,26 +21,31 @@ export default function QRCodeScanButton() {
   const startScanner = async (cameraId) => {
     const html5QrCode = new Html5Qrcode("reader");
 
-    const handleScanSuccess = async (decodedText) => { 
+    const handleScanSuccess = async (decodedText) => {
+      if (isScanning) return; // já está processando
+      setIsScanning(true);
+    
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: decodedText }),
         });
-
+    
         const data = await response.json();
         alert(data.mensagem || (response.ok ? "Presença confirmada!" : "Erro ao confirmar presença."));
       } catch (error) {
         console.error("Erro ao registrar presença:", error);
         alert("Erro ao registrar presença.");
       }
-
+    
       await html5QrCode.stop();
       html5QrCode.clear();
       setShowScanner(false);
       setScanner(null);
+      setIsScanning(false); 
     };
+    
 
     try {
       await html5QrCode.start(
