@@ -21,8 +21,7 @@ export default function QRCodeScanButton() {
   const startScanner = async (cameraId) => {
     const html5QrCode = new Html5Qrcode("reader");
 
-    const handleScanSuccess = async (decodedText) => {
-      
+    const handleScanSuccess = async (decodedText) => { 
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/presenca`, {
           method: "POST",
