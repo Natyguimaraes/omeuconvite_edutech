@@ -13,7 +13,9 @@ import {
   confirmarAcompanhantes,
   addConvidadoToEvento,
   updateConvidadoEvento,
-  removeConvidadoFromEvento
+  removeConvidadoFromEvento,
+  confirmarPresencaPorToken
+
 } from "../controller/convidado.js";
 
 const router = express.Router();
@@ -40,5 +42,7 @@ router.delete('/acompanhantes/:id', deleteAcompanhanteById);
 
 // Confirmação em massa de acompanhantes
 router.post("/:convidadoId/confirmar-acompanhantes", confirmarAcompanhantes);
+
+router.post('/presenca', confirmarPresencaPorToken);
 
 export default router;

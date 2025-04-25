@@ -9,6 +9,7 @@ function GerarCredencialButton({
   convidadoNome,
   convidadoTelefone,
   convidadoEmail,
+  eventoId,
   eventoNome,
   eventoData,
   eventoLocal,
@@ -122,35 +123,66 @@ function GerarCredencialButton({
     return () => clearInterval(intervalo);
   }, [data_gerar_qrcode]);
   
-  const handleGerarCredencial = () => {
+  
+  const handleGerarCredencial = async () => {
     if (!isAvailable) return;
     
-    navigate('', {
-      state: {
+    try {
+      setIsLoading(true);
+      
+      // Dados que serão enviados para a API
+      const payload = {
+        convidadoId,
+        eventoId: eventoId, // Usando eventoId que já deve estar disponível nas props
+        acompanhantes: acompanhantes.filter(a => a.id && a.nome) // Filtra acompanhantes válidos
+      };
+  
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/credenciais`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      
+      const { tokenConvidado, tokensAcompanhantes } = await response.json();
+      
+      // Prepara os dados para a página de credenciais
+      const dadosCredenciais = {
         convidado: {
           id: convidadoId,
           nome: convidadoNome,
           telefone: convidadoTelefone,
-          email: convidadoEmail
+          email: convidadoEmail,
+          token: tokenConvidado
         },
         evento: {
           nome: eventoNome,
           data_evento: eventoData,
           local: eventoLocal
         },
-        acompanhantes: acompanhantes.filter(a => a.nome && a.id)
-      }
-    });
+        acompanhantes: acompanhantes.map(acomp => ({
+          ...acomp,
+          token: tokensAcompanhantes.find(t => t.id === acomp.id)?.token || null
+        })).filter(a => a.token) // Filtra apenas acompanhantes com tokens válidos
+      };
+  
+      // Navega para a página de credenciais com os dados
+      navigate('/credenciais', {
+        state: dadosCredenciais
+      });
+    } catch (error) {
+      console.error('Erro ao gerar credencial:', error);
+      alert(`Erro ao gerar credencial: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-4">
-        <Loader2 className="animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
+  
   return (
     <div className="w-full max-w-xs mx-auto">
       <motion.button

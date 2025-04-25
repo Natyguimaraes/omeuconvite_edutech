@@ -159,10 +159,31 @@ function Eventos() {
 
   const getAusentesPorEvento = (eventoId) => {
     const convidadosEvento = getConvidadosPorEvento(eventoId);
+
+		const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
+			if (!convidado?.acompanhantes) return total;
+			return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => a.confirmado === 2).length : 0);
+		}, 0);
+
     return convidadosEvento.filter(c =>
       c.eventos?.find(e => e.id === eventoId)?.confirmado === 2
-    ).length;
+    ).length + acompanhatesAusentes;
   };
+
+	const getPendentesPorEvento = (eventoId) => {
+		const convidadosEvento = getConvidadosPorEvento(eventoId);
+
+		console.log("convidadosEvento", convidadosEvento)
+
+		const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
+			if (!convidado?.acompanhantes) return total;
+			return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => !a.confirmado).length : 0);
+		}, 0);
+
+		return convidadosEvento.filter(c =>
+			!c.eventos?.find(e => e.id === eventoId)?.confirmado
+		).length + acompanhatesAusentes;
+	};
 
   const handleEventoClick = (eventoId, e) => {
     if (e?.target?.closest('button')) return;
@@ -461,6 +482,7 @@ function Eventos() {
                               totalConvidados={getConvidadosPorEvento(evento.id).length}
                               totalConfirmados={getConfirmadosPorEvento(evento.id)}
                               totalAusentes={getAusentesPorEvento(evento.id)}
+																	totalPendentes={getPendentesPorEvento(evento.id)}
                               isExpanded={eventoExpandido === evento.id}
                               onClick={(e) => handleEventoClick(evento.id, e)}
                               onVerDetalhes={() => handleVerDetalhes(evento.id)}

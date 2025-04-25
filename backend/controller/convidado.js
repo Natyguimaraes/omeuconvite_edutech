@@ -11,7 +11,9 @@ import {
   addConvidadoToEventoModel,
   updateConvidadoEventoModel,
   removeConvidadoFromEventoModel,
-  removeConvidadoFromAllEventosModel, inativaAcompanhanteModel, getConvidadosModelOtimized
+  removeConvidadoFromAllEventosModel, inativaAcompanhanteModel, getConvidadosModelOtimized,
+  getConvidadoByTokenModel,
+  confirmarPresencaPorTokenModel
 } from "../model/convidado.js";
 
 export async function createConvidado(req, res) {
@@ -507,5 +509,80 @@ export async function inativaAcompanhanteByIdConvidado(convidadoId) {
     await inativaAcompanhanteModel(convidadoId);
   } catch (err) {
     console.error("Erro ao atualizar acompanhante:", err);
+  }
+}
+
+export async function validarTokenController(req, res) {
+  try {
+    const token = req.params.token;
+    const convidado = await getConvidadoByTokenModel(token);
+
+    if (!convidado) {
+      return res.status(404).json({ valid: false, error: "Token inválido" });
+    }
+
+    res.status(200).json({
+      valid: true,
+      convidado
+    });
+  } catch (err) {
+    console.error("Erro ao validar token:", err);
+    res.status(500).json({ valid: false, error: "Erro interno do servidor" });
+  }
+}
+
+export async function confirmarPresencaPorToken(req, res) {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ mensagem: "Token não fornecido." });
+  }
+
+  try {
+    // Verifica se é um convidado
+    const [convidadoResult] = await conexao.promise().query(
+      `SELECT ce.*, c.nome 
+       FROM convidado_evento ce
+       JOIN convidados c ON ce.convidado_id = c.id
+       WHERE ce.token = ?`,
+      [token]
+    );
+
+    if (convidadoResult.length > 0) {
+      await conexao.promise().query(
+        "UPDATE convidado_evento SET token_usado = 1 WHERE token = ?",
+        [token]
+      );
+
+      return res.json({
+        tipo: "convidado",
+        nome: convidadoResult[0].nome,
+        mensagem: `🎉 Convidado ${convidadoResult[0].nome} presente na festa!`,
+      });
+    }
+
+    // Verifica se é um acompanhante
+    const [acompanhanteResult] = await conexao.promise().query(
+      "SELECT * FROM acompanhantes WHERE token = ?",
+      [token]
+    );
+
+    if (acompanhanteResult.length > 0) {
+      await conexao.promise().query(
+        "UPDATE acompanhantes SET token_usado = 1 WHERE token = ?",
+        [token]
+      );
+
+      return res.json({
+        tipo: "acompanhante",
+        nome: acompanhanteResult[0].nome,
+        mensagem: `🎉 Acompanhante ${acompanhanteResult[0].nome} presente na festa!`,
+      });
+    }
+
+    return res.status(404).json({ mensagem: "Token inválido ou não encontrado." });
+  } catch (error) {
+    console.error("Erro ao confirmar presença por token:", error);
+    return res.status(500).json({ mensagem: "Erro interno ao confirmar presença." });
   }
 }
