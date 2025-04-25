@@ -9,6 +9,8 @@ import { credenciaisRouter } from './rotas/credenciais.js';
 import superadminRoutes from "./rotas/superadmin.js";
 import process from 'process';
 import dotenv from 'dotenv';
+import presencaRouter from "./rotas/convidados.js";
+
 dotenv.config({ path: '.env' });
 
 const app = express();
@@ -38,6 +40,10 @@ app.use("/api/administradores", adminRoutes);
 app.use("/api/convidados", convidadoRoutes);
 app.use("/api/superadmin", superadminRoutes);
 app.use('/api/credenciais', credenciaisRouter);
+
+//para confirmar presença
+
+app.use("/api", presencaRouter);
 
 app.get("/", (req, res) => {
   res.status(200).json({ 

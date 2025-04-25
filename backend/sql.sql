@@ -152,6 +152,13 @@ ALTER TABLE acompanhante
    ADD ativo_acompanhante TINYINT(1) NULL DEFAULT 1;
 
 
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`acompanhante` 
+ADD COLUMN `token` VARCHAR(255) NULL DEFAULT NULL AFTER `confirmado`,
+ADD COLUMN `token_usado` TINYINT(0) NULL DEFAULT NULL AFTER `token`;
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`convidado_evento` 
+ADD COLUMN `token` VARCHAR(255) NULL DEFAULT NULL AFTER `limite_acompanhante`,
+ADD COLUMN `token_usado` TINYINT(0) NULL DEFAULT NULL AFTER `token`;
 -- UPDATE acompanhante
 --
 -- INNER JOIN convidados ON acompanhante.convidado_id = convidados.id

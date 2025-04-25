@@ -23,6 +23,7 @@ import { FaSadCry, FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import NavBar from "../components/menu";
 import BadgeConvidadoStatus from "../components/BadgeConvidadoStatus";
+import QRCodeScanButton from '../components/QrCodeButon';
 
 const Confirmacao = () => {
   const navigate = useNavigate();
@@ -88,7 +89,6 @@ const Confirmacao = () => {
     return convidados
       .filter(convidado => {
         try {
-          // Verifica se o convidado está no evento
           const eventosConvidado = Array.isArray(convidado?.eventos) ? 
             convidado.eventos : [];
           
@@ -109,9 +109,10 @@ const Confirmacao = () => {
             e?.id === eventoIdNum
           );
   
-          // Mostra acompanhantes APENAS se:
-          // 1. Não for um novo evento (novoEvento: true)
-          // 2. E for o PRIMEIRO evento do convidado
+          console.log('Convidado:', convidado.nome);
+          console.log('eventoRelacao:', eventoRelacao);
+          console.log('token_usado bruto:', eventoRelacao?.token_usado);
+          console.log('token_usado convertido:', Number(eventoRelacao?.token_usado));
           const mostrarAcompanhantes = (
             !eventoRelacao?.novoEvento && 
             eventosConvidado[0]?.id === eventoIdNum
@@ -120,22 +121,37 @@ const Confirmacao = () => {
           return {
             ...convidado,
             confirmado: eventoRelacao?.confirmado || false,
+            presente: Number(eventoRelacao?.token_usado) === 1, // Adiciona campo presente: para verificar se convidado está presente ou não
             limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
             acompanhantes: mostrarAcompanhantes ? 
-              (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes : []) : 
-              []
+  (Array.isArray(convidado.acompanhantes) ? 
+    convidado.acompanhantes.map(a => {
+      console.log(`Acompanhante de ${convidado.nome}:`, a.nome);
+                console.log(`token_usado do acompanhante (bruto):`, a.token_usado);
+                console.log(`token_usado do acompanhante (convertido):`, Number(a.token_usado));
+      return {
+      ...a,
+      presente: Number(a.token_usado) === 1 // Corrigido aqui
+      }
+    })
+  : []) 
+: []
           };
+         
         } catch (error) {
           console.error('Error mapping convidado:', error, convidado);
+   
           return {
             ...convidado,
             confirmado: false,
+            presente: false,
             limite_acompanhante: 0,
             acompanhantes: []
           };
         }
       });
   };
+
   const contarParticipantes = (convidadosEvento) => {
     if (!Array.isArray(convidadosEvento)) return 0;
     return convidadosEvento.reduce((acc, convidado) => {
@@ -175,7 +191,6 @@ const Confirmacao = () => {
   }, [searchTerm, convidados, eventoId]);
 
   // Adicionar convidado existente ao evento
- // Adicionar convidado existente ao evento
  const handleAddToEvent = async (convidado) => {
   setAddingGuest(true);
   try {
@@ -263,7 +278,7 @@ const Confirmacao = () => {
     setAddingGuest(true);
 
     try {
-      // Dados básicos do convidado (mantido igual)
+      // Dados básicos do convidado
       const convidadoData = {
         nome: newGuest.nome.trim(),
         telefone: newGuest.telefone.trim(),
@@ -666,17 +681,25 @@ const Confirmacao = () => {
             body: JSON.stringify({ confirmado: !estaConfirmado }),
           }
         );
-
+  
         if (!response.ok) {
           throw new Error("Erro ao atualizar confirmação");
         }
-
+  
+        const data = await response.json(); // Adicione esta linha para pegar a resposta completa
+  
         setConvidados(prev => prev.map(c => 
           c.id === convidadoId
             ? {
                 ...c,
                 eventos: c.eventos.map(e => 
-                  e.id === parseInt(eventoId) ? { ...e, confirmado: !estaConfirmado } : e
+                  e.id === parseInt(eventoId) 
+                    ? { 
+                        ...e, 
+                        confirmado: !estaConfirmado,
+                        token_usado: data.token_usado // Atualiza o token_usado com a resposta da API
+                      } 
+                    : e
                 )
               }
             : c
@@ -690,24 +713,30 @@ const Confirmacao = () => {
             headers: { "Content-Type": "application/json" },
           }
         );
-
+  
         if (!response.ok) {
           throw new Error("Erro ao atualizar confirmação do acompanhante");
         }
-
+  
+        const data = await response.json(); // Adicione esta linha
+  
         setConvidados(prev => prev.map(c => {
           if (c.id !== convidadoId) return c;
           return {
             ...c,
             acompanhantes: c.acompanhantes.map(a => 
               a.id === acompanhanteId 
-                ? { ...a, confirmado: !a.confirmado } 
+                ? { 
+                    ...a, 
+                    confirmado: !a.confirmado,
+                    token_usado: data.token_usado // Atualiza o token_usado com a resposta da API
+                  } 
                 : a
             )
           };
         }));
       }
-
+  
       toast.success("Status atualizado com sucesso!");
     } catch (error) {
       toast.error(`Erro: ${error.message}`);
@@ -837,6 +866,7 @@ const Confirmacao = () => {
     <><NavBar />
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
+       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-6"
@@ -844,6 +874,10 @@ const Confirmacao = () => {
           <ChevronLeft className="h-4 w-4 mr-1" />
           <span>Voltar</span>
         </button>
+        <div className="flex items-center gap-2">
+          <QRCodeScanButton onScan={(data) => console.log("QR Lido:", data)} />
+        </div>
+      </div>
 
         <div className="flex items-center mb-8">
           <div className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-medium mr-3">
@@ -1128,6 +1162,9 @@ const Confirmacao = () => {
                               <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
                                 Status
                               </th>
+                              <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
+      Presente na Festa
+    </th>
                               <th className="px-4 py-3 text-right font-medium text-gray-600 tracking-wider">
                                 Ações
                               </th>
@@ -1328,6 +1365,26 @@ const Confirmacao = () => {
                                           <td className="px-4 py-4">
                                             <BadgeConvidadoStatus status={convidado.confirmado || 0}/>
                                           </td>
+
+                                          <td className="px-4 py-4">
+  {(() => {
+    console.log('Convidado:', convidado.nome);
+    console.log('Presente?', convidado.presente);
+    return convidado.presente ? (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-purple-800">
+        <CheckCircle className="h-3 w-3 mr-1" />
+        Presente
+      </span>
+    ) : (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+        <XCircle className="h-3 w-3 mr-1" />
+        Ausente
+      </span>
+    );
+  })()}
+</td>
+
+
                                           <td className="px-4 py-4 text-right whitespace-nowrap">
                                             <div className="flex justify-end space-x-1">
                                               <button
@@ -1460,6 +1517,20 @@ const Confirmacao = () => {
                                               }
                                             </button>
                                           </td>
+
+                                          <td className="px-4 py-3">
+  {acompanhante.presente ? (
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-purple-800">
+      <CheckCircle className="h-3 w-3 mr-1" />
+      Presente
+    </span>
+  ) : (
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+      <XCircle className="h-3 w-3 mr-1" />
+      Ausente
+    </span>
+  )}
+</td>
                                           <td className="px-4 py-3 text-right whitespace-nowrap">
                                             <div className="flex justify-end space-x-1">
                                               {isEditingAcomp ? (

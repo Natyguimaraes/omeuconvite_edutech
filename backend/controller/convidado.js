@@ -15,6 +15,7 @@ import {
   getConvidadoByTokenModel,
   confirmarPresencaPorTokenModel
 } from "../model/convidado.js";
+import conexao from '../configuracao/banco.js'
 
 export async function createConvidado(req, res) {
   try {
@@ -549,6 +550,10 @@ export async function confirmarPresencaPorToken(req, res) {
     );
 
     if (convidadoResult.length > 0) {
+      if (convidadoResult[0].token_usado === 1) {
+        return res.status(409).json({ mensagem: "Essa credencial já foi lida"})
+      }
+
       await conexao.promise().query(
         "UPDATE convidado_evento SET token_usado = 1 WHERE token = ?",
         [token]
@@ -563,13 +568,16 @@ export async function confirmarPresencaPorToken(req, res) {
 
     // Verifica se é um acompanhante
     const [acompanhanteResult] = await conexao.promise().query(
-      "SELECT * FROM acompanhantes WHERE token = ?",
+      "SELECT * FROM acompanhante WHERE token = ?",
       [token]
     );
 
     if (acompanhanteResult.length > 0) {
+      if (acompanhanteResult[0].token_usado === 1) {
+        return res.status(409).json({ mensagem: "Essa credencial já foi lida"})
+      }
       await conexao.promise().query(
-        "UPDATE acompanhantes SET token_usado = 1 WHERE token = ?",
+        "UPDATE acompanhante SET token_usado = 1 WHERE token = ?",
         [token]
       );
 

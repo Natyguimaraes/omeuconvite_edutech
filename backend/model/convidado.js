@@ -71,7 +71,7 @@ export async function getConvidadosModelOtimized() {
           SELECT
             CONCAT('[',
               GROUP_CONCAT(
-                JSON_OBJECT('id', acompanhante.id, 'convidado_id', acompanhante.convidado_id, 'nome', IFNULL(acompanhante.nome, ''), 'telefone', IFNULL(acompanhante.telefone, ''), 'email', IFNULL(acompanhante.email, ''), 'confirmado', IFNULL(acompanhante.confirmado, ''), 'eventoId', IFNULL(acompanhante.evento_id, ''))
+                JSON_OBJECT('id', acompanhante.id, 'convidado_id', acompanhante.convidado_id, 'nome', IFNULL(acompanhante.nome, ''), 'telefone', IFNULL(acompanhante.telefone, ''), 'email', IFNULL(acompanhante.email, ''), 'confirmado', IFNULL(acompanhante.confirmado, ''), 'eventoId', IFNULL(acompanhante.evento_id, ''), 'token_usado', IFNULL(acompanhante.token_usado, 0))
                     
                 SEPARATOR ", ")
             ,"]")
@@ -89,6 +89,7 @@ export async function getConvidadosModelOtimized() {
                                 ', "ativo": "', IFNULL(e.ativo, ''), '"',
                                 ', "limite_acompanhante": ', IFNULL(ce.limite_acompanhante, ''),
                                 ', "confirmado": ', IFNULL(ce.confirmado, ''),
+                                ', "token_usado": ', IFNULL(ce.token_usado, 0),
                             '}'
                         )
                     )
@@ -375,29 +376,50 @@ export async function getConvidadoByTokenModel(token) {
 //presença
 export function confirmarPresencaPorTokenModel(token) {
   return new Promise((resolve, reject) => {
-    conexao.query("SELECT * FROM convidado_evento WHERE token = ?", [token], (err, convidado) => {
-      if (err) return reject(err);
+    // Verifica se é um convidado
+    conexao.query(
+      `SELECT ce.*, c.nome 
+       FROM convidado_evento ce
+       JOIN convidados c ON ce.convidado_id = c.id
+       WHERE ce.token = ?`,
+      [token],
+      (err, convidado) => {
+        if (err) return reject(err);
 
-      if (convidado.length > 0) {
-        conexao.query("UPDATE convidados SET presenca = 1 WHERE token = ?", [token], (errUpdate) => {
-          if (errUpdate) return reject(errUpdate);
-          return resolve({ tipo: 'convidado', nome: convidado[0].nome });
-        });
-      } else {
-        conexao.query("SELECT * FROM acompanhante WHERE token = ?", [token], (err2, acompanhante) => {
-          if (err2) return reject(err2);
+        if (convidado.length > 0) {
+          conexao.query(
+            "UPDATE convidado_evento SET token_usado = 1 WHERE token = ?",
+            [token],
+            (errUpdate) => {
+              if (errUpdate) return reject(errUpdate);
+              return resolve({ tipo: "convidado", nome: convidado[0].nome });
+            }
+          );
+        } else {
+          // Verifica se é um acompanhante
+          conexao.query(
+            "SELECT * FROM acompanhante WHERE token = ?",
+            [token],
+            (err2, acompanhante) => {
+              if (err2) return reject(err2);
 
-          if (acompanhante.length > 0) {
-            conexao.query("UPDATE acompanhante SET presenca = 1 WHERE token = ?", [token], (errUpdate2) => {
-              if (errUpdate2) return reject(errUpdate2);
-              return resolve({ tipo: 'acompanhante', nome: acompanhante[0].nome });
-            });
-          } else {
-            return resolve(null);
-          }
-        });
+              if (acompanhante.length > 0) {
+                conexao.query(
+                  "UPDATE acompanhante SET token_usado = 1 WHERE token = ?",
+                  [token],
+                  (errUpdate2) => {
+                    if (errUpdate2) return reject(errUpdate2);
+                    return resolve({ tipo: "acompanhante", nome: acompanhante[0].nome });
+                  }
+                );
+              } else {
+                return resolve(null); // Token inválido
+              }
+            }
+          );
+        }
       }
-    });
+    );
   });
 }
 
