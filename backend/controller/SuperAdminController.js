@@ -38,9 +38,9 @@ import {
   
 
   export async function liberarAdministradorController(req, res) {
-    const { cpf, planoId } = req.body;
+    const { nome, planoId } = req.body;
     try {
-      const sucesso = await liberarAdministrador(cpf, planoId);
+      const sucesso = await liberarAdministrador(nome, planoId);
       if (sucesso) {
         res.status(200).json({ message: "Administrador liberado com sucesso!" });
       } else {

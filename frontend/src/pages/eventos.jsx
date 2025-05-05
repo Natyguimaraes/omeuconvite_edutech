@@ -26,6 +26,9 @@ function Eventos() {
   const [eventoExpandido, setEventoExpandido] = useState(null);
   const navigate = useNavigate();
 
+  // Obter o ID do administrador logado
+  const adminId = localStorage.getItem('adminId') || sessionStorage.getItem('adminId');
+  
   const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState({
     imagem_evento: "", 
@@ -47,8 +50,11 @@ function Eventos() {
       setLoading(true);
       setError(null);
       try {
+        // Adicionar o adminId como query parameter na requisição
+        const eventosUrl = adminId ? `${apiUrlEventos}?administrador_id=${adminId}` : apiUrlEventos;
+        
         const [eventosResponse, convidadosResponse] = await Promise.all([
-          fetch(apiUrlEventos),
+          fetch(eventosUrl),
           fetch(apiUrlConvidados)
         ]);
 
@@ -60,46 +66,47 @@ function Eventos() {
           convidadosResponse.json()
         ]);
 
-        console.log("convidadosData", convidadosData)
-
+        // Filtro adicional no frontend para garantir que só apareçam eventos do admin logado
         const eventosProcessados = Array.isArray(eventosData)
-          ? eventosData.map(e => ({
-            ...e,
-            id: Number(e.id),
-            data_evento: e.data_evento || new Date().toISOString()
-          }))
+          ? eventosData
+              .filter(e => adminId ? e.administrador_id == adminId : true)
+              .map(e => ({
+                ...e,
+                id: Number(e.id),
+                data_evento: e.data_evento || new Date().toISOString()
+              }))
           : [];
 
         const convidadosProcessados = Array.isArray(convidadosData?.data)
           ? convidadosData.data.map(c => {
-            if (!c) return null;
-            
-            let eventosConvidado = [];
-            if (c.eventos) {
-              if (Array.isArray(c.eventos)) {
-                eventosConvidado = c.eventos.map(e => ({
-                  ...e,
-                  id: Number(e.id),
-                  limite_acompanhante: e.limite_acompanhante || 0,
-                  confirmado: e.confirmado || false
-                }));
+              if (!c) return null;
+              
+              let eventosConvidado = [];
+              if (c.eventos) {
+                if (Array.isArray(c.eventos)) {
+                  eventosConvidado = c.eventos.map(e => ({
+                    ...e,
+                    id: Number(e.id),
+                    limite_acompanhante: e.limite_acompanhante || 0,
+                    confirmado: e.confirmado || false
+                  }));
+                }
               }
-            }
 
-            let acompanhantes = [];
-            if (c.acompanhantes) {
-              if (Array.isArray(c.acompanhantes)) {
-                acompanhantes = c.acompanhantes;
+              let acompanhantes = [];
+              if (c.acompanhantes) {
+                if (Array.isArray(c.acompanhantes)) {
+                  acompanhantes = c.acompanhantes;
+                }
               }
-            }
 
-            return {
-              ...c,
-              id: Number(c.id),
-              eventos: eventosConvidado,
-              acompanhantes
-            };
-          }).filter(Boolean)
+              return {
+                ...c,
+                id: Number(c.id),
+                eventos: eventosConvidado,
+                acompanhantes
+              };
+            }).filter(Boolean)
           : [];
 
         setEventos(eventosProcessados);
@@ -114,7 +121,7 @@ function Eventos() {
     }
 
     fetchDados();
-  }, [apiUrlEventos, apiUrlConvidados]);
+  }, [apiUrlEventos, apiUrlConvidados, adminId]);
 
   const getConvidadosPorEvento = (eventoId) => {
     if (!Array.isArray(convidados)) return [];
@@ -143,10 +150,8 @@ function Eventos() {
     convidadosEvento.forEach(convidado => {
       const eventoConvidado = convidado.eventos?.find(e => e.id === eventoId);
       if (eventoConvidado?.confirmado === 1) {
-        // Conta o convidado
         totalConfirmados += 1;
   
-        // Conta os acompanhantes (se houver)
         if (Array.isArray(convidado.acompanhantes)) {
           totalConfirmados += convidado.acompanhantes.filter(a => String(a.eventoId) === String(eventoId)).length;
         }
@@ -156,34 +161,31 @@ function Eventos() {
     return totalConfirmados;
   };
   
-
   const getAusentesPorEvento = (eventoId) => {
     const convidadosEvento = getConvidadosPorEvento(eventoId);
 
-		const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
-			if (!convidado?.acompanhantes) return total;
-			return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => a.confirmado === 2).length : 0);
-		}, 0);
+    const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
+      if (!convidado?.acompanhantes) return total;
+      return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => a.confirmado === 2).length : 0);
+    }, 0);
 
     return convidadosEvento.filter(c =>
       c.eventos?.find(e => e.id === eventoId)?.confirmado === 2
     ).length + acompanhatesAusentes;
   };
 
-	const getPendentesPorEvento = (eventoId) => {
-		const convidadosEvento = getConvidadosPorEvento(eventoId);
+  const getPendentesPorEvento = (eventoId) => {
+    const convidadosEvento = getConvidadosPorEvento(eventoId);
 
-		console.log("convidadosEvento", convidadosEvento)
+    const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
+      if (!convidado?.acompanhantes) return total;
+      return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => !a.confirmado).length : 0);
+    }, 0);
 
-		const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
-			if (!convidado?.acompanhantes) return total;
-			return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => !a.confirmado).length : 0);
-		}, 0);
-
-		return convidadosEvento.filter(c =>
-			!c.eventos?.find(e => e.id === eventoId)?.confirmado
-		).length + acompanhatesAusentes;
-	};
+    return convidadosEvento.filter(c =>
+      !c.eventos?.find(e => e.id === eventoId)?.confirmado
+    ).length + acompanhatesAusentes;
+  };
 
   const handleEventoClick = (eventoId, e) => {
     if (e?.target?.closest('button')) return;
@@ -197,15 +199,21 @@ function Eventos() {
   const formatDataParaInput = (dataString) => {
     if (!dataString) return "";
     const data = new Date(dataString);
-    return data.toISOString().slice(0, 16); // pega até 'YYYY-MM-DDTHH:MM'
+    return data.toISOString().slice(0, 16);
   };
   
   const handleEditarEvento = (eventoId, e) => {
     e.stopPropagation();
     const evento = eventos.find(e => e.id === eventoId);
+    
+    // Verifica se o evento pertence ao admin logado
+    if (evento.administrador_id != adminId) {
+      alert("Você não tem permissão para editar este evento");
+      return;
+    }
+    
     setEditIndex(eventoId);
     setEditData({
-     
       nome: evento.nome,
       descricao: evento.descricao,
       data_evento: formatDataParaInput(evento.data_evento),
@@ -214,12 +222,10 @@ function Eventos() {
       mensagem_whatsapp: evento.mensagem_whatsapp,
     });
   };
-  
 
   const handleCancelarEdicao = () => {
     setEditIndex(null);
     setEditData({
-      
       nome: "",
       descricao: "",
       data_evento: "",
@@ -259,7 +265,6 @@ function Eventos() {
       alert("Erro ao atualizar evento");
     }
   };
-  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -271,6 +276,14 @@ function Eventos() {
 
   const handleExcluirEvento = async (eventoId, e) => {
     e.stopPropagation();
+    
+    const evento = eventos.find(e => e.id === eventoId);
+    
+    // Verifica se o evento pertence ao admin logado
+    if (evento.administrador_id != adminId) {
+      alert("Você não tem permissão para excluir este evento");
+      return;
+    }
     
     if (window.confirm("Tem certeza que deseja excluir este evento?")) {
       try {
@@ -390,8 +403,6 @@ function Eventos() {
                         >
                           {isEditing ? (
                             <div className="p-6">
-                  
-
                               <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
                                 <input
@@ -482,7 +493,7 @@ function Eventos() {
                               totalConvidados={getConvidadosPorEvento(evento.id).length}
                               totalConfirmados={getConfirmadosPorEvento(evento.id)}
                               totalAusentes={getAusentesPorEvento(evento.id)}
-																	totalPendentes={getPendentesPorEvento(evento.id)}
+                              totalPendentes={getPendentesPorEvento(evento.id)}
                               isExpanded={eventoExpandido === evento.id}
                               onClick={(e) => handleEventoClick(evento.id, e)}
                               onVerDetalhes={() => handleVerDetalhes(evento.id)}

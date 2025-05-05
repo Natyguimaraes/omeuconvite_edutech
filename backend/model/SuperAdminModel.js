@@ -26,10 +26,10 @@ export function listarPlanos() {
 }
 
 
-export function liberarAdministrador(cpf, planoId) {
+export function liberarAdministrador(nome, planoId) {
   return new Promise((resolve, reject) => {
-    const query = "UPDATE administradores SET plano_id = ?, ativo = 1 WHERE cpf = ?";
-    banco.query(query, [planoId, cpf], (err, results) => {
+    const query = "UPDATE administradores SET plano_id = ?, ativo = 1 WHERE nome = ?";
+    banco.query(query, [planoId, nome], (err, results) => {
       if (err) return reject(err);
       resolve(results.affectedRows > 0);
     });

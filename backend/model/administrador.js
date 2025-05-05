@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
 import conexao from "../configuracao/banco.js";
 
-export function findByCpfAndSenha(cpf, senha) {
+export function findByCpfAndSenha(nome, senha) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "SELECT * FROM administradores WHERE cpf = ? AND ativo = 1", 
-      [cpf],
+      "SELECT * FROM administradores WHERE nome = ? AND ativo = 1", 
+      [nome],
       async (err, results) => {
         if (err) return reject(err);
         
@@ -46,11 +46,11 @@ export function createAdmin(nome, cpf, senha) {
 }
 
 
-export function liberarAcesso(cpf, planoId) {
+export function liberarAcesso(nome, planoId) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "UPDATE administradores SET liberado = TRUE, plano_id = ? WHERE cpf = ?",
-      [planoId, cpf],
+      "UPDATE administradores SET liberado = TRUE, plano_id = ? WHERE nome = ?",
+      [planoId, nome],
       (err, result) => {
         if (err) return reject(err);
         resolve(result);

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 
 const LiberarAdministrador = () => {
-    const [cpf, setCpf] = useState("");
+    const [nome, setNome] = useState("");
+    //const [cpf, setCpf] = useState("");
     const [planoId, setPlanoId] = useState("");
     const [planos, setPlanos] = useState([]);
 
@@ -35,7 +36,7 @@ const LiberarAdministrador = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ cpf, planoId }),
+                body: JSON.stringify({ nome, planoId }),
             });
 
             if (!response.ok) {
@@ -43,7 +44,7 @@ const LiberarAdministrador = () => {
             }
 
             alert("Administrador liberado com sucesso!");
-            setCpf("");
+            setNome("");
             setPlanoId("");
         } catch (error) {
             console.error("Erro ao liberar administrador:", error);
@@ -56,11 +57,11 @@ const LiberarAdministrador = () => {
             <h2>Liberar Administrador</h2>
             <form onSubmit={handleSubmit} style={styles.form}>
                 <div style={styles.formGroup}>
-                    <label>CPF do Administrador:</label>
+                    <label>Nome do Administrador:</label>
                     <input
                         type="text"
-                        value={cpf}
-                        onChange={(e) => setCpf(e.target.value)}
+                        value={nome}
+                        onChange={(e) => setNome(e.target.value)}
                         required
                     />
                 </div>

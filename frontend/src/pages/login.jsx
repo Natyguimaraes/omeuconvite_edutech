@@ -4,7 +4,8 @@ import { LockKeyhole, User } from "lucide-react";
 import NavBar from "../components/menu";
 
 function LoginAdministrador() {
-  const [cpf, setCpf] = useState("");
+  const [nome, setNome] = useState("");
+  //const [cpf, setCpf] = useState("");
   const [senha, setSenha] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function LoginAdministrador() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/administradores/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cpf, senha }),
+        body: JSON.stringify({ nome, senha }),
         credentials: 'same-origin'
       });
   
@@ -65,19 +66,24 @@ function LoginAdministrador() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
+                {/*<label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
                   CPF
-                </label>
+                </label> */}
+
+               <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
+                  Usuário
+                </label> 
+
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <User className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    id="cpf"
+                    id="nome"
                     type="text"
-                    placeholder="00000000000"
-                    value={cpf}
-                    onChange={(e) => setCpf(e.target.value)}
+                    placeholder="Nome de usuário"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
                     required
                     className="block w-full pl-10 pr-3 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder-gray-400 transition-all duration-200 outline-none"
                     autoComplete="username"

@@ -2,14 +2,14 @@ import { gerarToken } from "../auth.js";
 import { findByCpfAndSenha, createAdmin } from "../model/administrador.js";
 
 export async function loginAdmin(req, res) {
-  const { cpf, senha } = req.body;
+  const { nome, senha } = req.body;
 
-  if (!cpf || !senha) {
-    return res.status(400).json({ message: "CPF e senha são obrigatórios" });
+  if (!nome || !senha) {
+    return res.status(400).json({ message: "nome e senha são obrigatórios" });
   }
 
   try {
-    const admin = await findByCpfAndSenha(cpf, senha);
+    const admin = await findByCpfAndSenha(nome, senha);
     if (!admin) {
       return res.status(401).json({ message: "Credenciais inválidas" });
     }
