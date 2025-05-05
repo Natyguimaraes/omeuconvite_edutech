@@ -24,8 +24,7 @@ import { toast } from "sonner";
 import NavBar from "../components/menu";
 import BadgeConvidadoStatus from "../components/BadgeConvidadoStatus";
 import QRCodeScanButton from '../components/QrCodeButon';
-import PrintGuestList from '../components/PrintGuestList';
-import GuestFilters from "../components/GuestFilters";
+import GuestActions from "../components/GuestFilters";
 
 const Confirmacao = () => {
   const navigate = useNavigate();
@@ -1056,19 +1055,14 @@ const Confirmacao = () => {
           </div>
 
           {/* Filtros */}
-          <GuestFilters
-            filters={filters}
-            setFilters={setFilters}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-          />
+          <GuestActions
+  filters={filters}
+  setFilters={setFilters}
+  getConvidadosPorEvento={getConvidadosPorEvento}
+  eventos={eventos}
+  eventoId={eventoId}
+/>
 
-          <PrintGuestList
-            eventos={eventos}
-            eventoId={eventoId}
-            getConvidadosPorEvento={getConvidadosPorEvento}
-            aplicarFiltros={aplicarFiltros}
-          />
           <div className="space-y-6">
             {Array.isArray(eventos) &&
               eventos

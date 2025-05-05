@@ -103,31 +103,27 @@ export async function deleteEventoController(req, res) {
   const { id } = req.params;
 
   try {
-    // Primeiro obtém o evento para pegar a imagem
+    // Verifica se o evento existe
     const evento = await getEventoByIdModel(id);
     
     if (!evento) {
-      return res.status(404).json({ error: "Evento não encontrado para exclusão." });
+      return res.status(404).json({ error: "Evento não encontrado para inativação." });
     }
 
-    // Se houver imagem no Cloudinary, deleta
-    if (evento.imagem_evento) {
-      // Extrai o public_id da URL (isso depende de como você armazenou)
-      // Ou melhor, armazene o public_id no banco de dados
-      // await cloudinary.uploader.destroy(publicId);
-    }
-
+    // Inativa o evento (ativo = 0) ao invés de deletar
     const result = await deleteEvento(id);
+
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Evento não encontrado para exclusão." });
+      return res.status(404).json({ error: "Evento não encontrado para inativação." });
     }
     
-    res.status(200).json({ message: "Evento excluído com sucesso" });
+    res.status(200).json({ message: "Evento inativado com sucesso" });
   } catch (err) {
-    console.error("Erro ao excluir evento:", err);
-    res.status(500).json({ error: "Erro interno ao excluir evento." });
+    console.error("Erro ao inativar evento:", err);
+    res.status(500).json({ error: "Erro interno ao inativar evento." });
   }
 }
+
 
 export async function getEventoById(req, res) {
   try {

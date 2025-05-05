@@ -2,7 +2,7 @@ import conexao from "../configuracao/banco.js";
 
 export function readEventos() {
   return new Promise((resolve, reject) => {
-    conexao.query("SELECT * FROM eventos", (err, result) => {
+    conexao.query("SELECT * FROM eventos WHERE ativo = 1", (err, result) => {
       if (err) {
         console.error("Erro ao ler eventos do banco de dados:", err);
         reject("Erro ao ler eventos do banco de dados");
@@ -50,10 +50,10 @@ export function updateEvento(id, novoDados) {
 
 export function deleteEvento(id) {
   return new Promise((resolve, reject) => {
-    conexao.query("DELETE FROM eventos WHERE id = ?", [id], (err, result) => {
+    conexao.query("UPDATE eventos SET ativo = 0 WHERE id = ?", [id], (err, result) => {
       if (err) {
-        console.error("Erro ao deletar evento:", err);
-        reject("Erro ao deletar evento");
+        console.error("Erro ao inativar evento:", err);
+        reject("Erro ao INATIVAR evento");
         return;
       }
       resolve(result);
