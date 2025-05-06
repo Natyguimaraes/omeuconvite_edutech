@@ -822,7 +822,7 @@ function EventCredential() {
             transition={{ duration: 0.7, ease: "easeOut" }}
             className="mt-8 rounded-3xl overflow-hidden shadow-xl"
           >
-            <iframe
+            {/*<iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.989312273572!2d-38.386530382556124!3d-12.112883599999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x716b9f273764e37%3A0xcd8de6c2e5963b66!2sHaras%20Bom%20Jesus%20Eventos!5e0!3m2!1spt-PT!2sbr!4v1743444753198!5m2!1spt-PT!2sbr"
               width="100%"
               height="450"
@@ -833,6 +833,7 @@ function EventCredential() {
               className="rounded-3xl"
               title="Localização do Evento - Haras Bom Jesus Eventos"
             />
+            */}
           </motion.div>
 
           <div className="backdrop-blur-md bg-white/90 rounded-3xl overflow-hidden border border-white/50 shadow-xl">
