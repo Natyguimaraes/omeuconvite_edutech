@@ -142,7 +142,7 @@ const GuestActions = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-5">
+    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-5 bg-gradient-to-r from-purple-300/100 via-indigo-200/100 to-purple-300/90">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center">
           <Filter className="h-5 w-5 mr-2 text-indigo-500" />

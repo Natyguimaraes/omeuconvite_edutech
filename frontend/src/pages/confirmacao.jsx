@@ -14,17 +14,16 @@ import {
   UserPlus,
   CheckCircle,
   XCircle,
-  Search,
-  Filter,
-  Phone,
-  Mail,
+  
 } from "lucide-react";
-import { FaSadCry, FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import NavBar from "../components/menu";
 import BadgeConvidadoStatus from "../components/BadgeConvidadoStatus";
 import QRCodeScanButton from '../components/QrCodeButon';
 import GuestActions from "../components/GuestFilters";
+import { formatPhoneNumber, isValidPhoneNumber } from '../components/phoneUtils';
+import GuestSearchAdd from "../components/buscaConvidado";
 
 const Confirmacao = () => {
   const navigate = useNavigate();
@@ -262,39 +261,51 @@ const Confirmacao = () => {
   // Função para lidar com mudanças nos campos do formulário
   const handleNewGuestChange = (e) => {
     const { name, value } = e.target;
-    setNewGuest(prev => ({
-      ...prev,
-      [name]: name === 'limite_acompanhante' ? 
-        (value === '' ? '' : Math.max(0, parseInt(value) || 0)) : 
-        value
-    }));
+    
+    if (name === 'telefone') {
+      // Aplica a máscara apenas para o campo de telefone
+      const formattedValue = formatPhoneNumber(value);
+      setNewGuest(prev => ({
+        ...prev,
+        [name]: formattedValue
+      }));
+    } else {
+      setNewGuest(prev => ({
+        ...prev,
+        [name]: name === 'limite_acompanhante' ? 
+          (value === '' ? '' : Math.max(0, parseInt(value) || 0)) : 
+          value
+      }));
+    }
   };
 
   // Adicionar novo convidado e associar ao evento
   const handleAddNewGuest = async () => {
-    // Validação reforçada (mantida igual)
+    // Validação reforçada
     if (!newGuest.nome.trim()) {
       toast.error("O nome do convidado é obrigatório");
       return;
     }
-
-    if (!newGuest.telefone.trim()) {
-      toast.error("O telefone do convidado é obrigatório");
+  
+    // Validação do telefone
+    const phoneDigits = newGuest.telefone.replace(/\D/g, '');
+    if (!isValidPhoneNumber(newGuest.telefone)) {
+      toast.error("Por favor, insira um telefone válido com DDD (10 ou 11 dígitos)");
       return;
     }
-
+  
     if (!eventoId && !newGuest.evento_id) {
       toast.error("Selecione um evento para o convidado");
       return;
     }
-
+  
     setAddingGuest(true);
-
+  
     try {
-      // Dados básicos do convidado
+      // Dados básicos do convidado - remove a máscara antes de enviar
       const convidadoData = {
         nome: newGuest.nome.trim(),
-        telefone: newGuest.telefone.trim(),
+        telefone: phoneDigits, // Envia apenas os dígitos
         email: newGuest.email.trim() || null,
         limite_acompanhante: Number(newGuest.limite_acompanhante) || 0
       };
@@ -468,6 +479,7 @@ const Confirmacao = () => {
       setLoading(false);
     }
   };
+  //buscar dados somente do administrador logado.
   const adminId = localStorage.getItem('adminId');
   // Buscar dados iniciais
   async function fetchDados() {
@@ -843,246 +855,24 @@ const Confirmacao = () => {
             </h1>
           </div>
 
-          {/* Barra de busca e adicionar convidado */}
-          <div className="mb-8 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
-                  placeholder="Buscar convidados de outros eventos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <X className="h-5 w-5 text-gray-400 hover:text-gray-500" />
-                  </button>
-                )}
-              </div>
-
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg flex items-center justify-center transition-colors"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                <span>Adicionar Convidado</span>
-              </button>
-            </div>
-
-            {/* Formulário para adicionar novo convidado */}
-            {showAddForm && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="font-medium text-gray-800 mb-4 flex items-center">
-                  <UserPlus className="h-5 w-5 text-indigo-600 mr-2" />
-                  Novo Convidado
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label htmlFor="nome">Nome*</label>
-                    <div className="relative">
-                      <User
-                        className="absolute left-3 top-3 text-gray-400"
-                        size={18}
-                      />
-                      <input
-                        type="text"
-                        id="nome"
-                        name="nome"
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                        placeholder="Nome completo"
-                        value={newGuest.nome}
-                        onChange={handleNewGuestChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label htmlFor="telefone">Telefone*</label>
-                    <div className="relative">
-                      <Phone
-                        className="absolute left-3 top-3 text-gray-400"
-                        size={18}
-                      />
-                      <input
-                        type="tel"
-                        id="telefone"
-                        name="telefone"
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                        placeholder="(00) 00000-0000"
-                        value={newGuest.telefone}
-                        onChange={handleNewGuestChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label htmlFor="email">Email</label>
-                    <div className="relative">
-                      <Mail
-                        className="absolute left-3 top-3 text-gray-400"
-                        size={18}
-                      />
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                        placeholder="email@exemplo.com"
-                        value={newGuest.email}
-                        onChange={handleNewGuestChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label htmlFor="limite_acompanhante">
-                      Limite de Acompanhantes
-                    </label>
-                    <div className="relative">
-                      <Users
-                        className="absolute left-3 top-3 text-gray-400"
-                        size={18}
-                      />
-                      <input
-                        type="number"
-                        id="limite_acompanhante"
-                        name="limite_acompanhante"
-                        min="0"
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                        value={newGuest.limite_acompanhante}
-                        onChange={handleNewGuestChange}
-                      />
-                    </div>
-                  </div>
-
-                  {!eventoId && (
-                    <div className="flex flex-col gap-1">
-                      <label htmlFor="evento_id">Evento*</label>
-                      <div className="relative">
-                        <CalendarIcon
-                          className="absolute left-3 top-3 text-gray-400"
-                          size={18}
-                        />
-                        <select
-                          id="evento_id"
-                          name="evento_id"
-                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                          value={newGuest.evento_id}
-                          onChange={handleNewGuestChange}
-                          required
-                        >
-                          <option value="">Selecione um evento</option>
-                          {eventos.map((evento) => (
-                            <option key={evento.id} value={evento.id}>
-                              {evento.nome}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-end space-x-3 mt-4">
-                  <button
-                    onClick={() => setShowAddForm(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                    disabled={addingGuest}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleAddNewGuest}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center"
-                    disabled={addingGuest}
-                  >
-                    {addingGuest ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Salvando...
-                      </>
-                    ) : (
-                      <>
-                        <Check className="h-4 w-4 mr-2" />
-                        Salvar
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Resultados da busca */}
-            {searchTerm && searchResults.length > 0 && (
-  <div className="mt-2 bg-white rounded-md shadow-lg overflow-hidden border border-gray-200">
-    <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-      {searchResults.map((convidado) => {
-        // Encontra o primeiro evento do convidado que pertence ao admin
-        const eventoConvidado = convidado.eventos?.find(e => 
-          eventos.some(ev => ev.id === e.id)
-        );
-        
-        return (
-          <li
-            key={convidado.id}
-            className="p-4 hover:bg-indigo-50 transition-colors cursor-pointer flex justify-between items-center"
-            onClick={() => handleAddToEvent(convidado)}
-          >
-            <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                <User className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">
-                  {convidado.nome}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {convidado.telefone}
-                </p>
-                {eventoConvidado && (
-                  <p className="text-xs text-gray-400">
-                    Evento: {eventos.find(e => e.id === eventoConvidado.id)?.nome}
-                  </p>
-                )}
-              </div>
-            </div>
-            <button
-              className="ml-4 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToEvent(convidado);
-              }}
-              disabled={addingGuest}
-            >
-              {addingGuest ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-            </button>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-)}
-
-            {searchTerm && searchResults.length === 0 && (
-              <div className="mt-2 bg-white rounded-lg shadow-sm p-4 text-center text-gray-500">
-                Nenhum convidado encontrado em outros eventos
-              </div>
-            )}
-          </div>
+      {/* Barra de busca e adicionar convidado */}
+<GuestSearchAdd
+  eventos={eventos}
+  convidados={convidados}
+  eventoId={eventoId}
+  searchTerm={searchTerm}
+  setSearchTerm={setSearchTerm}
+  searchResults={searchResults}
+  setSearchResults={setSearchResults}
+  addingGuest={addingGuest}
+  setAddingGuest={setAddingGuest}
+  showAddForm={showAddForm}
+  setShowAddForm={setShowAddForm}
+  newGuest={newGuest}
+  setNewGuest={setNewGuest}
+  handleAddToEvent={handleAddToEvent}
+  handleAddNewGuest={handleAddNewGuest}
+/>
 
           {/* Filtros */}
           <GuestActions
