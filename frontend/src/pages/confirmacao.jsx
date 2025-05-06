@@ -183,15 +183,25 @@ const Confirmacao = () => {
       setSearchResults([]);
       return;
     }
-
+  
     const term = searchTerm.toLowerCase();
-    const results = convidados.filter(c => 
-      c.nome.toLowerCase().includes(term) && 
-      !c.eventos?.some(e => e.id === parseInt(eventoId))
-    );
-
+    
+    // Filtra convidados que:
+    // 1. Correspondem ao termo de busca
+    // 2. Não estão no evento atual
+    // 3. Pertencem a eventos do admin logado
+    const results = convidados.filter(c => {
+      const nomeMatch = c.nome.toLowerCase().includes(term);
+      const naoEstaNoEventoAtual = !c.eventos?.some(e => e.id === parseInt(eventoId));
+      const pertenceAEventoDoAdmin = c.eventos?.some(e => 
+        eventos.some(ev => ev.id === e.id) // Verifica se o evento existe na lista de eventos do admin
+      );
+      
+      return nomeMatch && naoEstaNoEventoAtual && pertenceAEventoDoAdmin;
+    });
+  
     setSearchResults(results);
-  }, [searchTerm, convidados, eventoId]);
+  }, [searchTerm, convidados, eventoId, eventos]);
 
   // Adicionar convidado existente ao evento
  const handleAddToEvent = async (convidado) => {
@@ -458,7 +468,7 @@ const Confirmacao = () => {
       setLoading(false);
     }
   };
-
+  const adminId = localStorage.getItem('adminId');
   // Buscar dados iniciais
   async function fetchDados() {
     setLoading(true);
@@ -467,25 +477,38 @@ const Confirmacao = () => {
         fetch(apiEventos),
         fetch(apiConvidados),
       ]);
-
+  
       if (!eventosRes.ok || !convidadosRes.ok) {
         throw new Error("Erro ao buscar dados");
       }
-
+  
       const eventosData = await eventosRes.json();
       const convidadosData = await convidadosRes.json();
-
-      setEventos(Array.isArray(eventosData) ? eventosData : []);
+  
+      // Processa eventos - filtra por adminId e converte tipos
+      const eventosProcessados = Array.isArray(eventosData)
+        ? eventosData
+            .filter(e => adminId ? e.administrador_id == adminId : true)
+            .map(e => ({
+              ...e,
+              id: Number(e.id),
+              data_evento: e.data_evento || new Date().toISOString()
+            }))
+        : [];
+  
+      setEventos(eventosProcessados);
       
-      // Processa convidados com eventos associados
+      // Processa convidados
       const convidadosProcessados = Array.isArray(convidadosData.data)
         ? convidadosData.data.map(c => ({
             ...c,
             eventos: c.eventos || [],
-            acompanhantes: c.acompanhantes ? c.acompanhantes.filter(a => a.eventoId === eventoId) : []
+            acompanhantes: c.acompanhantes ? 
+              c.acompanhantes.filter(a => a.eventoId === eventoId) : 
+              []
           }))
         : [];
-
+  
       setConvidados(convidadosProcessados);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
@@ -1001,51 +1024,58 @@ const Confirmacao = () => {
 
             {/* Resultados da busca */}
             {searchTerm && searchResults.length > 0 && (
-              <div className="mt-2 bg-white rounded-md shadow-lg overflow-hidden border border-gray-200">
-                <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-                  {searchResults.map((convidado) => (
-                    <li
-                      key={convidado.id}
-                      className="p-4 hover:bg-indigo-50 transition-colors cursor-pointer flex justify-between items-center"
-                      onClick={() => handleAddToEvent(convidado)}
-                    >
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                          <User className="h-5 w-5 text-indigo-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">
-                            {convidado.nome}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {convidado.telefone}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Evento:{" "}
-                            {eventos.find((e) => e.id === convidado.evento_id)
-                              ?.nome || "Outro"}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        className="ml-4 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddToEvent(convidado);
-                        }}
-                        disabled={addingGuest}
-                      >
-                        {addingGuest ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Plus className="h-4 w-4" />
-                        )}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+  <div className="mt-2 bg-white rounded-md shadow-lg overflow-hidden border border-gray-200">
+    <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+      {searchResults.map((convidado) => {
+        // Encontra o primeiro evento do convidado que pertence ao admin
+        const eventoConvidado = convidado.eventos?.find(e => 
+          eventos.some(ev => ev.id === e.id)
+        );
+        
+        return (
+          <li
+            key={convidado.id}
+            className="p-4 hover:bg-indigo-50 transition-colors cursor-pointer flex justify-between items-center"
+            onClick={() => handleAddToEvent(convidado)}
+          >
+            <div className="flex items-center">
+              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                <User className="h-5 w-5 text-indigo-600" />
               </div>
-            )}
+              <div>
+                <p className="font-medium text-gray-900">
+                  {convidado.nome}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {convidado.telefone}
+                </p>
+                {eventoConvidado && (
+                  <p className="text-xs text-gray-400">
+                    Evento: {eventos.find(e => e.id === eventoConvidado.id)?.nome}
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              className="ml-4 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToEvent(convidado);
+              }}
+              disabled={addingGuest}
+            >
+              {addingGuest ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}
 
             {searchTerm && searchResults.length === 0 && (
               <div className="mt-2 bg-white rounded-lg shadow-sm p-4 text-center text-gray-500">

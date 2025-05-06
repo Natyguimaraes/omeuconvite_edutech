@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 function Rodape() {
   // Dados do WhatsApp
   const whatsappInfo = {
-    number: "75999924885",
-    formattedNumber: "(75) 99992-4885",
+    number: "75998054428",
+    formattedNumber: "(75) 99805-4428",
     message: "Olá, gostaria de contratar seus serviços para um evento!",
-    url: `https://wa.me/75999924885?text=${encodeURIComponent(
+    url: `https://wa.me/75998054428?text=${encodeURIComponent(
       "Olá, gostaria de contratar seus serviços para um evento!"
     )}`,
   };
