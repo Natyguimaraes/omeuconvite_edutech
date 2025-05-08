@@ -1281,29 +1281,34 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                 }
                                               />
                                             </td>
-                                            <td className="px-4 py-4">
-  <div className="flex items-center">
-    <input
-      type="checkbox"
-      checked={convidado.presente}
-      onChange={() => togglePresenca(convidado.id)}
-      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
-    />
-    <span className="ml-2">
+        <td className="px-4 py-4">
+  <div className="flex items-center gap-3">
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        checked={convidado.presente}
+        onChange={() => togglePresenca(convidado.id)}
+        className="sr-only peer"
+      />
+      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
+      <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
+    </label>
+    <span className="text-sm font-medium">
       {convidado.presente ? (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-200 text-purple-800">
-          <CheckCircle className="h-3 w-3 mr-1" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
+          <CheckCircle className="w-4 h-4" />
           Presente
         </span>
       ) : (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          <XCircle className="h-3 w-3 mr-1" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
+          <XCircle className="w-4 h-4" />
           Ausente
         </span>
       )}
     </span>
   </div>
 </td>
+
 
 
                                             <td className="px-4 py-4 text-right whitespace-nowrap">
@@ -1494,28 +1499,33 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                 </button>
                                               </td>
                                               <td className="px-4 py-3">
-  <div className="flex items-center">
-    <input
-      type="checkbox"
-      checked={acompanhante.presente}
-      onChange={() => togglePresenca(convidado.id, acompanhante.id)}
-      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
-    />
-    <span className="ml-2">
+  <div className="flex items-center gap-3">
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        checked={acompanhante.presente}
+        onChange={() => togglePresenca(convidado.id, acompanhante.id)}
+        className="sr-only peer"
+      />
+      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
+      <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
+    </label>
+    <span className="text-sm font-medium">
       {acompanhante.presente ? (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-200 text-purple-800">
-          <CheckCircle className="h-3 w-3 mr-1" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
+          <CheckCircle className="w-4 h-4" />
           Presente
         </span>
       ) : (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          <XCircle className="h-3 w-3 mr-1" />
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
+          <XCircle className="w-4 h-4" />
           Ausente
         </span>
       )}
     </span>
   </div>
 </td>
+
                                               <td className="px-4 py-3 text-right whitespace-nowrap">
                                                 <div className="flex justify-end space-x-1">
                                                   {isEditingAcomp ? (

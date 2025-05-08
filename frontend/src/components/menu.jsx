@@ -1,88 +1,101 @@
 import { useState, useEffect } from 'react';
 
-// Componente principal da Navbar
 const Navbar = () => {
-  // Estado para controlar se a página foi scrollada
   const [scrolled, setScrolled] = useState(false);
-  
-  // Componente de estrela individual
-  // (Eu criei esse componente separado para facilitar a reutilização)
+
   const Star = ({ style }) => (
-    <div 
-      className="absolute text-gray-400 opacity-70"
+    <div
+      className="absolute text-white"
       style={{
-        ...style,  // Recebe as posições e tamanhos personalizados
-        animation: `twinkle ${Math.random() * 4 + 2}s infinite ease-in-out`,
-        filter: 'blur(0.5px)'  // Efeito de desfoque sutil
+        ...style,
+        animation: `twinkle ${Math.random() * 5 + 3}s infinite ease-in-out`,
+        filter: 'blur(1px)',
+        pointerEvents: 'none',
       }}
     >
-      ★  
+      ★
     </div>
   );
 
-  // Gerando 12 posições aleatórias para as estrelas
-  // (Aqui eu calculo onde cada estrela vai aparecer)
-  const starPositions = Array.from({ length: 12 }).map((_, i) => ({
-    top: `${Math.random() * 100}%`,  // Posição vertical aleatória
-    left: `${Math.random() * 100}%`, // Posição horizontal aleatória
-    fontSize: `${Math.random() * 6 + 8}px`,  // Tamanho entre 8px e 14px
-    animationDelay: `${Math.random() * 2}s`  // Tempo de animação diferente para cada estrela
+  // Aumentamos a quantidade de estrelas e variamos mais o tamanho
+  const starPositions = Array.from({ length: 20 }).map(() => ({
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    fontSize: `${Math.random() * 10 + 6}px`,
+    opacity: Math.random() * 0.5 + 0.2,
+    animationDelay: `${Math.random() * 3}s`,
   }));
 
-  // Efeito para detectar scroll da página
-  // (Isso faz a navbar mudar de aparência quando rolamos a página)
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
+      setScrolled(window.scrollY > 10);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrolled]);
+  }, []);
 
   return (
     <>
-    
-      
-      {/* Navbar principal */}
-      <nav className="top-0 w-full z-50 transition-all duration-300 overflow-hidden bg-gradient-to-r from-purple-300/90 via-indigo-200/90 to-purple-300/90 backdrop-blur-md py-1 shadow-lg rounded-b-4xl md:rounded-b-full ">
+      <nav
+        className={`fixed top-0 w-full transition-all duration-500 backdrop-blur-lg overflow-hidden z-50 ${
+          scrolled
+            ? "bg-gradient-to-r from-purple-600/40 via-indigo-700/30 to-purple-600/40 shadow-lg py-2"
+            : "bg-gradient-to-r from-purple-500/30 via-indigo-400/20 to-purple-500/30 py-4"
+        }`}
+        style={{
+          borderBottom: `1px solid ${scrolled ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)'}`,
+          borderRadius: '0 0 24px 24px',
+          boxShadow: scrolled 
+            ? '0 10px 30px -10px rgba(79, 70, 229, 0.2)' 
+            : 'none'
+        }}
+      >
+        {/* Efeito de brilho do fundo */}
+        <div 
+          className="absolute inset-0 opacity-30" 
+          style={{
+            background: 'radial-gradient(circle at 50% -20%, rgba(244, 231, 255, 0.3), transparent 70%)',
+            filter: 'blur(40px)',
+          }}
+        ></div>
         
-        {/* Renderizando todas as estrelas */}
-        {starPositions.map((pos, index) => (
-          <Star key={`star-${index}`} style={pos} />
+        {/* Estrelas */}
+        {starPositions.map((pos, i) => (
+          <Star key={i} style={pos} />
         ))}
 
-        {/* Container do conteúdo centralizado */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex items-center justify-center">
-            {/* Container da logo com efeitos especiais */}
-            <div className="relative flex justify-center z-10">
-              <div 
-                className="animate-float bg-transparent"
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="flex justify-center items-center">
+            <div className="relative animate-float">
+              {/* Efeito de brilho mais suave e elegante */}
+              <div
+                className="absolute -inset-4 rounded-full opacity-40"
                 style={{
-                  animation: 'float 6s infinite ease-in-out'  // Animação de flutuação
+                  background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(224,231,255,0.3) 40%, rgba(255,255,255,0) 70%)',
+                  filter: 'blur(12px)',
+                  animation: 'pulse 8s infinite ease-in-out',
                 }}
-              >
-                {/* Efeito de glow atrás da logo */}
-                <div 
-                  className="absolute inset-0 rounded-full opacity-20"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
-                    filter: 'blur(6px)',
-                    animation: 'pulse 10s infinite ease-in-out'  // Animação de pulsação
-                  }}
-                ></div>
-                
-                {/* Imagem da logo principal */}
-                <img 
-                  src="/omeuconvitelogo1.png" 
+              ></div>
+              
+              {/* Reflexo superior */}
+              <div 
+                className="absolute -top-2 left-1/2 w-3/4 h-1/4 -translate-x-1/2 opacity-70" 
+                style={{ 
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.5), transparent)',
+                  borderRadius: '100% 100% 0 0',
+                  transform: 'translateX(-50%) rotate(5deg)',
+                  filter: 'blur(4px)'
+                }}
+              ></div>
+
+              {/* Container do logo com bordas mais suaves */}
+              <div className="relative rounded-full p-1 bg-gradient-to-b from-white/40 to-transparent overflow-hidden">
+                <img
+                  src="/omeuconvitelogo1.png"
                   alt="O Meu Convite Logo"
-                  className="h-30 w-30 md:h-30 md:w-40 object-contain rounded-full transform transition-transform duration-500 hover:scale-110"
-                  style={{
-                    filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2))'  // Sombra sutil
+                  className="h-28 w-28 md:h-32 md:w-32 object-cover rounded-full border border-white/20 shadow-lg transition-transform duration-300 hover:scale-110"
+                  style={{ 
+                    boxShadow: '0 8px 32px rgba(31, 38, 135, 0.2)',
                   }}
                 />
               </div>
@@ -91,23 +104,30 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Definições de animações CSS globais */}
-      {/* (Aqui eu coloco todos os keyframes que são usados nos efeitos) */}
-      <style jsx global>{`
+      {/* Espaçador para compensar o menu fixo */}
+      <div className="h-44 md:h-48"></div>
+
+      <style>{`
         @keyframes float {
           0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(3deg); }
+          50% { transform: translateY(-10px) rotate(1deg); }
           100% { transform: translateY(0px) rotate(0deg); }
         }
+
         @keyframes pulse {
-          0% { opacity: 0.2; transform: scale(0.95); }
-          50% { opacity: 0.4; transform: scale(1.05); }
-          100% { opacity: 0.2; transform: scale(0.95); }
+          0% { opacity: 0.3; transform: scale(0.97); }
+          50% { opacity: 0.6; transform: scale(1.03); }
+          100% { opacity: 0.3; transform: scale(0.97); }
         }
+
         @keyframes twinkle {
-          0% { opacity: 0.3; transform: scale(0.8); }
-          50% { opacity: 0.8; transform: scale(1.1); }
-          100% { opacity: 0.3; transform: scale(0.8); }
+          0% { opacity: 0.1; transform: scale(0.8); filter: blur(2px); }
+          50% { opacity: 0.7; transform: scale(1.1); filter: blur(1px); }
+          100% { opacity: 0.1; transform: scale(0.8); filter: blur(2px); }
+        }
+
+        .animate-float {
+          animation: float 6s infinite ease-in-out;
         }
       `}</style>
     </>
