@@ -449,3 +449,5 @@ export function salvarTokenAcompanhante(acompanhanteId, token) {
     );
   });
 }
+
+//model para confirmar presença via checkbox

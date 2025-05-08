@@ -594,3 +594,107 @@ export async function confirmarPresencaPorToken(req, res) {
     return res.status(500).json({ mensagem: "Erro interno ao confirmar presença." });
   }
 }
+
+// Adicione estas funções ao seu controller
+
+export const togglePresencaConvidado = async (req, res) => {
+  try {
+    const { convidadoId, eventoId } = req.params;
+    
+    // 1. Verifica o status atual
+    const convidadoEvento = await new Promise((resolve, reject) => {
+      conexao.query(
+        "SELECT token_usado FROM convidado_evento WHERE convidado_id = ? AND evento_id = ?",
+        [convidadoId, eventoId],
+        (err, results) => {
+          if (err) return reject(err);
+          resolve(results[0]);
+        }
+      );
+    });
+
+    if (!convidadoEvento) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Relação convidado-evento não encontrada' 
+      });
+    }
+
+    // 2. Alterna o status
+    const novoStatus = convidadoEvento.token_usado ? 0 : 1;
+    
+    await new Promise((resolve, reject) => {
+      conexao.query(
+        "UPDATE convidado_evento SET token_usado = ? WHERE convidado_id = ? AND evento_id = ?",
+        [novoStatus, convidadoId, eventoId],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    res.json({ 
+      success: true,
+      token_usado: novoStatus,
+      message: `Presença ${novoStatus ? 'marcada' : 'desmarcada'} com sucesso`
+    });
+  } catch (error) {
+    console.error('Erro ao alternar presença:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+};
+
+export const togglePresencaAcompanhante = async (req, res) => {
+  try {
+    const { acompanhanteId } = req.params;
+    
+    // 1. Verifica o status atual
+    const acompanhante = await new Promise((resolve, reject) => {
+      conexao.query(
+        "SELECT token_usado FROM acompanhante WHERE id = ?",
+        [acompanhanteId],
+        (err, results) => {
+          if (err) return reject(err);
+          resolve(results[0]);
+        }
+      );
+    });
+
+    if (!acompanhante) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Acompanhante não encontrado' 
+      });
+    }
+
+    // 2. Alterna o status
+    const novoStatus = acompanhante.token_usado ? 0 : 1;
+    
+    await new Promise((resolve, reject) => {
+      conexao.query(
+        "UPDATE acompanhante SET token_usado = ? WHERE id = ?",
+        [novoStatus, acompanhanteId],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    res.json({ 
+      success: true,
+      token_usado: novoStatus,
+      message: `Presença ${novoStatus ? 'marcada' : 'desmarcada'} com sucesso`
+    });
+  } catch (error) {
+    console.error('Erro ao alternar presença do acompanhante:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+};

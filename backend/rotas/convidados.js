@@ -14,7 +14,9 @@ import {
   addConvidadoToEvento,
   updateConvidadoEvento,
   removeConvidadoFromEvento,
-  confirmarPresencaPorToken
+  confirmarPresencaPorToken,
+  togglePresencaConvidado,
+  togglePresencaAcompanhante
 } from "../controller/convidado.js";
 
 const router = express.Router();
@@ -32,6 +34,8 @@ router.put("/:convidadoId/eventos/:eventoId", updateConvidadoEvento);
 router.delete("/:convidadoId/eventos/:eventoId", removeConvidadoFromEvento);
 router.put("/:convidadoId/eventos/:eventoId/confirmacao", confirmarPresencaConvidado);
 
+router.put("/:convidadoId/eventos/:eventoId/presenca", togglePresencaConvidado);
+
 // Rotas para acompanhantes (agrupadas de forma consistente)
 router.get("/:convidadoId/acompanhantes", getAcompanhantesByConvidadoId);
 router.post("/:convidadoId/acompanhantes", createAcompanhante);
@@ -39,6 +43,7 @@ router.post("/:convidadoId/acompanhantes", createAcompanhante);
 router.put("/:convidadoId/acompanhantes/:acompanhanteId", updateAcompanhanteById);
 router.delete('/acompanhantes/:id', deleteAcompanhanteById);
 
+router.put("/:convidadoId/acompanhantes/:acompanhanteId/presenca", togglePresencaAcompanhante);
 // Confirmação em massa de acompanhantes
 router.post("/:convidadoId/confirmar-acompanhantes", confirmarAcompanhantes);
 

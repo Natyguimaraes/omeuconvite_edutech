@@ -781,6 +781,78 @@ const Confirmacao = () => {
     }
   };
 
+const togglePresenca = async (convidadoId, acompanhanteId = null) => {
+  try {
+    if (!acompanhanteId) {
+      // Toggle presença do convidado principal
+      const response = await fetch(
+        `${apiConvidados}/${convidadoId}/eventos/${eventoId}/presenca`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar presença");
+      }
+
+      const data = await response.json();
+
+      setConvidados(prev => prev.map(c => 
+        c.id === convidadoId
+          ? {
+              ...c,
+              eventos: c.eventos.map(e => 
+                e.id === parseInt(eventoId) 
+                  ? { 
+                      ...e, 
+                      token_usado: data.token_usado
+                    } 
+                  : e
+              ),
+              presente: data.token_usado === 1
+            }
+          : c
+      ));
+    } else {
+      // Toggle presença do acompanhante
+      const response = await fetch(
+        `${apiConvidados}/${convidadoId}/acompanhantes/${acompanhanteId}/presenca`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar presença do acompanhante");
+      }
+
+      const data = await response.json();
+
+      setConvidados(prev => prev.map(c => {
+        if (c.id !== convidadoId) return c;
+        return {
+          ...c,
+          acompanhantes: c.acompanhantes.map(a => 
+            a.id === acompanhanteId 
+              ? { 
+                  ...a, 
+                  token_usado: data.token_usado,
+                  presente: data.token_usado === 1
+                } 
+              : a
+          )
+        };
+      }));
+    }
+
+    toast.success("Presença atualizada com sucesso!");
+  } catch (error) {
+    toast.error(`Erro: ${error.message}`);
+  }
+};
   // Função de filtro corrigida
   const aplicarFiltros = (convidados) => {
     if (!Array.isArray(convidados)) return [];
@@ -1209,30 +1281,30 @@ const Confirmacao = () => {
                                                 }
                                               />
                                             </td>
-
                                             <td className="px-4 py-4">
-                                              {(() => {
-                                                console.log(
-                                                  "Convidado:",
-                                                  convidado.nome
-                                                );
-                                                console.log(
-                                                  "Presente?",
-                                                  convidado.presente
-                                                );
-                                                return convidado.presente ? (
-                                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-purple-800">
-                                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                                    Presente
-                                                  </span>
-                                                ) : (
-                                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                    <XCircle className="h-3 w-3 mr-1" />
-                                                    Ausente
-                                                  </span>
-                                                );
-                                              })()}
-                                            </td>
+  <div className="flex items-center">
+    <input
+      type="checkbox"
+      checked={convidado.presente}
+      onChange={() => togglePresenca(convidado.id)}
+      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+    />
+    <span className="ml-2">
+      {convidado.presente ? (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-green-800">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Presente
+        </span>
+      ) : (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <XCircle className="h-3 w-3 mr-1" />
+          Ausente
+        </span>
+      )}
+    </span>
+  </div>
+</td>
+
 
                                             <td className="px-4 py-4 text-right whitespace-nowrap">
                                               <div className="flex justify-end space-x-1">
@@ -1421,20 +1493,29 @@ const Confirmacao = () => {
                                                   )}
                                                 </button>
                                               </td>
-
                                               <td className="px-4 py-3">
-                                                {acompanhante.presente ? (
-                                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-purple-800">
-                                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                                    Presente
-                                                  </span>
-                                                ) : (
-                                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                    <XCircle className="h-3 w-3 mr-1" />
-                                                    Ausente
-                                                  </span>
-                                                )}
-                                              </td>
+  <div className="flex items-center">
+    <input
+      type="checkbox"
+      checked={acompanhante.presente}
+      onChange={() => togglePresenca(convidado.id, acompanhante.id)}
+      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+    />
+    <span className="ml-2">
+      {acompanhante.presente ? (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-green-800">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Presente
+        </span>
+      ) : (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <XCircle className="h-3 w-3 mr-1" />
+          Ausente
+        </span>
+      )}
+    </span>
+  </div>
+</td>
                                               <td className="px-4 py-3 text-right whitespace-nowrap">
                                                 <div className="flex justify-end space-x-1">
                                                   {isEditingAcomp ? (
