@@ -80,7 +80,7 @@ const Navbar = () => {
                 <img 
                   src="/omeuconvitelogo1.png" 
                   alt="O Meu Convite Logo"
-                  className="h-40 w-40 md:h-40 md:w-40 object-contain rounded-full transform transition-transform duration-500 hover:scale-110"
+                  className="h-30 w-30 md:h-30 md:w-40 object-contain rounded-full transform transition-transform duration-500 hover:scale-110"
                   style={{
                     filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2))'  // Sombra sutil
                   }}
