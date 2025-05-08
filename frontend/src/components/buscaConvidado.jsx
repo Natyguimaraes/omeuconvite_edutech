@@ -41,15 +41,15 @@ const GuestSearchAdd = ({
   };
 
   return (
-    <div className="mb-8 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+    <div className="mb-8 p-4 rounded-lg shadow-sm border border-gray-100">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-indigo-400" />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
+            className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-gray-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
             placeholder="Buscar convidados de outros eventos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -66,9 +66,9 @@ const GuestSearchAdd = ({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg flex items-center justify-center transition-colors"
+          className="bg-purple-700 hover:bg-purple-900 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-colors"
         >
-          <Plus className="h-5 w-5 mr-2" />
+          
           <span>Adicionar Convidado</span>
         </button>
       </div>

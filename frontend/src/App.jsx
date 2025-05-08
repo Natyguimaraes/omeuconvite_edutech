@@ -18,9 +18,11 @@ import LiberarAdministrador from "./pages/superadmin/LiberarAdministrador";
 import Rodape from "././components/rodape"
 import CredenciaisPage from "./pages/Credencialpage";
 
+
 function App() {
   return (
-    <><Router>
+    <>
+    <Router>
       <Routes>
         <Route path="/" element={<LoginAdministrador />} />
 

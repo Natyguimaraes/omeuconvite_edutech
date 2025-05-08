@@ -1008,7 +1008,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                             <thead>
                               <tr className="bg-gray-50">
                                 <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider w-12">
-                                  👤
+                                <Users className="w-4 h-4"/>
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
                                   Convidado
@@ -1287,7 +1287,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
       type="checkbox"
       checked={convidado.presente}
       onChange={() => togglePresenca(convidado.id)}
-      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
     />
     <span className="ml-2">
       {convidado.presente ? (
@@ -1499,7 +1499,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
       type="checkbox"
       checked={acompanhante.presente}
       onChange={() => togglePresenca(convidado.id, acompanhante.id)}
-      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
     />
     <span className="ml-2">
       {acompanhante.presente ? (

@@ -45,15 +45,10 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Espaço reservado para evitar que o conteúdo fique atrás da navbar fixa */}
-      <div className={`h-[150px] transition-all duration-300`}></div>
+    
       
       {/* Navbar principal */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 overflow-hidden ${
-        scrolled 
-          ? 'bg-gradient-to-r from-purple-300/90 via-indigo-200/90 to-purple-300/90 backdrop-blur-md py-1 shadow-lg'  // Estilo quando scrollado
-          : 'bg-gradient-to-r from-purple-200 via-indigo-100 to-purple-200 py-2'  // Estilo normal
-      }`}>
+      <nav className="top-0 w-full z-50 transition-all duration-300 overflow-hidden bg-gradient-to-r from-purple-300/90 via-indigo-200/90 to-purple-300/90 backdrop-blur-md py-1 shadow-lg rounded-b-4xl md:rounded-b-full ">
         
         {/* Renderizando todas as estrelas */}
         {starPositions.map((pos, index) => (
@@ -76,8 +71,8 @@ const Navbar = () => {
                   className="absolute inset-0 rounded-full opacity-20"
                   style={{
                     background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
-                    filter: 'blur(5px)',
-                    animation: 'pulse 4s infinite ease-in-out'  // Animação de pulsação
+                    filter: 'blur(6px)',
+                    animation: 'pulse 10s infinite ease-in-out'  // Animação de pulsação
                   }}
                 ></div>
                 
@@ -85,9 +80,9 @@ const Navbar = () => {
                 <img 
                   src="/omeuconvitelogo1.png" 
                   alt="O Meu Convite Logo"
-                  className="h-28 w-28 md:h-36 md:w-36 object-contain rounded-full transform transition-transform duration-500 hover:scale-110"
+                  className="h-40 w-40 md:h-40 md:w-40 object-contain rounded-full transform transition-transform duration-500 hover:scale-110"
                   style={{
-                    filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))'  // Sombra sutil
+                    filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2))'  // Sombra sutil
                   }}
                 />
               </div>

@@ -153,9 +153,9 @@ const GuestActions = ({
             setFilters({ status: "all", searchName: "" });
             setFiltroImpressao("todos");
           }}
-          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition duration-150 ease-in-out flex items-center"
+          className="text-indigo-600 hover:text-indigo-700 text-sm font-medium transition duration-150 ease-in-out flex items-center"
         >
-          <X className="h-3.5 w-3.5 mr-1" />
+          <X className="h-4 w-4 mr-1" />
           Limpar tudo
         </button>
       </div>
@@ -166,7 +166,7 @@ const GuestActions = ({
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent text-sm bg-gray-50 hover:bg-gray-100 transition duration-150 ease-in-out shadow-sm"
+            className="w-full px-4 py-2.5 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent text-sm bg-gray-50 hover:bg-gray-100 transition duration-150 ease-in-out shadow-sm cursor-pointer"
           >
             <option value="all">Todos</option>
             <option value="confirmed">Confirmados</option>
@@ -177,8 +177,8 @@ const GuestActions = ({
 
         <div className="md:col-span-2 space-y-1.5">
           <label className="block text-xs font-medium text-gray-600 mb-1.5">Buscar por nome</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <div className="relative cursor-pointer">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none cursor-pointer">
               <Search className="h-4 w-4 text-gray-500" />
             </div>
             <input
@@ -209,7 +209,7 @@ const GuestActions = ({
             id="filtro"
             value={filtroImpressao}
             onChange={(e) => setFiltroImpressao(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-gray-50 shadow-sm"
+            className="border border-gray-200 rounded-lg px-3.5 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-gray-50 shadow-sm cursor-pointer"
           >
             <option value="todos">Todos</option>
             <option value="confirmados">Confirmados</option>
@@ -220,8 +220,8 @@ const GuestActions = ({
 
         <button
           onClick={handlePrint}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-        >
+          className="flex items-center justify-center gap-2 px-5 py-2.5 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md transform hover:-translate-y-0.5 bg-purple-700"
+        >        
           <Printer className="h-4.5 w-4.5" />
           <span>Imprimir Lista</span>
         </button>
