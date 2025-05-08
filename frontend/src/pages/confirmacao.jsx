@@ -1291,7 +1291,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
     />
     <span className="ml-2">
       {convidado.presente ? (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-green-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-200 text-purple-800">
           <CheckCircle className="h-3 w-3 mr-1" />
           Presente
         </span>
@@ -1503,7 +1503,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
     />
     <span className="ml-2">
       {acompanhante.presente ? (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-200 text-green-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-200 text-purple-800">
           <CheckCircle className="h-3 w-3 mr-1" />
           Presente
         </span>
