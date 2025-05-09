@@ -17,13 +17,30 @@ import CadastrarPlano from "./pages/superadmin/CadastrarPlano";
 import LiberarAdministrador from "./pages/superadmin/LiberarAdministrador";
 import Rodape from "././components/rodape"
 import CredenciaisPage from "./pages/Credencialpage";
-
+import InactivityHandlerWithModal from "./components/InactivityHandler";
 
 function App() {
+
+  const isLoggedIn = !!localStorage.getItem("token");
+ 
+const handleLogout = () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = "/";
+};
+
   return (
     <>
     <Router>
+      {isLoggedIn && (
+        <InactivityHandlerWithModal
+          timeout={1 * 60 * 1000}         // 1 minuto total
+          warningBefore={30 * 1000}      // Avisar 30 segundos antes
+          onLogout={handleLogout}
+        />
+      )}
       <Routes>
+        
         <Route path="/" element={<LoginAdministrador />} />
 
         {/* Rotas de superadmin (mantidas, mas não acessíveis diretamente) */}

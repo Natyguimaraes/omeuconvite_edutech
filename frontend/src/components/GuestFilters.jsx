@@ -229,7 +229,9 @@ const GuestActions = ({
             </div>
           </div>
         </div>
-
+<button className="bg-purple-600 rounded-2xl p-3 text-white font-bold text-sm cursor-pointer transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5">
+  Aplicar Filtros
+</button>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-purple-100/70">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <label htmlFor="filtro" className="text-sm font-medium text-purple-700">
@@ -257,7 +259,7 @@ const GuestActions = ({
 
           <button
             onClick={handlePrint}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 text-white rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 text-white rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
             style={{
               boxShadow: "0 4px 12px rgba(124, 58, 237, 0.3)"
             }}

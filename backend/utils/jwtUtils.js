@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'segredo_super_secreto_123';
+const JWT_SECRET = process.env.JWT_SECRET //|| 'segredo_super_secreto_123';
 const JWT_EXPIRES_IN = '30d'; // Tokens expiram em 30 dias
 
 export function gerarTokenCredencial(dados) {
