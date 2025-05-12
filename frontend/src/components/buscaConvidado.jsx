@@ -4,14 +4,11 @@ import { formatPhoneNumber, isValidPhoneNumber } from '../components/phoneUtils'
 
 const GuestSearchAdd = ({
   eventos,
-  convidados,
   eventoId,
   searchTerm,
   setSearchTerm,
   searchResults,
-  setSearchResults,
   addingGuest,
-  setAddingGuest,
   showAddForm,
   setShowAddForm,
   newGuest,
@@ -49,7 +46,7 @@ const GuestSearchAdd = ({
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-gray-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
+            className="block w-full pl-10 pr-12 py-3 border border-purple-200 rounded-lg bg-purple-200 shadow-lg focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-base"
             placeholder="Buscar convidados de outros eventos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -66,7 +63,7 @@ const GuestSearchAdd = ({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-purple-700 hover:bg-purple-900 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-colors"
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-all"
         >
           
           <span>Adicionar Convidado</span>

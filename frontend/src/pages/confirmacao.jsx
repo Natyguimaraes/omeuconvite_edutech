@@ -24,6 +24,8 @@ import QRCodeScanButton from '../components/QrCodeButon';
 import GuestActions from "../components/GuestFilters";
 import { formatPhoneNumber, isValidPhoneNumber } from '../components/phoneUtils';
 import GuestSearchAdd from "../components/buscaConvidado";
+import PrintList from "../components/printList";
+
 
 const Confirmacao = () => {
   const navigate = useNavigate();
@@ -946,8 +948,8 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
   handleAddNewGuest={handleAddNewGuest}
 />
 
-          {/* Filtros */}
-          <GuestActions
+
+<PrintList 
   filters={filters}
   setFilters={setFilters}
   getConvidadosPorEvento={getConvidadosPorEvento}
@@ -955,7 +957,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
   eventoId={eventoId}
 />
 
-          <div className="space-y-6">
+          <div className="space-y-10 border-1 border-purple-50">
             {Array.isArray(eventos) &&
               eventos
                 .filter((evento) => !eventoId || evento.id == eventoId)
@@ -967,644 +969,560 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                     contarParticipantes(convidadosEvento);
                   const totalConfirmados = contarConfirmados(convidadosEvento);
                   return (
-                    <div
-                      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-                      key={evento.id}
-                    >
-                      <div className="p-4 md:p-6 border-b border-gray-100">
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="bg-indigo-100 p-2 rounded-lg">
-                              <CalendarIcon className="h-5 w-5 text-indigo-600" />
+                    <>
+                    <GuestActions
+                      filters={filters}
+                      setFilters={setFilters} />
+                      <div
+                        className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                        key={evento.id}
+                      >
+                        <div className="p-4 md:p-6 border-b border-gray-100">
+                          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="bg-indigo-100 p-2 rounded-lg">
+                                <CalendarIcon className="h-5 w-5 text-indigo-600" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                                  {evento.nome}
+                                </h3>
+                                <p className="text-xs md:text-sm text-gray-500">
+                                  {new Date(
+                                    evento.data_evento
+                                  ).toLocaleDateString("pt-BR", {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                  })}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="text-lg md:text-xl font-semibold text-gray-900">
-                                {evento.nome}
-                              </h3>
-                              <p className="text-xs md:text-sm text-gray-500">
-                                {new Date(
-                                  evento.data_evento
-                                ).toLocaleDateString("pt-BR", {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric",
-                                })}
-                              </p>
+                            <div className="flex items-center bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
+                              <Users className="h-3 w-3 mr-1" />
+                              <span>
+                                {totalConfirmados}/{totalParticipantes}{" "}
+                                confirmados
+                              </span>
                             </div>
-                          </div>
-                          <div className="flex items-center bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
-                            <Users className="h-3 w-3 mr-1" />
-                            <span>
-                              {totalConfirmados}/{totalParticipantes}{" "}
-                              confirmados
-                            </span>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="overflow-x-auto">
-                        {convidadosEvento.length > 0 ? (
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="bg-gray-50">
-                                <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider w-12">
-                                <Users className="w-4 h-4"/>
-                                </th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
-                                  Convidado
-                                </th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider hidden sm:table-cell">
-                                  Contato
-                                </th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
-                                  Status
-                                </th>
-                                <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
-                                  Presente na Festa
-                                </th>
-                                <th className="px-4 py-3 text-right font-medium text-gray-600 tracking-wider">
-                                  Ações
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                              {(() => {
-                                let globalIndex = 0;
-                                return convidadosEvento.map((convidado) => {
-                                  globalIndex++;
-                                  const isEditing = editIndex === convidado.id;
+                        <div className="overflow-x-auto">
+                          {convidadosEvento.length > 0 ? (
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider w-12">
+                                    <Users className="w-4 h-4" />
+                                  </th>
+                                  <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
+                                    Convidado
+                                  </th>
+                                  <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider hidden sm:table-cell">
+                                    Contato
+                                  </th>
+                                  <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
+                                    Status
+                                  </th>
+                                  <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
+                                    Presente na Festa
+                                  </th>
+                                  <th className="px-4 py-3 text-right font-medium text-gray-600 tracking-wider">
+                                    Ações
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {(() => {
+                                  let globalIndex = 0;
+                                  return convidadosEvento.map((convidado) => {
+                                    globalIndex++;
+                                    const isEditing = editIndex === convidado.id;
 
-                                  return (
-                                    <>
-                                      <tr
-                                        key={convidado.id}
-                                        className="hover:bg-gray-50/50 transition-colors"
-                                      >
-                                        {isEditing ? (
-                                          <td className="px-4 py-4" colSpan={5}>
-                                            <div className="space-y-4">
-                                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                <div>
-                                                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                                                    Nome
-                                                  </label>
-                                                  <input
-                                                    type="text"
-                                                    name="nome"
-                                                    value={editData.nome}
-                                                    onChange={(e) =>
-                                                      setEditData({
+                                    return (
+                                      <>
+                                        <tr
+                                          key={convidado.id}
+                                          className="hover:bg-gray-50/50 transition-colors"
+                                        >
+                                          {isEditing ? (
+                                            <td className="px-4 py-4" colSpan={5}>
+                                              <div className="space-y-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                  <div>
+                                                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                                                      Nome
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      name="nome"
+                                                      value={editData.nome}
+                                                      onChange={(e) => setEditData({
                                                         ...editData,
                                                         nome: e.target.value,
-                                                      })
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                                                  />
-                                                </div>
-                                                <div>
-                                                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                                                    Telefone
-                                                  </label>
-                                                  <input
-                                                    type="text"
-                                                    name="telefone"
-                                                    value={editData.telefone}
-                                                    onChange={(e) =>
-                                                      setEditData({
+                                                      })}
+                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                                                      Telefone
+                                                    </label>
+                                                    <input
+                                                      type="text"
+                                                      name="telefone"
+                                                      value={editData.telefone}
+                                                      onChange={(e) => setEditData({
                                                         ...editData,
-                                                        telefone:
-                                                          e.target.value,
-                                                      })
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                                                  />
-                                                </div>
-                                                <div>
-                                                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                                                    Limite de Acompanhantes
-                                                  </label>
-                                                  <input
-                                                    type="number"
-                                                    min="0"
-                                                    value={
-                                                      editData.limite_acompanhante ||
-                                                      0
-                                                    }
-                                                    onChange={(e) =>
-                                                      setEditData({
+                                                        telefone: e.target.value,
+                                                      })}
+                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                                                  </div>
+                                                  <div>
+                                                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                                                      Limite de Acompanhantes
+                                                    </label>
+                                                    <input
+                                                      type="number"
+                                                      min="0"
+                                                      value={editData.limite_acompanhante ||
+                                                        0}
+                                                      onChange={(e) => setEditData({
                                                         ...editData,
-                                                        limite_acompanhante:
-                                                          parseInt(
-                                                            e.target.value
-                                                          ) || 0,
-                                                      })
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                                                  />
+                                                        limite_acompanhante: parseInt(
+                                                          e.target.value
+                                                        ) || 0,
+                                                      })}
+                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                                                  </div>
                                                 </div>
-                                              </div>
 
-                                              <div>
-                                                <div className="flex justify-between items-center mb-2">
-                                                  <label className="block text-xs font-medium text-gray-500">
-                                                    Acompanhantes (
-                                                    {editData.acompanhantes
-                                                      ?.length || 0}
-                                                    /
-                                                    {editData.limite_acompanhante ||
-                                                      0}
-                                                    )
-                                                  </label>
-                                                  <button
-                                                    onClick={
-                                                      handleAddAcompanhante
-                                                    }
-                                                    className="text-indigo-600 flex items-center text-xs hover:text-indigo-700 transition-colors"
-                                                    disabled={
-                                                      editData.acompanhantes
+                                                <div>
+                                                  <div className="flex justify-between items-center mb-2">
+                                                    <label className="block text-xs font-medium text-gray-500">
+                                                      Acompanhantes (
+                                                      {editData.acompanhantes
+                                                        ?.length || 0}
+                                                      /
+                                                      {editData.limite_acompanhante ||
+                                                        0}
+                                                      )
+                                                    </label>
+                                                    <button
+                                                      onClick={handleAddAcompanhante}
+                                                      className="text-indigo-600 flex items-center text-xs hover:text-indigo-700 transition-colors"
+                                                      disabled={editData.acompanhantes
                                                         ?.length >=
-                                                      (editData.limite_acompanhante ||
-                                                        0)
-                                                    }
-                                                  >
-                                                    <Plus className="h-3 w-3 mr-1" />
-                                                    Adicionar
-                                                  </button>
-                                                </div>
-                                                <div className="space-y-2">
-                                                  {editData.acompanhantes.map(
-                                                    (acompanhante, index) => (
-                                                      <div
-                                                        key={index}
-                                                        className="flex items-center space-x-2 pb-2 border-b border-gray-100"
-                                                      >
-                                                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                          <input
-                                                            type="text"
-                                                            value={
-                                                              acompanhante.nome ||
-                                                              ""
-                                                            }
-                                                            onChange={(e) => {
-                                                              const updatedAcompanhantes =
-                                                                [
+                                                        (editData.limite_acompanhante ||
+                                                          0)}
+                                                    >
+                                                      <Plus className="h-3 w-3 mr-1" />
+                                                      Adicionar
+                                                    </button>
+                                                  </div>
+                                                  <div className="space-y-2">
+                                                    {editData.acompanhantes.map(
+                                                      (acompanhante, index) => (
+                                                        <div
+                                                          key={index}
+                                                          className="flex items-center space-x-2 pb-2 border-b border-gray-100"
+                                                        >
+                                                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                            <input
+                                                              type="text"
+                                                              value={acompanhante.nome ||
+                                                                ""}
+                                                              onChange={(e) => {
+                                                                const updatedAcompanhantes = [
                                                                   ...editData.acompanhantes,
                                                                 ];
-                                                              updatedAcompanhantes[
-                                                                index
-                                                              ] = {
-                                                                ...updatedAcompanhantes[
-                                                                  index
-                                                                ],
-                                                                nome: e.target
-                                                                  .value,
-                                                              };
-                                                              setEditData({
-                                                                ...editData,
-                                                                acompanhantes:
-                                                                  updatedAcompanhantes,
-                                                              });
-                                                            }}
-                                                            placeholder="Nome"
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                                          />
-                                                          <input
-                                                            type="text"
-                                                            value={
-                                                              acompanhante.telefone ||
-                                                              ""
-                                                            }
-                                                            onChange={(e) => {
-                                                              const updatedAcompanhantes =
-                                                                [
-                                                                  ...editData.acompanhantes,
-                                                                ];
-                                                              updatedAcompanhantes[
-                                                                index
-                                                              ] = {
-                                                                ...updatedAcompanhantes[
-                                                                  index
-                                                                ],
-                                                                telefone:
-                                                                  e.target
+                                                                updatedAcompanhantes[index] = {
+                                                                  ...updatedAcompanhantes[index],
+                                                                  nome: e.target
                                                                     .value,
-                                                              };
-                                                              setEditData({
-                                                                ...editData,
-                                                                acompanhantes:
-                                                                  updatedAcompanhantes,
-                                                              });
-                                                            }}
-                                                            placeholder="Telefone"
-                                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                                          />
-                                                        </div>
-                                                        <button
-                                                          type="button"
-                                                          onClick={() => {
-                                                            const updatedAcompanhantes =
-                                                              [
+                                                                };
+                                                                setEditData({
+                                                                  ...editData,
+                                                                  acompanhantes: updatedAcompanhantes,
+                                                                });
+                                                              } }
+                                                              placeholder="Nome"
+                                                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                                            <input
+                                                              type="text"
+                                                              value={acompanhante.telefone ||
+                                                                ""}
+                                                              onChange={(e) => {
+                                                                const updatedAcompanhantes = [
+                                                                  ...editData.acompanhantes,
+                                                                ];
+                                                                updatedAcompanhantes[index] = {
+                                                                  ...updatedAcompanhantes[index],
+                                                                  telefone: e.target
+                                                                    .value,
+                                                                };
+                                                                setEditData({
+                                                                  ...editData,
+                                                                  acompanhantes: updatedAcompanhantes,
+                                                                });
+                                                              } }
+                                                              placeholder="Telefone"
+                                                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                                          </div>
+                                                          <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                              const updatedAcompanhantes = [
                                                                 ...editData.acompanhantes,
                                                               ];
-                                                            updatedAcompanhantes.splice(
-                                                              index,
-                                                              1
-                                                            );
-                                                            setEditData({
-                                                              ...editData,
-                                                              acompanhantes:
-                                                                updatedAcompanhantes,
-                                                            });
-                                                          }}
-                                                          className="bg-red-100 text-red-600 p-1.5 rounded-full hover:bg-red-200 transition-colors"
-                                                          title="Remover acompanhante"
-                                                        >
-                                                          <Trash2 className="h-3 w-3" />
-                                                        </button>
-                                                      </div>
-                                                    )
-                                                  )}
-                                                </div>
-                                              </div>
-
-                                              <div className="flex justify-end space-x-2 pt-2">
-                                                <button
-                                                  onClick={() =>
-                                                    setEditIndex(null)
-                                                  }
-                                                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                                                >
-                                                  Cancelar
-                                                </button>
-                                                <button
-                                                  onClick={handleUpdate}
-                                                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                                                >
-                                                  Salvar
-                                                </button>
-                                              </div>
-                                            </div>
-                                          </td>
-                                        ) : (
-                                          <>
-                                            <td className="px-4 py-4">
-                                              <div className="flex justify-center">
-                                                <span className="bg-indigo-100 text-indigo-600 font-medium rounded-full h-6 w-6 flex items-center justify-center text-xs">
-                                                  {globalIndex}
-                                                </span>
-                                              </div>
-                                            </td>
-                                            <td className="px-4 py-4">
-                                              <div className="flex items-center">
-                                                <div className="bg-indigo-100 p-2 rounded-full mr-3">
-                                                  <User className="h-4 w-4 text-indigo-600" />
-                                                </div>
-                                                <div>
-                                                  <div className="font-medium text-gray-900">
-                                                    {convidado.nome}
-                                                  </div>
-                                                  <div className="text-xs text-gray-500 mt-1 sm:hidden">
-                                                    {convidado.telefone}
+                                                              updatedAcompanhantes.splice(
+                                                                index,
+                                                                1
+                                                              );
+                                                              setEditData({
+                                                                ...editData,
+                                                                acompanhantes: updatedAcompanhantes,
+                                                              });
+                                                            } }
+                                                            className="bg-red-100 text-red-600 p-1.5 rounded-full hover:bg-red-200 transition-colors"
+                                                            title="Remover acompanhante"
+                                                          >
+                                                            <Trash2 className="h-3 w-3" />
+                                                          </button>
+                                                        </div>
+                                                      )
+                                                    )}
                                                   </div>
                                                 </div>
+
+                                                <div className="flex justify-end space-x-2 pt-2">
+                                                  <button
+                                                    onClick={() => setEditIndex(null)}
+                                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                  >
+                                                    Cancelar
+                                                  </button>
+                                                  <button
+                                                    onClick={handleUpdate}
+                                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                                  >
+                                                    Salvar
+                                                  </button>
+                                                </div>
                                               </div>
                                             </td>
-                                            <td className="px-4 py-4 hidden sm:table-cell">
-                                              <div className="text-gray-700">
-                                                {convidado.telefone}
-                                              </div>
-                                            </td>
-                                            <td className="px-4 py-4">
-                                              <BadgeConvidadoStatus
-                                                status={
-                                                  convidado.confirmado || 0
-                                                }
-                                              />
-                                            </td>
-        <td className="px-4 py-4">
-  <div className="flex items-center gap-3">
-    <label className="relative inline-flex items-center cursor-pointer">
-      <input
-        type="checkbox"
-        checked={convidado.presente}
-        onChange={() => togglePresenca(convidado.id)}
-        className="sr-only peer"
-      />
-      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
-      <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
-    </label>
-    <span className="text-sm font-medium">
-      {convidado.presente ? (
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
-          <CheckCircle className="w-4 h-4" />
-          Presente
-        </span>
-      ) : (
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
-          <XCircle className="w-4 h-4" />
-          Ausente
-        </span>
-      )}
-    </span>
-  </div>
-</td>
-
-
-
-                                            <td className="px-4 py-4 text-right whitespace-nowrap">
-                                              <div className="flex justify-end space-x-1">
-                                                <button
-                                                  onClick={() =>
-                                                    handleSendWhatsapp(
-                                                      convidado
-                                                    )
-                                                  }
-                                                  className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
-                                                  title="Enviar WhatsApp"
-                                                >
-                                                  <FaWhatsapp className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                  onClick={() =>
-                                                    handleEdit(convidado.id)
-                                                  }
-                                                  className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
-                                                  title="Editar convidado"
-                                                >
-                                                  <Edit className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                  onClick={() =>
-                                                    handleDeleteConvidado(
-                                                      convidado.id
-                                                    )
-                                                  }
-                                                  className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
-                                                  title="Remover convidado"
-                                                >
-                                                  <Trash2 className="h-4 w-4" />
-                                                </button>
-                                              </div>
-                                            </td>
-                                          </>
-                                        )}
-                                      </tr>
-
-                                      {/* Acompanhantes */}
-                                      {convidado.acompanhantes?.map(
-                                        (acompanhante) => {
-                                          globalIndex++;
-                                          const isEditingAcomp =
-                                            editingAcompanhante ===
-                                            `${convidado.id}-${acompanhante.id}`;
-
-                                          return (
-                                            <tr
-                                              key={`${convidado.id}-${acompanhante.id}`}
-                                              className="bg-gray-50 hover:bg-gray-100/50 transition-colors"
-                                            >
-                                              <td className="px-4 py-3">
+                                          ) : (
+                                            <>
+                                              <td className="px-4 py-4">
                                                 <div className="flex justify-center">
-                                                  <span className="bg-purple-100 text-purple-600 font-medium rounded-full h-6 w-6 flex items-center justify-center text-xs">
+                                                  <span className="bg-indigo-100 text-indigo-600 font-medium rounded-full h-6 w-6 flex items-center justify-center text-xs">
                                                     {globalIndex}
                                                   </span>
                                                 </div>
                                               </td>
-                                              <td className="px-4 py-3">
-                                                {isEditingAcomp ? (
-                                                  <input
-                                                    type="text"
-                                                    value={acompanhante.nome}
-                                                    onChange={(e) => {
-                                                      const updatedConvidados =
-                                                        [...convidados];
-                                                      const convidadoIndex =
-                                                        updatedConvidados.findIndex(
-                                                          (c) =>
-                                                            c.id ===
-                                                            convidado.id
-                                                        );
-                                                      const acompanhanteIndex =
-                                                        updatedConvidados[
-                                                          convidadoIndex
-                                                        ].acompanhantes.findIndex(
-                                                          (a) =>
-                                                            a.id ===
-                                                            acompanhante.id
-                                                        );
-                                                      updatedConvidados[
-                                                        convidadoIndex
-                                                      ].acompanhantes[
-                                                        acompanhanteIndex
-                                                      ].nome = e.target.value;
-                                                      setConvidados(
-                                                        updatedConvidados
-                                                      );
-                                                    }}
-                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                                  />
-                                                ) : (
-                                                  <div className="flex items-center pl-8 md:pl-10">
-                                                    <div className="bg-purple-100 p-2 rounded-full mr-3">
-                                                      <UserPlus className="h-4 w-4 text-purple-600" />
+                                              <td className="px-4 py-4">
+                                                <div className="flex items-center">
+                                                  <div className="bg-indigo-100 p-2 rounded-full mr-3">
+                                                    <User className="h-4 w-4 text-indigo-600" />
+                                                  </div>
+                                                  <div>
+                                                    <div className="font-medium text-gray-900">
+                                                      {convidado.nome}
                                                     </div>
-                                                    <div>
-                                                      <div className="font-medium text-gray-900">
-                                                        {acompanhante.nome}
-                                                      </div>
-                                                      <div className="text-xs text-gray-500 mt-1 sm:hidden">
-                                                        {acompanhante.telefone}
-                                                      </div>
+                                                    <div className="text-xs text-gray-500 mt-1 sm:hidden">
+                                                      {convidado.telefone}
                                                     </div>
                                                   </div>
-                                                )}
-                                              </td>
-                                              <td className="px-4 py-3 hidden sm:table-cell">
-                                                {isEditingAcomp ? (
-                                                  <input
-                                                    type="text"
-                                                    value={
-                                                      acompanhante.telefone
-                                                    }
-                                                    onChange={(e) => {
-                                                      const updatedConvidados =
-                                                        [...convidados];
-                                                      const convidadoIndex =
-                                                        updatedConvidados.findIndex(
-                                                          (c) =>
-                                                            c.id ===
-                                                            convidado.id
-                                                        );
-                                                      const acompanhanteIndex =
-                                                        updatedConvidados[
-                                                          convidadoIndex
-                                                        ].acompanhantes.findIndex(
-                                                          (a) =>
-                                                            a.id ===
-                                                            acompanhante.id
-                                                        );
-                                                      updatedConvidados[
-                                                        convidadoIndex
-                                                      ].acompanhantes[
-                                                        acompanhanteIndex
-                                                      ].telefone =
-                                                        e.target.value;
-                                                      setConvidados(
-                                                        updatedConvidados
-                                                      );
-                                                    }}
-                                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                                  />
-                                                ) : (
-                                                  <div className="text-gray-700">
-                                                    {acompanhante.telefone}
-                                                  </div>
-                                                )}
-                                              </td>
-                                              <td className="px-4 py-3">
-                                                <button
-                                                  onClick={() =>
-                                                    toggleConfirmacao(
-                                                      convidado.id,
-                                                      acompanhante.id
-                                                    )
-                                                  }
-                                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                    acompanhante.confirmado == 0
-                                                      ? "bg-red-100 text-red-800"
-                                                      : acompanhante.confirmado ==
-                                                        1
-                                                      ? "bg-green-100 text-green-800"
-                                                      : "bg-yellow-100 text-yellow-800"
-                                                  }`}
-                                                >
-                                                  {acompanhante.confirmado ==
-                                                  0 ? (
-                                                    <>
-                                                      <CheckCircle className="h-3 w-3 mr-1" />
-                                                      Pendente
-                                                    </>
-                                                  ) : acompanhante.confirmado ==
-                                                    1 ? (
-                                                    <>
-                                                      <XCircle className="h-3 w-3 mr-1" />
-                                                      Confirmado
-                                                    </>
-                                                  ) : (
-                                                    <>
-                                                      <XCircle className="h-3 w-3 mr-1" />
-                                                      Não comparecerá
-                                                    </>
-                                                  )}
-                                                </button>
-                                              </td>
-                                              <td className="px-4 py-3">
-  <div className="flex items-center gap-3">
-    <label className="relative inline-flex items-center cursor-pointer">
-      <input
-        type="checkbox"
-        checked={acompanhante.presente}
-        onChange={() => togglePresenca(convidado.id, acompanhante.id)}
-        className="sr-only peer"
-      />
-      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
-      <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
-    </label>
-    <span className="text-sm font-medium">
-      {acompanhante.presente ? (
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
-          <CheckCircle className="w-4 h-4" />
-          Presente
-        </span>
-      ) : (
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
-          <XCircle className="w-4 h-4" />
-          Ausente
-        </span>
-      )}
-    </span>
-  </div>
-</td>
-
-                                              <td className="px-4 py-3 text-right whitespace-nowrap">
-                                                <div className="flex justify-end space-x-1">
-                                                  {isEditingAcomp ? (
-                                                    <>
-                                                      <button
-                                                        onClick={() => {
-                                                          handleUpdateAcompanhante(
-                                                            convidado.id,
-                                                            acompanhante.id,
-                                                            acompanhante
-                                                          );
-                                                        }}
-                                                        className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
-                                                      >
-                                                        <Check className="h-4 w-4" />
-                                                      </button>
-                                                      <button
-                                                        onClick={() =>
-                                                          setEditingAcompanhante(
-                                                            null
-                                                          )
-                                                        }
-                                                        className="text-gray-600 p-1.5 rounded-full hover:bg-gray-50 transition-colors"
-                                                      >
-                                                        <X className="h-4 w-4" />
-                                                      </button>
-                                                    </>
-                                                  ) : (
-                                                    <>
-                                                      <button
-                                                        onClick={() =>
-                                                          setEditingAcompanhante(
-                                                            `${convidado.id}-${acompanhante.id}`
-                                                          )
-                                                        }
-                                                        className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
-                                                        title="Editar acompanhante"
-                                                      >
-                                                        <Edit className="h-4 w-4" />
-                                                      </button>
-                                                      <button
-                                                        onClick={() => {
-                                                          if (
-                                                            window.confirm(
-                                                              `Remover ${acompanhante.nome}?`
-                                                            )
-                                                          ) {
-                                                            handleDeleteAcompanhante(
-                                                              convidado.id,
-                                                              acompanhante.id
-                                                            );
-                                                          }
-                                                        }}
-                                                        className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
-                                                        title="Remover acompanhante"
-                                                      >
-                                                        <Trash2 className="h-4 w-4" />
-                                                      </button>
-                                                    </>
-                                                  )}
                                                 </div>
                                               </td>
-                                            </tr>
-                                          );
-                                        }
-                                      )}
-                                    </>
-                                  );
-                                });
-                              })()}
-                            </tbody>
-                          </table>
-                        ) : (
-                          <div className="p-6 text-center text-gray-500">
-                            Nenhum convidado encontrado para este evento.
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                                              <td className="px-4 py-4 hidden sm:table-cell">
+                                                <div className="text-gray-700">
+                                                  {convidado.telefone}
+                                                </div>
+                                              </td>
+                                              <td className="px-4 py-4">
+                                                <BadgeConvidadoStatus
+                                                  status={convidado.confirmado || 0} />
+                                              </td>
+                                              <td className="px-4 py-4">
+                                                <div className="flex items-center gap-3">
+                                                  <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={convidado.presente}
+                                                      onChange={() => togglePresenca(convidado.id)}
+                                                      className="sr-only peer" />
+                                                    <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
+                                                    <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
+                                                  </label>
+                                                  <span className="text-sm font-medium">
+                                                    {convidado.presente ? (
+                                                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
+                                                        <CheckCircle className="w-4 h-4" />
+                                                        Presente
+                                                      </span>
+                                                    ) : (
+                                                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
+                                                        <XCircle className="w-4 h-4" />
+                                                        Ausente
+                                                      </span>
+                                                    )}
+                                                  </span>
+                                                </div>
+                                              </td>
+
+
+
+                                              <td className="px-4 py-4 text-right whitespace-nowrap">
+                                                <div className="flex justify-end space-x-1">
+                                                  <button
+                                                    onClick={() => handleSendWhatsapp(
+                                                      convidado
+                                                    )}
+                                                    className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
+                                                    title="Enviar WhatsApp"
+                                                  >
+                                                    <FaWhatsapp className="h-4 w-4" />
+                                                  </button>
+                                                  <button
+                                                    onClick={() => handleEdit(convidado.id)}
+                                                    className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
+                                                    title="Editar convidado"
+                                                  >
+                                                    <Edit className="h-4 w-4" />
+                                                  </button>
+                                                  <button
+                                                    onClick={() => handleDeleteConvidado(
+                                                      convidado.id
+                                                    )}
+                                                    className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
+                                                    title="Remover convidado"
+                                                  >
+                                                    <Trash2 className="h-4 w-4" />
+                                                  </button>
+                                                </div>
+                                              </td>
+                                            </>
+                                          )}
+                                        </tr>
+
+                                        {/* Acompanhantes */}
+                                        {convidado.acompanhantes?.map(
+                                          (acompanhante) => {
+                                            globalIndex++;
+                                            const isEditingAcomp = editingAcompanhante ===
+                                              `${convidado.id}-${acompanhante.id}`;
+
+                                            return (
+                                              <tr
+                                                key={`${convidado.id}-${acompanhante.id}`}
+                                                className="bg-gray-50 hover:bg-gray-100/50 transition-colors"
+                                              >
+                                                <td className="px-4 py-3">
+                                                  <div className="flex justify-center">
+                                                    <span className="bg-purple-100 text-purple-600 font-medium rounded-full h-6 w-6 flex items-center justify-center text-xs">
+                                                      {globalIndex}
+                                                    </span>
+                                                  </div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                  {isEditingAcomp ? (
+                                                    <input
+                                                      type="text"
+                                                      value={acompanhante.nome}
+                                                      onChange={(e) => {
+                                                        const updatedConvidados = [...convidados];
+                                                        const convidadoIndex = updatedConvidados.findIndex(
+                                                          (c) => c.id ===
+                                                            convidado.id
+                                                        );
+                                                        const acompanhanteIndex = updatedConvidados[convidadoIndex].acompanhantes.findIndex(
+                                                          (a) => a.id ===
+                                                            acompanhante.id
+                                                        );
+                                                        updatedConvidados[convidadoIndex].acompanhantes[acompanhanteIndex].nome = e.target.value;
+                                                        setConvidados(
+                                                          updatedConvidados
+                                                        );
+                                                      } }
+                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                                  ) : (
+                                                    <div className="flex items-center pl-8 md:pl-10">
+                                                      <div className="bg-purple-100 p-2 rounded-full mr-3">
+                                                        <UserPlus className="h-4 w-4 text-purple-600" />
+                                                      </div>
+                                                      <div>
+                                                        <div className="font-medium text-gray-900">
+                                                          {acompanhante.nome}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-1 sm:hidden">
+                                                          {acompanhante.telefone}
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                </td>
+                                                <td className="px-4 py-3 hidden sm:table-cell">
+                                                  {isEditingAcomp ? (
+                                                    <input
+                                                      type="text"
+                                                      value={acompanhante.telefone}
+                                                      onChange={(e) => {
+                                                        const updatedConvidados = [...convidados];
+                                                        const convidadoIndex = updatedConvidados.findIndex(
+                                                          (c) => c.id ===
+                                                            convidado.id
+                                                        );
+                                                        const acompanhanteIndex = updatedConvidados[convidadoIndex].acompanhantes.findIndex(
+                                                          (a) => a.id ===
+                                                            acompanhante.id
+                                                        );
+                                                        updatedConvidados[convidadoIndex].acompanhantes[acompanhanteIndex].telefone =
+                                                          e.target.value;
+                                                        setConvidados(
+                                                          updatedConvidados
+                                                        );
+                                                      } }
+                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                                  ) : (
+                                                    <div className="text-gray-700">
+                                                      {acompanhante.telefone}
+                                                    </div>
+                                                  )}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                  <button
+                                                    onClick={() => toggleConfirmacao(
+                                                      convidado.id,
+                                                      acompanhante.id
+                                                    )}
+                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${acompanhante.confirmado == 0
+                                                        ? "bg-red-100 text-red-800"
+                                                        : acompanhante.confirmado ==
+                                                          1
+                                                          ? "bg-green-100 text-green-800"
+                                                          : "bg-yellow-100 text-yellow-800"}`}
+                                                  >
+                                                    {acompanhante.confirmado ==
+                                                      0 ? (
+                                                      <>
+                                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                                        Pendente
+                                                      </>
+                                                    ) : acompanhante.confirmado ==
+                                                      1 ? (
+                                                      <>
+                                                        <XCircle className="h-3 w-3 mr-1" />
+                                                        Confirmado
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <XCircle className="h-3 w-3 mr-1" />
+                                                        Não comparecerá
+                                                      </>
+                                                    )}
+                                                  </button>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                  <div className="flex items-center gap-3">
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                      <input
+                                                        type="checkbox"
+                                                        checked={acompanhante.presente}
+                                                        onChange={() => togglePresenca(convidado.id, acompanhante.id)}
+                                                        className="sr-only peer" />
+                                                      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
+                                                      <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
+                                                    </label>
+                                                    <span className="text-sm font-medium">
+                                                      {acompanhante.presente ? (
+                                                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
+                                                          <CheckCircle className="w-4 h-4" />
+                                                          Presente
+                                                        </span>
+                                                      ) : (
+                                                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
+                                                          <XCircle className="w-4 h-4" />
+                                                          Ausente
+                                                        </span>
+                                                      )}
+                                                    </span>
+                                                  </div>
+                                                </td>
+
+                                                <td className="px-4 py-3 text-right whitespace-nowrap">
+                                                  <div className="flex justify-end space-x-1">
+                                                    {isEditingAcomp ? (
+                                                      <>
+                                                        <button
+                                                          onClick={() => {
+                                                            handleUpdateAcompanhante(
+                                                              convidado.id,
+                                                              acompanhante.id,
+                                                              acompanhante
+                                                            );
+                                                          } }
+                                                          className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
+                                                        >
+                                                          <Check className="h-4 w-4" />
+                                                        </button>
+                                                        <button
+                                                          onClick={() => setEditingAcompanhante(
+                                                            null
+                                                          )}
+                                                          className="text-gray-600 p-1.5 rounded-full hover:bg-gray-50 transition-colors"
+                                                        >
+                                                          <X className="h-4 w-4" />
+                                                        </button>
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <button
+                                                          onClick={() => setEditingAcompanhante(
+                                                            `${convidado.id}-${acompanhante.id}`
+                                                          )}
+                                                          className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
+                                                          title="Editar acompanhante"
+                                                        >
+                                                          <Edit className="h-4 w-4" />
+                                                        </button>
+                                                        <button
+                                                          onClick={() => {
+                                                            if (window.confirm(
+                                                              `Remover ${acompanhante.nome}?`
+                                                            )) {
+                                                              handleDeleteAcompanhante(
+                                                                convidado.id,
+                                                                acompanhante.id
+                                                              );
+                                                            }
+                                                          } }
+                                                          className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
+                                                          title="Remover acompanhante"
+                                                        >
+                                                          <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                      </>
+                                                    )}
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            );
+                                          }
+                                        )}
+                                      </>
+                                    );
+                                  });
+                                })()}
+                              </tbody>
+                            </table>
+                          ) : (
+                            <div className="p-6 text-center text-gray-500">
+                              Nenhum convidado encontrado para este evento.
+                            </div>
+                          )}
+                        </div>
+                      </div></>
                   );
                 })}
           </div>
