@@ -726,7 +726,7 @@ const Confirmacao = () => {
           throw new Error("Erro ao atualizar confirmação");
         }
   
-        const data = await response.json(); // Adicione esta linha para pegar a resposta completa
+        const data = await response.json(); 
   
         setConvidados(prev => prev.map(c => 
           c.id === convidadoId

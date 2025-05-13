@@ -197,7 +197,7 @@ const GuestSearchAdd = ({
             </button>
             <button
               onClick={handleAddNewGuest}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
               disabled={addingGuest}
             >
               {addingGuest ? (
@@ -225,7 +225,7 @@ const GuestSearchAdd = ({
               const eventoConvidado = convidado.eventos?.find(e => 
                 eventos.some(ev => ev.id === e.id)
               );
-              
+              console.log("Search results:", searchResults);
               return (
                 <li
                   key={convidado.id}
@@ -240,8 +240,11 @@ const GuestSearchAdd = ({
                       <p className="font-medium text-gray-900">
                         {convidado.nome}
                       </p>
-                      <p className="text-sm text-gray-500">
+                     <p className="text-sm text-gray-500">
                         {convidado.telefone}
+                      </p>
+                      <p>
+                        {convidado.limite_acompanhante}
                       </p>
                       {eventoConvidado && (
                         <p className="text-xs text-gray-400">

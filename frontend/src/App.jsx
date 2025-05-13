@@ -34,8 +34,8 @@ const handleLogout = () => {
     <Router>
       {isLoggedIn && (
         <InactivityHandlerWithModal
-          timeout={1 * 60 * 1000}         // 1 minuto total
-          warningBefore={30 * 1000}      // Avisar 30 segundos antes
+          timeout={48 * 60 * 60 * 1000}         // 1 minuto total
+          warningBefore={5 * 60 * 1000}      // Avisar 30 segundos antes
           onLogout={handleLogout}
         />
       )}

@@ -4,7 +4,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function InactivityHandlerWithModal({ timeout = 1 * 60 * 1000, warningBefore = 30 * 1000, onLogout }) {
+function InactivityHandlerWithModal({ timeout = 48 * 60 * 60 * 1000, warningBefore = 5 * 60 * 1000, onLogout }) {
+
   const [showWarning, setShowWarning] = useState(false);
   const [countdown, setCountdown] = useState(warningBefore / 1000);
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ function InactivityHandlerWithModal({ timeout = 1 * 60 * 1000, warningBefore = 3
       <span className="font-bold text-indigo-600">{countdown}</span> segundos.
     </p>
     <p className="text-xs text-gray-400 mt-3">
-      Mova o mouse ou pressione uma tecla para continuar.
+      Mova o mouse, clique na tela ou aperte uma tecla para continuar.
     </p>
   </div>
 </div>
