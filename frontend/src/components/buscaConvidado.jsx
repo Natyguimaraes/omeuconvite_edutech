@@ -63,7 +63,7 @@ const GuestSearchAdd = ({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-all"
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-all cursor-pointer"
         >
           
           <span>Adicionar Convidado</span>
@@ -72,25 +72,33 @@ const GuestSearchAdd = ({
 
       {/* Formulário para adicionar novo convidado */}
       {showAddForm && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="font-medium text-gray-800 mb-4 flex items-center">
-            <Plus className="h-5 w-5 text-indigo-600 mr-2" />
-            Novo Convidado
-          </h3>
+        <div className="mt-5 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center bg-indigo-100 px-4 py-2 rounded-full text-indigo-600 font-medium mb-4 shadow-sm">
+                  <User className="w-4 h-4 mr-2" />
+                  <span>Cadastro de Convidado</span>
+                </div>
+                <h1 className="text-3xl font-extrabold tracking-tight text-gray-800 mb-2">
+                  Adicionar Novo Convidado
+                </h1>
+                <p className="text-gray-600 max-w-lg mx-auto">
+                  Preencha os detalhes do convidado e defina o limite de acompanhantes
+                </p>
+              </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label htmlFor="nome">Nome*</label>
               <div className="relative">
                 <User
-                  className="absolute left-3 top-3 text-gray-400"
+                  className="absolute left-3 top-3 text-purple-400"
                   size={18}
                 />
                 <input
                   type="text"
                   id="nome"
                   name="nome"
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
                   placeholder="Nome completo"
                   value={newGuest.nome}
                   onChange={handleNewGuestChange}
@@ -110,7 +118,7 @@ const GuestSearchAdd = ({
                   type="tel"
                   id="telefone"
                   name="telefone"
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
                   placeholder="(00) 00000-0000"
                   value={newGuest.telefone}
                   onChange={handleNewGuestChange}
@@ -130,7 +138,7 @@ const GuestSearchAdd = ({
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
                   placeholder="email@exemplo.com"
                   value={newGuest.email}
                   onChange={handleNewGuestChange}
@@ -152,7 +160,7 @@ const GuestSearchAdd = ({
                   id="limite_acompanhante"
                   name="limite_acompanhante"
                   min="0"
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full bg-white/90 border border-gray-200 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
                   value={newGuest.limite_acompanhante}
                   onChange={handleNewGuestChange}
                 />
@@ -197,7 +205,7 @@ const GuestSearchAdd = ({
             </button>
             <button
               onClick={handleAddNewGuest}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-3.5 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 flex items-center justify-center cursor-pointer"
               disabled={addingGuest}
             >
               {addingGuest ? (

@@ -195,7 +195,7 @@ function CadastroConvidados() {
                   <button 
                     type="button"
                     onClick={handleCadastro}
-                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-3.5 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 w-full flex items-center justify-center"
+                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-3.5 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 w-full flex items-center justify-center cursor-pointer"
                     disabled={isLoading}
                   >
                     {isLoading ? (

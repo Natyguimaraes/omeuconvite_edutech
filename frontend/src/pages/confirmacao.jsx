@@ -906,13 +906,14 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors mb-6"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              <span>Voltar</span>
-            </button>
+           <button
+  onClick={() => navigate(-1)}
+  className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 transition-all shadow-sm mb-6 cursor-pointer"
+>
+  <ChevronLeft className="h-4 w-4 mr-2" />
+  <span>Voltar</span>
+</button>
+
             <div className="flex items-center gap-2">
               <QRCodeScanButton
                 onScan={(data) => console.log("QR Lido:", data)}
@@ -920,14 +921,15 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
             </div>
           </div>
 
-          <div className="flex items-center mb-8">
-            <div className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-xs font-medium mr-3">
-              Confirmações
-            </div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
-              Lista de Convidados
-            </h1>
-          </div>
+         
+     
+   <div className="max-w-5xl mx-auto text-center">
+  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight mt-2 sm:mt-0">
+    Lista de <span className="bg-gradient-to-br from-indigo-600 to-violet-500 bg-clip-text text-transparent">Convidados</span>
+  </h1>
+</div>
+
+   
 
       {/* Barra de busca e adicionar convidado */}
 <GuestSearchAdd

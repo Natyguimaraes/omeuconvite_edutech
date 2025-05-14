@@ -136,12 +136,12 @@ export default function QRCodeScanButton() {
   return (
     <div>
       <button
-        onClick={() => setShowScanner(true)}
-        className="inline-flex items-center gap-2 px-2 py-1 bg-green-600 text-white font-semibold rounded-xl shadow-md hover:bg-green-700 transition-all cursor-pointer"
-      >
-        <ScanLine size={20} />
-        Ler QR Code
-      </button>
+          onClick={() => setShowScanner(true)}
+          className="inline-flex items-center justify-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg hover:shadow-indigo-300/40 hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 cursor-pointer"
+        >
+          <ScanLine size={18} className="text-indigo-100" />
+          <span>Ler QR Code</span>
+        </button>
 
       {showScanner && (
         <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50">

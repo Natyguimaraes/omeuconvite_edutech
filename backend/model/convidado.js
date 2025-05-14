@@ -127,7 +127,7 @@ export async function getConvidadosModelOtimized() {
 export async function getConvidadoByIdModel(id) {
   return new Promise((resolve, reject) => {
     conexao.query(
-      "SELECT id, nome, telefone, email, limite_acompanhante FROM convidados WHERE id = ?", 
+      "SELECT id, nome, telefone, email FROM convidados WHERE id = ?", 
       [id],
       async (err, results) => {
         if (err) return reject(err);
@@ -260,7 +260,7 @@ export function createAcompanhanteModel(dados) {
     const { nome, telefone, email, convidado_id, evento_id } = dados;
     conexao.query(
       "INSERT INTO acompanhante SET ?",
-      { nome, telefone, email, convidado_id, confirmado: 0, evento_id },
+      { nome, telefone, email, convidado_id, confirmado: 1, evento_id },
       (err, result) => {
         if (err) return reject(err);
         resolve(result);
@@ -449,5 +449,3 @@ export function salvarTokenAcompanhante(acompanhanteId, token) {
     );
   });
 }
-
-//model para confirmar presença via checkbox
