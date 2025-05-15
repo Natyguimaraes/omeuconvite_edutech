@@ -53,98 +53,128 @@ function LoginAdministrador() {
   return (
     <>
       <NavBar />
-      <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-        <div className="w-full max-w-md px-6">
-          <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-            <div className="flex flex-col items-center mb-10">
-              <div className="mb-6 p-4 rounded-full bg-indigo-50">
-                <LockKeyhole className="h-8 w-8 text-indigo-600" />
-              </div>
-              <h1 className="text-2xl font-semibold text-gray-900 mb-1">Login Cliente</h1>
-              <p className="text-gray-500 text-sm">Insira suas credenciais para continuar</p>
-            </div>
+     <div className="min-h-screen w-full flex items-center justify-center px-6 bg-gradient-to-b from-purple-50 to-indigo-100">
+  <div className="flex flex-col md:flex-row items-center justify-center w-full max-w-5xl border border-purple-200 shadow-2xl rounded-2xl overflow-hidden bg-white/90 backdrop-blur-sm">
+    
+    {/* Imagem visível apenas em telas md+ */}
+    <div className="hidden md:block md:w-1/2 bg-gradient-to-r from-indigo-500 to-purple-600">
+      <img src="vector_login3.png" alt="imagem da tela de login" className="w-full h-auto" />
+    </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                {/*<label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
-                  CPF
-                </label> */}
-
-               <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
-                  Usuário
-                </label> 
-
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="nome"
-                    type="text"
-                    placeholder="Nome de usuário"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    required
-                    className="block w-full pl-10 pr-3 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder-gray-400 transition-all duration-200 outline-none"
-                    autoComplete="username"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Senha
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <LockKeyhole className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    required
-                    className="block w-full pl-10 pr-3 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder-gray-400 transition-all duration-200 outline-none"
-                    autoComplete="current-password"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`w-full flex justify-center py-3 px-4 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 ${
-                    isLoading ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-                  }`}
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Autenticando...
-                    </>
-                  ) : (
-                    "Entrar"
-                  )}
-                </button>
-              </div>
-            </form>
-
-            {message && (
-              <div className={`mt-6 p-3 rounded-lg text-center ${
-                message.includes("Erro") ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
-              }`}>
-                <p>{message}</p>
-              </div>
-            )}
+    {/* Formulário de login */}
+    <div className="w-full md:w-1/2 px-4 py-8 md:px-8">
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-purple-100/50">
+        {/* Decoração visual (apenas mobile) */}
+        <div className="md:hidden w-full flex justify-center mb-6">
+          <div className="absolute top-0 -mt-4 w-24 h-24 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full opacity-20 blur-2xl"></div>
+          <div className="absolute top-0 right-1/4 -mt-8 w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full opacity-20 blur-lg"></div>
+        </div>
+        
+        <div className="flex flex-col items-center mb-8">
+          <div className="mb-5 p-4 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 shadow-inner">
+            <LockKeyhole className="h-8 w-8 text-indigo-600" />
           </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Login
+            <span className="bg-gradient-to-br from-indigo-600 to-violet-500 bg-clip-text text-transparent"> Cliente </span> 
+          </h1>
+          <p className="text-gray-500 text-sm">Insira suas credenciais para continuar</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
+              Usuário
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-indigo-500" />
+              </div>
+              <input
+                id="nome"
+                type="text"
+                placeholder="Nome de usuário"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+                className="block w-full pl-10 pr-3 py-3 rounded-xl border border-purple-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder-gray-400 transition-all duration-200 outline-none bg-white/80"
+                autoComplete="username"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Senha
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <LockKeyhole className="h-5 w-5 text-indigo-500" />
+              </div>
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+                className="block w-full pl-10 pr-3 py-3 rounded-xl border border-purple-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm placeholder-gray-400 transition-all duration-200 outline-none bg-white/80"
+                autoComplete="current-password"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full flex justify-center py-3 px-4 rounded-xl text-white font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
+                isLoading 
+                ? "bg-indigo-400 cursor-not-allowed" 
+                : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 hover:shadow-indigo-200 hover:-translate-y-0.5"
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Autenticando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </button>
+          </div>
+        </form>
+
+        {message && (
+          <div className={`mt-6 p-3 rounded-lg text-center shadow-sm ${
+            message.includes("Erro") 
+              ? "bg-red-50 text-red-600 border border-red-200" 
+              : "bg-green-50 text-green-600 border border-green-200"
+          }`}>
+            <p>{message}</p>
+          </div>
+        )}
+
+        {/* Decorações visuais para mobile */}
+        <div className="md:hidden mt-8 flex justify-center">
+          <div className="w-12 h-1 bg-gradient-to-r from-indigo-300 to-purple-300 rounded-full opacity-50"></div>
         </div>
       </div>
+      
+      {/* Elementos decorativos adicionais para mobile */}
+      <div className="md:hidden mt-6 flex justify-between px-4 opacity-70">
+        <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+        <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+        <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+        <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+        <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+      </div>
+    </div>
+  </div>
+</div>
     </>
   );
 }

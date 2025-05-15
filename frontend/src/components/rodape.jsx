@@ -2,7 +2,6 @@ import { FaWhatsapp } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 function Rodape() {
-  // Dados do WhatsApp
   const whatsappInfo = {
     number: "75998054428",
     formattedNumber: "(75) 99805-4428",
@@ -12,50 +11,72 @@ function Rodape() {
     )}`,
   };
 
-    return (
-      <footer className="bg-gradient-to-b from-purple-100 to-white py-8 px-6">
-        <div className="max-w-md mx-auto">
-          <div className="flex flex-col items-center gap-6">
-            {/* Botão WhatsApp */}
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              href={whatsappInfo.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-600 hover:bg-purple-700 text-white font-medium py-1 px-2 rounded-3xl shadow-lg flex items-center gap-3 transition-all duration-200"
-            >
-              <FaWhatsapp className="text-xl" />
-              <div className="text-left leading-tight">
-                <p className="text-sm font-semibold">Contato via WhatsApp</p>
-                <p className="text-xs font-light text-center">{whatsappInfo.formattedNumber}</p>
-              </div>
-            </motion.a>
-  
-            <div className="w-full border-t border-purple-200"></div>
-  
-            {/* Informações do rodapé */}
-            <div className="text-center space-y-1">
-              <p className="text-gray-700 text-sm font-medium">
-                Seu melhor gerenciador de eventos
-              </p>
-              <a
-                href="https://www.omeuconvite.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-purple-700 hover:text-purple-900 underline text-sm"
-              >
-                Visite nosso site: www.omeuconvite.com
-              </a>
-              <p className="text-gray-500 text-xs mt-2">
-                &copy; {new Date().getFullYear()} O Meu Convite • Desenvolvido por{" "}
-                <span className="font-semibold text-purple-600">EduTec</span>
-              </p>
-            </div>
-          </div>
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="relative bg-gradient-to-b from-purple-100 via-purple-50 to-white pt-6 pb-4 px-4 text-center text-sm overflow-hidden">
+      {/* Logo */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
+        className="flex justify-center mb-3"
+      >
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full opacity-30 group-hover:opacity-60 blur transition duration-500 group-hover:duration-200"></div>
+          <img 
+            src="/omeuconvitelogo1.png" 
+            alt="O Meu Convite" 
+            className="w-16 h-16 object-cover rounded-full relative bg-white p-1 shadow-md transform transition-all duration-300 group-hover:scale-105"
+          />
         </div>
-      </footer>
-    );
-  }
-  
-  export default Rodape;
+      </motion.div>
+
+      {/* Frase principal */}
+      <p className="text-sm text-purple-700 font-medium mb-2">
+        O seu melhor gerenciador de eventos
+      </p>
+
+      {/* WhatsApp */}
+      <motion.a
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.97 }}
+        href={whatsappInfo.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-full shadow-sm mb-3 transition-all duration-300 text-sm"
+      >
+        <FaWhatsapp className="text-lg" />
+        Contato via WhatsApp - {whatsappInfo.formattedNumber}
+      </motion.a>
+
+      {/* Frase + Link do site */}
+      <div className="mb-3 text-purple-700">
+        <p className="font-medium">Visite nosso site</p>
+        <a
+          href="https://www.omeuconvite.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-purple-600 hover:underline text-sm"
+        >
+          www.omeuconvite.com
+        </a>
+      </div>
+
+      {/* Direitos e créditos */}
+      <div className="text-xs text-gray-600 space-y-1">
+        <p>
+          &copy; {currentYear} O Meu Convite • Todos os direitos reservados
+        </p>
+        <p>
+          Desenvolvido com{" "}
+          <span className="text-red-500 animate-pulse">❤</span> por{" "}
+          <span className="font-semibold text-purple-600">EduTec</span>
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+export default Rodape;
