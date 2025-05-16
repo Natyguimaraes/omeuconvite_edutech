@@ -1065,7 +1065,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                         ...editData,
                                                         nome: e.target.value,
                                                       })}
-                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                                                      className="w-full px-3 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
                                                   </div>
                                                   <div>
                                                     <label className="block text-xs font-medium text-gray-500 mb-1">
@@ -1079,7 +1079,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                         ...editData,
                                                         telefone: e.target.value,
                                                       })}
-                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                                                      className="w-full px-3 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
                                                   </div>
                                                   <div>
                                                     <label className="block text-xs font-medium text-gray-500 mb-1">
@@ -1096,7 +1096,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                           e.target.value
                                                         ) || 0,
                                                       })}
-                                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                                                      className="w-full px-3 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200" />
                                                   </div>
                                                 </div>
 
@@ -1113,14 +1113,14 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                     </label>
                                                     <button
                                                       onClick={handleAddAcompanhante}
-                                                      className="text-indigo-600 flex items-center text-xs hover:text-indigo-700 transition-colors"
+                                                      className="text-white flex p-3 items-center text-xs text-bold rounded-2xl cursor-pointer bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
                                                       disabled={editData.acompanhantes
                                                         ?.length >=
                                                         (editData.limite_acompanhante ||
                                                           0)}
                                                     >
                                                       <Plus className="h-3 w-3 mr-1" />
-                                                      Adicionar
+                                                      Adicionar acompanhante
                                                     </button>
                                                   </div>
                                                   <div className="space-y-2">
@@ -1150,7 +1150,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                                 });
                                                               } }
                                                               placeholder="Nome"
-                                                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                                              className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm" />
                                                             <input
                                                               type="text"
                                                               value={acompanhante.telefone ||
@@ -1170,7 +1170,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                                 });
                                                               } }
                                                               placeholder="Telefone"
-                                                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                                                              className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm" />
                                                           </div>
                                                           <button
                                                             type="button"
@@ -1207,7 +1207,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                   </button>
                                                   <button
                                                     onClick={handleUpdate}
-                                                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                                    className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                                                   >
                                                     Salvar
                                                   </button>
