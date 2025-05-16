@@ -13,7 +13,9 @@ const Navbar = () => {
         pointerEvents: 'none',
       }}
     >
-      ★
+      {/*💌*/}
+      
+      ⭐
     </div>
   );
 
@@ -44,7 +46,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed top-0 w-full transition-all duration-700 backdrop-blur-md overflow-hidden z-50 rounded-b-[20px] ${
+        className={`fixed shadow-lg top-0 w-full transition-all duration-700 backdrop-blur-md overflow-hidden z-50 rounded-b-[20px] ${
           scrolled
             ? 'bg-white/90 shadow-[0_4px_20px_rgba(0,0,0,0.05)]'
             : 'bg-white/70'
@@ -52,7 +54,7 @@ const Navbar = () => {
       >
         {/* Fundo neutro e suave */}
         <div
-          className="absolute inset-0 w-full h-full opacity-30"
+          className="absolute inset-0 w-35 h-20 opacity-30"
           style={{
             background: 'radial-gradient(circle at 50% -20%, rgba(200, 200, 200, 0.4), transparent 60%)',
           }}
@@ -94,8 +96,8 @@ const Navbar = () => {
               />
 
               {/* Container do logo */}
-              <div className="relative rounded-full p-1 bg-white border border-gray-200 shadow-sm">
-                <div className="relative overflow-hidden rounded-full">
+              <div className="relative p-1shadow-sm">
+                <div className="relative overflow-hidden">
                   {/* Brilho sutil */}
                   <div
                     className="absolute inset-0 opacity-40 z-10 pointer-events-none"
@@ -111,7 +113,7 @@ const Navbar = () => {
                   <img
                     src="/omeuconvitelogo1.png"
                     alt="Logo"
-                    className="h-20 w-20 object-cover rounded-full border border-gray-300 shadow"
+                    className="h-20 w-20 md:h-30 md:w-30 object-cover"
                   />
                 </div>
               </div>
