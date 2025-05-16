@@ -156,7 +156,7 @@ const PrintList = ({
               box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
               z-index: 9999;
   */}
-   <div className="border border-purple-200 rounded-xl p-4 bg-white/60 shadow-sm">
+   <div className="border border-purple-200 rounded-xl p-4 bg-white/60 shadow-sm mb-3">
   {/* Título e descrição */}
   <h2 className="text-base sm:text-lg font-semibold text-purple-800 mb-1">
     Impressão de Lista de Convidados
@@ -195,7 +195,7 @@ const PrintList = ({
     {/* Botão */}
     <button
       onClick={handlePrint}
-      className="flex items-center justify-center gap-2 px-3 py-2 text-white rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer self-start sm:self-auto"
+      className="flex items-center justify-center gap-2 px-3 py-2 text-white rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer self-start sm:self-auto"
       style={{
         boxShadow: "0 4px 12px rgba(124, 58, 237, 0.3)"
       }}

@@ -903,7 +903,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
   return (
     <>
       <NavBar />
-      <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white py-6 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-white py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
            <button
@@ -959,7 +959,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
   eventoId={eventoId}
 />
 
-          <div className="space-y-10 border-1 border-purple-50">
+          <div className="space-y-10 shadow-lg">
             {Array.isArray(eventos) &&
               eventos
                 .filter((evento) => !eventoId || evento.id == eventoId)
@@ -972,13 +972,14 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                   const totalConfirmados = contarConfirmados(convidadosEvento);
                   return (
                     <>
-                    <GuestActions
-                      filters={filters}
-                      setFilters={setFilters} />
+                   
                       <div
                         className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
                         key={evento.id}
                       >
+ <GuestActions
+                      filters={filters}
+                      setFilters={setFilters} />
                         <div className="p-4 md:p-6 border-b border-gray-100">
                           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                             <div className="flex items-center space-x-3">

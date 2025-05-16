@@ -54,7 +54,7 @@ function LoginAdministrador() {
     <>
       <NavBar />
      <div className="min-h-screen w-full flex items-center justify-center px-6 ">
-  <div className="flex flex-col md:flex-row items-center justify-center w-full max-w-6xl mb-10 md:mb-10 md:mt-10 md:border md:border-gray-300 shadow-2xl overflow-hidden bg-white/90 backdrop-blur-sm rounded-2xl">
+  <div className="flex flex-col md:flex-row items-center justify-center w-full max-w-6xl mb-10 md:mb-10 md:mt-10 border border-gray-300 shadow-2xl overflow-hidden bg-white/90 backdrop-blur-sm rounded-2xl">
     
      {/* Decoração visual (apenas mobile) */}
         <div className="md:hidden relative w-full flex rounded-br-full h-50 bg-gradient-to-r from-indigo-500 to-purple-600"> 
@@ -127,7 +127,7 @@ function LoginAdministrador() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full flex justify-center py-3 px-4 rounded-xl text-white font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ${
+              className={`w-full flex justify-center py-3 px-4 rounded-xl text-white font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 cursor-pointer ${
                 isLoading 
                 ? "bg-indigo-400 cursor-not-allowed" 
                 : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 hover:shadow-indigo-200 hover:-translate-y-0.5"

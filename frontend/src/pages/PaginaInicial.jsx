@@ -5,13 +5,13 @@ function PaginaInicial() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#f8f8f8] to-[#CCCAC4]/30">
+    <div className="min-h-screen w-full flex items-center justify-center bg-white">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-[#8470A1]/10 blur-3xl"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-[#959FC6]/10 blur-3xl"></div>
+        <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-white blur-3xl"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-white blur-3xl"></div>
       </div>
 
-      <div className="w-full max-w-md p-10 rounded-2xl shadow-lg transition-transform duration-700 ease-out bg-white/80 backdrop-blur-md border border-white/20 relative z-10 hover:shadow-xl">
+      <div className="w-full max-w-md p-10 rounded-2xl shadow-lg transition-transform duration-700 ease-out bg-white backdrop-blur-md border border-white/20 relative z-10 hover:shadow-xl">
         <div className="text-center mb-10">
           <div className="h-20 w-20 mx-auto mb-6 bg-gradient-to-br from-[#8470A1] to-[#959FC6] rounded-2xl flex items-center justify-center shadow-lg">
             <svg

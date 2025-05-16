@@ -46,7 +46,7 @@ const GuestSearchAdd = ({
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-12 py-3 border border-purple-200 rounded-lg bg-purple-200 shadow-lg focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-base"
+            className="block w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg bg-gray-200 shadow-lg focus:outline-none focus:ring-1 focus:ring-purple-300 focus:border-purple-300 text-base"
             placeholder="Buscar convidados de outros eventos..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -63,7 +63,7 @@ const GuestSearchAdd = ({
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-white px-2 py-1 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+          className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-white px-5 py-3 rounded-lg flex items-center justify-center transition-all cursor-pointer"
         >
           
           <span>Adicionar Convidado</span>
