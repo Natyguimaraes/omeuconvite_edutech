@@ -53,8 +53,8 @@ function LoginAdministrador() {
   return (
     <>
       <NavBar />
-     <div className="min-h-screen w-full flex items-center justify-center px-6 bg-purple-50">
-  <div className="flex flex-col md:flex-row items-center justify-center w-full max-w-6xl border border-purple-300 shadow-2xl overflow-hidden bg-white/90 backdrop-blur-sm">
+     <div className="min-h-screen w-full flex items-center justify-center px-6 ">
+  <div className="flex flex-col md:flex-row items-center justify-center w-full max-w-6xl mb-10 md:mb-10 md:mt-10 md:border md:border-gray-300 shadow-2xl overflow-hidden bg-white/90 backdrop-blur-sm rounded-2xl">
     
      {/* Decoração visual (apenas mobile) */}
         <div className="md:hidden relative w-full flex rounded-br-full h-50 bg-gradient-to-r from-indigo-500 to-purple-600"> 
