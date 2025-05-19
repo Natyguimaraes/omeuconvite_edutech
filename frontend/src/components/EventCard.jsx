@@ -139,7 +139,7 @@ export default function EventCard({
         {isExpanded && (
           <div className="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-gray-100 animate-fade-in">
             <button
-              className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium py-2 sm:py-3 px-3 sm:px-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 active:scale-95 flex items-center justify-center text-sm sm:text-base"
+              className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium py-2 sm:py-3 px-3 sm:px-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 active:scale-95 flex items-center justify-center text-sm sm:text-base cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 onVerDetalhes();

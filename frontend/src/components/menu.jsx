@@ -113,7 +113,7 @@ const Navbar = () => {
                   <img
                     src="/omeuconvitelogo1.png"
                     alt="Logo"
-                    className="h-20 w-20 md:h-30 md:w-30 object-cover"
+                    className="h-20 w-20 md:h-30 md:w-30 object-cover transform transition-transform duration-500 hover:scale-110"
                   />
                 </div>
               </div>

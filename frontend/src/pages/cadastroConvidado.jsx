@@ -3,7 +3,7 @@ import { User, Phone, Mail, ChevronLeft, Loader2, X, Users } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import NavBar from "../components/menu";
-
+import { formatPhoneNumber } from "../components/phoneUtils";
 
 function CadastroConvidados() {
   const { eventoId } = useParams();
@@ -103,10 +103,10 @@ function CadastroConvidados() {
         </div>
         
         <div className="max-w-4xl mx-auto relative z-10">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-indigo-600 mb-6 transition-colors group"
-          >
+          <button
+  onClick={() => navigate(-1)}
+  className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 transition-all shadow-sm mb-6 cursor-pointer"
+>
             <ChevronLeft size={20} className="mr-1 group-hover:-translate-x-1 transition-transform" />
             <span>Voltar</span>
           </button>
@@ -154,7 +154,7 @@ function CadastroConvidados() {
                       type="tel"
                       placeholder="Telefone*"
                       value={telefone}
-                      onChange={(e) => setTelefone(e.target.value)}
+                      onChange={(e) => setTelefone(formatPhoneNumber(e.target.value))}
                       required
                     />
                   </div>
