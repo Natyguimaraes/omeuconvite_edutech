@@ -61,6 +61,7 @@ const GuestSearchAdd = ({
           )}
         </div>
 
+{/* botão para adioionar o convidado */}
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-white px-5 py-3 rounded-lg flex items-center justify-center transition-all cursor-pointer"

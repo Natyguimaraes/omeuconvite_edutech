@@ -68,3 +68,18 @@ export async function buscarAdministradorLogado(req, res) {
     res.status(500).json({ message: "Erro ao buscar administrador.", error });
   }
 }
+
+export async function buscarAdminPorIdDireto(req, res) {
+  const { id } = req.params;
+
+  try {
+    const administrador = await buscarAdministradorPorId(id);
+    if (administrador) {
+      res.status(200).json(administrador);
+    } else {
+      res.status(404).json({ message: "Administrador não encontrado." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar administrador por ID.", error });
+  }
+}

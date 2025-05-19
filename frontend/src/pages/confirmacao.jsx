@@ -30,7 +30,7 @@ import PrintList from "../components/printList";
 const Confirmacao = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const eventoId = searchParams.get("eventoId");
+  const eventoId = searchParams.get("eventoId");  {/* Filtrando para que só apareça dados do evento selecionado */}
 
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem('convidadosFilters');
@@ -198,7 +198,7 @@ const Confirmacao = () => {
         eventos.some(ev => ev.id === e.id) // Verifica se o evento existe na lista de eventos do admin
       );
       
-      return nomeMatch && naoEstaNoEventoAtual && pertenceAEventoDoAdmin;
+      return nomeMatch && naoEstaNoEventoAtual ;  {/*&& pertenceAEventoDoAdmin*/}
     });
   
     setSearchResults(results);
@@ -1201,13 +1201,13 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                 <div className="flex justify-end space-x-2 pt-2">
                                                   <button
                                                     onClick={() => setEditIndex(null)}
-                                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                                                   >
                                                     Cancelar
                                                   </button>
                                                   <button
                                                     onClick={handleUpdate}
-                                                    className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                                    className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer"
                                                   >
                                                     Salvar
                                                   </button>
@@ -1235,6 +1235,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                     <div className="text-xs text-gray-500 mt-1 sm:hidden">
                                                       {convidado.telefone}
                                                     </div>
+                                                   
                                                   </div>
                                                 </div>
                                               </td>
@@ -1285,14 +1286,14 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                     className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
                                                     title="Enviar WhatsApp"
                                                   >
-                                                    <FaWhatsapp className="h-4 w-4" />
+                                                    <FaWhatsapp className="h-4 w-4 cursor-pointer" />
                                                   </button>
                                                   <button
                                                     onClick={() => handleEdit(convidado.id)}
                                                     className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
                                                     title="Editar convidado"
                                                   >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="h-4 w-4 cursor-pointer" />
                                                   </button>
                                                   <button
                                                     onClick={() => handleDeleteConvidado(
@@ -1301,7 +1302,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                     className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
                                                     title="Remover convidado"
                                                   >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4 cursor-pointer" />
                                                   </button>
                                                 </div>
                                               </td>
@@ -1467,7 +1468,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                           } }
                                                           className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
                                                         >
-                                                          <Check className="h-4 w-4" />
+                                                          <Check className="h-4 w-4 cursor-pointer" />
                                                         </button>
                                                         <button
                                                           onClick={() => setEditingAcompanhante(
@@ -1475,7 +1476,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                           )}
                                                           className="text-gray-600 p-1.5 rounded-full hover:bg-gray-50 transition-colors"
                                                         >
-                                                          <X className="h-4 w-4" />
+                                                          <X className="h-4 w-4 cursor-pointer" />
                                                         </button>
                                                       </>
                                                     ) : (
@@ -1487,7 +1488,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                           className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
                                                           title="Editar acompanhante"
                                                         >
-                                                          <Edit className="h-4 w-4" />
+                                                          <Edit className="h-4 w-4 cursor-pointer" />
                                                         </button>
                                                         <button
                                                           onClick={() => {
@@ -1503,7 +1504,7 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                           className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
                                                           title="Remover acompanhante"
                                                         >
-                                                          <Trash2 className="h-4 w-4" />
+                                                          <Trash2 className="h-4 w-4 cursor-pointer" />
                                                         </button>
                                                       </>
                                                     )}

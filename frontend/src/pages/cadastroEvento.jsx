@@ -199,10 +199,10 @@ function CadastroEventos() {
         </div>
 
         <div className="max-w-3xl mx-auto relative z-10">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-indigo-600 mb-6 transition-colors group"
-          >
+                  <button
+  onClick={() => navigate(-1)}
+  className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 transition-all shadow-sm mb-6 cursor-pointer"
+>
             <ArrowLeft size={20} className="mr-1 group-hover:-translate-x-1 transition-transform" />
             <span>Voltar para eventos</span>
           </button>

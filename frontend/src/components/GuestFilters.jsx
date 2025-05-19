@@ -81,12 +81,12 @@ const GuestActions = ({
                 placeholder="Buscar convidados ou acompanhantes..."
                 value={filters.searchName}
                 onChange={(e) => setFilters({ ...filters, searchName: e.target.value })}
-                className="w-full pl-11 pr-12 py-2.5 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 text-sm bg-white/70 backdrop-blur-sm hover:bg-white placeholder-purple-300 shadow-sm transition-all duration-200"
+                className="w-full pl-11 pr-12 py-2.5 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 text-sm bg-white/70 backdrop-blur-sm hover:bg-white placeholder-gray-600 shadow-sm transition-all duration-200"
               />
               {filters.searchName && (
                 <button
                   onClick={() => setFilters({ ...filters, searchName: "" })}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-purple-400 hover:text-purple-700 transition duration-150 ease-in-out"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-black hover:text-gray-700 transition duration-150 ease-in-out"
                 >
                   <X className="h-4 w-4" />
                 </button>

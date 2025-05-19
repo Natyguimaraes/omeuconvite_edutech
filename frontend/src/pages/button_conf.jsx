@@ -728,7 +728,7 @@ function EventCredential() {
         />
       )}
 
-      <div className="min-h-screen pt-20 bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50 pt-6 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="min-h-screen pt-6 bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           {[...Array(20)].map((_, i) => (
             <motion.div
@@ -836,9 +836,9 @@ function EventCredential() {
             */}
           </motion.div>
 
-          <div className="backdrop-blur-md bg-white/90 rounded-3xl overflow-hidden border border-white/50 shadow-xl">
+<div className="backdrop-blur-md bg-white/90 rounded-3xl overflow-hidden border border-white/50 shadow-xl">
             <div className="p-6 md:p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 gap-4 md:gap-6">
                 <motion.div
                   className="flex items-start gap-4 text-gray-700 bg-gradient-to-br from-white to-pink-50 p-5 rounded-2xl border border-pink-100/70 shadow-md hover:shadow-lg transition-all"
                   whileHover={{ y: -5 }}
@@ -906,56 +906,64 @@ function EventCredential() {
 
                 {/* inputs */}
 
-                {/* Forma 2 de exibição de convidado*/}
-                <div className="flex flex-col w-155">
-                  <div>
-                    <div className="w-68 md:w-32 lg:w-190">
-                      <h3 className=" text-center m-auto md:w-32 lg:w-190 font-bold md:text-xl mb-4 text-gray-800 text-2xl">
-                        {" "}
-                        Olá, {convidado.nome}! Você é nosso(a) convidado(a)
-                      </h3>
-                    </div>
-                  </div>
+               <div className="flex flex-col px-4 w-full space-y-6">
 
-                  <div>
-                    <h1 className="font-semibold text-gray-800 text-lg md:text-xl ">
-                      Convidado
-                    </h1>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <div className=" relative left-4 top-9 text-gray-400">
-                        <User size={22} />
-                      </div>
-                      <input
-                        className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
-                        type="text"
-                        value={convidado.nome || ""}
-                        disabled
-                      />
+  {/* Título */}
+  <div className="text-center">
+    <h3 className="font-bold text-gray-800 text-2xl sm:text-3xl md:text-4xl mb-2">
+      Olá, {convidado.nome}! Você é nosso(a) convidado(a)
+    </h3>
+  </div>
 
-                      <div className="relative left-5 top-9 text-gray-400">
-                        <Phone size={22} />
-                      </div>
-                      <input
-                        className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all cursor-not-allowed}`}
-                        type="tel"
-                        value={convidado.telefone || ""}
-                        disabled
-                      />
+  <div>
+    <h1 className="font-semibold text-gray-800 text-lg md:text-xl mb-2">
+      Dados do Convidado
+    </h1>
+  </div>
 
-                      <div className="relative left-5 top-9 text-gray-400">
-                        <Mail size={22} />
-                      </div>
-                      <input
-                        className={`w-70 md:w-32 lg:w-175 bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all}`}
-                        type="text"
-                        value={convidado.email || "email"}
-                        disabled
-                      />
-                    </div>
-                  </div>
-                </div>
+  {/* Campos em grid responsivo */}
+  <div className="grid grid-cols-1 gap-5">
+    {/* Nome */}
+    <div className="relative">
+      <div className="absolute inset-y-0 left-4 flex items-center text-gray-400">
+        <User size={22} />
+      </div>
+      <input
+        type="text"
+        value={convidado.nome || ""}
+        disabled
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all cursor-not-allowed"
+      />
+    </div>
+
+    {/* Telefone */}
+    <div className="relative">
+      <div className="absolute inset-y-0 left-4 flex items-center text-gray-400">
+        <Phone size={22} />
+      </div>
+      <input
+        type="tel"
+        value={convidado.telefone || ""}
+        disabled
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all cursor-not-allowed"
+      />
+    </div>
+
+    {/* E-mail (ocupa 2 colunas para alinhar melhor visualmente) */}
+    <div className="relative md:col-span-2">
+      <div className="absolute inset-y-0 left-4 flex items-center text-gray-400">
+        <Mail size={22} />
+      </div>
+      <input
+        type="text"
+        value={convidado.email || ""}
+        disabled
+        className="w-full bg-gray-100 border border-gray-300 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all cursor-not-allowed"
+      />
+    </div>
+  </div>
+</div>
+
               </div>
             </div>
             {/* Forma 2 de exibição de convidado final*/}

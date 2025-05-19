@@ -17,6 +17,7 @@ import {
 
 import NavBar from "../components/menu";
 import EventCard from "../components/EventCard";
+import BemVindo from "../components/boasVindas";
 
 function Eventos() {
   const [eventos, setEventos] = useState([]);
@@ -28,7 +29,7 @@ function Eventos() {
 
   // Obter o ID do administrador logado
   const adminId = localStorage.getItem('adminId') || sessionStorage.getItem('adminId');
-  
+
   const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState({
     imagem_evento: "", 
@@ -338,6 +339,8 @@ function Eventos() {
           <div className="absolute bottom-10 left-1/3 w-80 h-80 rounded-full bg-blue-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "2s" }}></div>
         </div>
 
+ <BemVindo/>
+ 
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-purple-100 px-4 py-2 rounded-full text-purple-600 font-medium mb-4 shadow-sm">
