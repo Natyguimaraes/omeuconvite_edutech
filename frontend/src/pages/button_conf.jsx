@@ -21,7 +21,7 @@ function EventCredential() {
 
   const [searchParams] = useSearchParams();
   const eventoId = searchParams.get("eventoId");
-
+ 
   const { convidadoId } = useParams();
   const [evento, setEvento] = useState({});
   const [convidadoStatus, setConvidadoStatus] = useState(null);
@@ -43,6 +43,7 @@ function EventCredential() {
   const [limiteAcompanhante, setLimiteAcompanhante] = useState(0)
   const [quantidadeAcompanhante, setQuantidadeAcompanhante] = useState(0)
 
+  
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const API_CONVIDADOS = `${API_URL}/api/convidados`;
   const API_EVENTOS = `${API_URL}/api/eventos`;
@@ -51,6 +52,8 @@ function EventCredential() {
     return confirmedStatus !== null ? confirmedStatus : convidado?.confirmado;
   }, [confirmedStatus, convidado])
 
+
+  
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
@@ -181,7 +184,7 @@ function EventCredential() {
       // 7. Atualiza estados
       setConvidado({
         id: dadosConvidado.id,
-        nome: dadosConvidado.nome || "Convidado",
+        nome: dadosConvidado.nome|| "Convidado",
         telefone: dadosConvidado.telefone || "",
         email: dadosConvidado.email || "",
         confirmado: eventoAssociado.confirmado === 1,

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Download, ChevronLeft, Users } from "lucide-react";
 import QRCode from "react-qr-code";
 import domtoimage from "dom-to-image-more";
+import Navbar from "../components/menu";
 
 export default function CredenciaisPage() {
   const location = useLocation();
@@ -85,12 +86,14 @@ export default function CredenciaisPage() {
   }
 
   return (
+    <>
+    <Navbar />
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-800"
+            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 bg-gray-100 hover:bg-indigo-100 hover:text-indigo-700 transition-all shadow-sm mb-6 cursor-pointer"
           >
             <ChevronLeft size={20} />
             <span>Voltar</span>
@@ -132,14 +135,13 @@ export default function CredenciaisPage() {
             <p className="text-xl text-gray-600 mb-2">
               {credenciais.evento.local}
             </p>
-            
+
             <div className="bg-white p-3 rounded-lg border border-gray-300 shadow-inner">
               <QRCode
                 value={`${credenciais.convidado.token}`}
                 size={200}
                 level="H"
-                className="mb-2"
-              />
+                className="mb-2" />
             </div>
 
             <p className="font-medium mt-2 text-gray-800">
@@ -150,8 +152,7 @@ export default function CredenciaisPage() {
             <img
               src="/omeuconvitelogo.jpeg"
               alt="Logo O Meu Convite"
-              className="w-25 mt-4 rounded-xl"
-            />
+              className="w-25 mt-4 rounded-xl" />
 
             <p className="text-lg text-gray-400 mt-3">
               Visite nosso site: www.omeuconvite.com
@@ -198,8 +199,7 @@ export default function CredenciaisPage() {
                       value={`${acomp.token}`}
                       size={200}
                       level="H"
-                      className="mb-2"
-                    />
+                      className="mb-2" />
                   </div>
 
                   <p className="font-medium mt-2 text-gray-800">{acomp.nome}</p>
@@ -207,8 +207,7 @@ export default function CredenciaisPage() {
                   <img
                     src="/omeuconvitelogo.jpeg"
                     alt="Logo O Meu Convite"
-                    className="w-25 mt-4 rounded-xl border-solid-black"
-                  />
+                    className="w-25 mt-4 rounded-xl border-solid-black" />
                   <p className="text-lg text-gray-400 mt-3">
                     Visite nosso site: www.omeuconvite.com
                   </p>
@@ -227,7 +226,7 @@ export default function CredenciaisPage() {
           </div>
         )}
       </div>
-    </div>
+    </div></>
   );
 }
 

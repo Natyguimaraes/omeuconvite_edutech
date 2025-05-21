@@ -112,7 +112,7 @@ function CadastroConvidados() {
           </button>
           
           <div className="backdrop-blur-md bg-white/80 rounded-3xl overflow-hidden border border-white/30 shadow-xl">
-            <div className="p-8 sm:p-10">
+            <div className="p-8 sm:p-10 mt-10">
               <div className="text-center mb-10">
                 <div className="inline-flex items-center bg-indigo-100 px-4 py-2 rounded-full text-indigo-600 font-medium mb-4 shadow-sm">
                   <User className="w-4 h-4 mr-2" />

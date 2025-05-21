@@ -676,7 +676,7 @@ const Confirmacao = () => {
   // Enviar WhatsApp
   const handleSendWhatsapp = async (convidado) => {
     const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
-    const linkConfirmacao = `${frontendUrl}/confirmacao/${convidado.id}?eventoId=${eventoId}`;
+    const linkConfirmacao = `${frontendUrl}/convite/${convidado.id}?eventoId=${eventoId}`;
     
     // Encontra o evento específico pelo ID
     const evento = eventos.find(e => e.id === parseInt(eventoId));

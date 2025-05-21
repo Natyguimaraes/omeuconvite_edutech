@@ -380,14 +380,14 @@ function Eventos() {
             <div className="flex space-x-4">
               <button
                 className="group bg-white px-5 py-3 rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition-all duration-200 text-indigo-600 font-medium flex items-center cursor-pointer"
-                onClick={() => navigate("/cadastroEvento")}
+                onClick={() => navigate("/cadastrar_evento")}
               >
                 <PlusCircle className="h-5 w-5 mr-2 group-hover:animate-pulse" />
                 <span>Novo Evento</span>
               </button>
               <button
                 className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium py-3 px-5 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 active:scale-95 flex items-center cursor-pointer"
-                onClick={() => navigate("/cadastroConvidado")}
+                onClick={() => navigate("/cadastrar_convidado")}
               >
                 <PlusCircle className="h-5 w-5 mr-2" />
                 <span>Adicionar Convidado</span>

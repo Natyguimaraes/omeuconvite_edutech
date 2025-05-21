@@ -41,7 +41,7 @@ function LoginAdministrador() {
       }
   
       setMessage(data.message);
-      navigate("/eventos");
+      navigate("/Pagina_Inicial_Seus_eventos");
     } catch (error) {
       setMessage(error.message);
       await new Promise(resolve => setTimeout(resolve, 1000));

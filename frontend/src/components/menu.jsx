@@ -1,33 +1,43 @@
 import { useState, useEffect } from 'react';
+import { PartyPopper } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
 
-  const Star = ({ style }) => (
-    <div
-      className="absolute text-white"
-      style={{
-        ...style,
-        animation: `twinkle ${Math.random() * 5 + 3}s infinite ease-in-out`,
-        filter: 'blur(1px)',
-        pointerEvents: 'none',
-      }}
-    >
-      {/*💌*/}
-      
-      ⭐
-    </div>
-  );
+  const Star = ({ style }) => {
+    const size = Math.random() * 10 + 12;
+    const rotation = Math.random() * 360;
 
-  const starPositions = Array.from({ length: 30 }).map(() => ({
+    return (
+      <div
+        className="absolute text-white"
+        style={{
+          ...style,
+          transform: `rotate(${rotation}deg)`,
+          animation: `twinkle ${Math.random() * 5 + 3}s infinite ease-in-out`,
+          filter: 'blur(1px) drop-shadow(0 0 3px rgba(0, 0, 0, 0.966))',
+          pointerEvents: 'none',
+        }}
+      >
+        <PartyPopper
+          size={26}
+          color="black"
+          strokeWidth={1.2}
+         
+        />
+      </div>
+    );
+  };
+
+  const starPositions = Array.from({ length: 15 }).map(() => ({
     top: `${Math.random() * 100}%`,
     left: `${Math.random() * 100}%`,
     fontSize: `${Math.random() * 10 + 4}px`,
     opacity: Math.random() * 0.4 + 0.1,
-    animationDelay: `${Math.random() * 5}s`,
+    animationDelay: `${Math.random() * 10}s`,
   }));
 
-  const glowParticles = Array.from({ length: 10 }).map(() => ({
+  const glowParticles = Array.from({ length: 5 }).map(() => ({
     top: `${Math.random() * 100}%`,
     left: `${Math.random() * 100}%`,
     size: `${Math.random() * 60 + 20}px`,
@@ -56,7 +66,8 @@ const Navbar = () => {
         <div
           className="absolute inset-0 w-35 h-20 opacity-30"
           style={{
-            background: 'radial-gradient(circle at 50% -20%, rgba(200, 200, 200, 0.4), transparent 60%)',
+            background:
+              'radial-gradient(circle at 50% -20%, rgba(200, 200, 200, 0.4), transparent 60%)',
           }}
         />
 
@@ -77,7 +88,7 @@ const Navbar = () => {
           />
         ))}
 
-        {/* Estrelas discretas */}
+        {/* Confetes (substituindo estrelas) */}
         {starPositions.map((pos, i) => (
           <Star key={i} style={pos} />
         ))}
@@ -89,14 +100,15 @@ const Navbar = () => {
               <div
                 className="absolute -inset-6 rounded-full opacity-20"
                 style={{
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.7) 0%, transparent 70%)',
+                  background:
+                    'radial-gradient(circle, rgba(255,255,255,0.7) 0%, transparent 70%)',
                   filter: 'blur(10px)',
                   animation: 'pulse 10s infinite ease-in-out',
                 }}
               />
 
               {/* Container do logo */}
-              <div className="relative p-1shadow-sm">
+              <div className="relative p-1 shadow-sm">
                 <div className="relative overflow-hidden">
                   {/* Brilho sutil */}
                   <div
@@ -123,7 +135,7 @@ const Navbar = () => {
       </nav>
 
       {/* Espaçador com altura reduzida */}
-      <div className="h-32 md:h-36"></div>
+      <div className="h-30 md:h-35"></div>
 
       <style>{`
         @keyframes float {
