@@ -193,9 +193,21 @@ function Eventos() {
     setEventoExpandido(eventoExpandido === eventoId ? null : eventoId);
   };
 
-  const handleVerDetalhes = (eventoId) => {
-    navigate(`/confirmacao?eventoId=${eventoId}`);
-  };
+  const handleVerDetalhes = (eventoId, nomeEvento) => {
+  const slug = nomeEvento
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "");
+
+  // Salva o eventoId no sessionStorage
+  sessionStorage.setItem("eventoId", eventoId);
+
+  // Navega passando state (opcional, mas útil)
+  navigate(`/detalhes_evento/${slug}`, {
+    state: { eventoId }
+  });
+};
+
 
   const formatDataParaInput = (dataString) => {
     if (!dataString) return "";
@@ -500,7 +512,7 @@ function Eventos() {
                               totalPendentes={getPendentesPorEvento(evento.id)}
                               isExpanded={eventoExpandido === evento.id}
                               onClick={(e) => handleEventoClick(evento.id, e)}
-                              onVerDetalhes={() => handleVerDetalhes(evento.id)}
+                              onVerDetalhes={() => handleVerDetalhes(evento.id, evento.nome)}
                               onEditar={(e) => handleEditarEvento(evento.id, e)}
                               onExcluir={(e) => handleExcluirEvento(evento.id, e)}
                             />

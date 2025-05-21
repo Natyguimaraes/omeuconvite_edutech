@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
   Check,
   Trash2,
@@ -29,8 +29,17 @@ import PrintList from "../components/printList";
 
 const Confirmacao = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const eventoId = searchParams.get("eventoId");  {/* Filtrando para que só apareça dados do evento selecionado */}
+
+  const eventoIdFromQuery = searchParams.get("eventoId");
+  const eventoId = eventoIdFromQuery || sessionStorage.getItem("eventoId");
+
+   useEffect(() => {
+    if (eventoIdFromQuery) {
+      sessionStorage.setItem("eventoId", eventoIdFromQuery);
+    }
+  }, [eventoIdFromQuery]);
 
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem('convidadosFilters');

@@ -59,7 +59,7 @@ const handleLogout = () => {
         <Route path="/menu" element={<NavBar />} />
         <Route path="/cadastroConvidado" element={<CadastroConvidados />} />
         <Route path="/cadastroEvento" element={<CadastroEventos />} />
-        <Route path="/confirmacao" element={<Confirmacao />} />
+        <Route path="/detalhes_evento/:slug" element={<Confirmacao />} />
         <Route path="/eventos" element={<Eventos />} />
         <Route path="/confirmacao/:convidadoId" element={<ButtonConf />} />
         <Route path="/ana_luiza/:convidadoId" element={<ButtonConf />} />
