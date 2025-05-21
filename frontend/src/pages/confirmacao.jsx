@@ -89,80 +89,72 @@ const Confirmacao = () => {
   const apiConvidados = `${baseUrl}/api/convidados`;
 
   // Função para obter convidados de um evento específico
-  const getConvidadosPorEvento = (eventoId) => {
-    if (!Array.isArray(convidados)) {
-      console.warn('convidados is not an array', convidados);
-      return [];
-    }
-  
-    const eventoIdNum = parseInt(eventoId);
-  
-    return convidados
-      .filter(convidado => {
-        try {
-          const eventosConvidado = Array.isArray(convidado?.eventos) ? 
-            convidado.eventos : [];
-          
-          return eventosConvidado.some(evento => 
-            evento?.id === eventoIdNum
-          );
-        } catch (error) {
-          console.error('Error filtering convidado:', error, convidado);
-          return false;
-        }
-      })
-      .map(convidado => {
-        try {
-          const eventosConvidado = Array.isArray(convidado.eventos) ? 
-            convidado.eventos : [];
-            
-          const eventoRelacao = eventosConvidado.find(e => 
-            e?.id === eventoIdNum
-          );
-  
-          console.log('Convidado:', convidado.nome);
-          console.log('eventoRelacao:', eventoRelacao);
-          console.log('token_usado bruto:', eventoRelacao?.token_usado);
-          console.log('token_usado convertido:', Number(eventoRelacao?.token_usado));
-          const mostrarAcompanhantes = (
-            !eventoRelacao?.novoEvento && 
-            eventosConvidado[0]?.id === eventoIdNum
-          );
-  
-          return {
-            ...convidado,
-            confirmado: eventoRelacao?.confirmado || false,
-            presente: Number(eventoRelacao?.token_usado) === 1, // Adiciona campo presente: para verificar se convidado está presente ou não
-            limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
-            acompanhantes: mostrarAcompanhantes ? 
-  (Array.isArray(convidado.acompanhantes) ? 
-    convidado.acompanhantes.map(a => {
-      console.log(`Acompanhante de ${convidado.nome}:`, a.nome);
-                console.log(`token_usado do acompanhante (bruto):`, a.token_usado);
-                console.log(`token_usado do acompanhante (convertido):`, Number(a.token_usado));
-                console.log(`confirmado do acompanhante:`, a.confirmado);
-      return {
-      ...a,
-      presente: Number(a.token_usado) === 1
+ const getConvidadosPorEvento = (eventoId) => {
+  if (!Array.isArray(convidados)) {
+    console.warn('convidados is not an array', convidados);
+    return [];
+  }
+
+  const eventoIdNum = parseInt(eventoId);
+
+  return convidados
+    .filter(convidado => {
+      try {
+        const eventosConvidado = Array.isArray(convidado?.eventos) ? 
+          convidado.eventos : [];
+        
+        return eventosConvidado.some(evento => evento?.id === eventoIdNum);
+      } catch (error) {
+        console.error('Error filtering convidado:', error, convidado);
+        return false;
       }
     })
-  : []) 
-: []
-          };
-         
-        } catch (error) {
-          console.error('Error mapping convidado:', error, convidado);
-   
-          return {
-            ...convidado,
-            confirmado: false,
-            presente: false,
-            limite_acompanhante: 0,
-            acompanhantes: []
-          };
-        }
-      });
-  };
+    .map(convidado => {
+      try {
+        const eventosConvidado = Array.isArray(convidado.eventos) ? 
+          convidado.eventos : [];
+          
+        const eventoRelacao = eventosConvidado.find(e => e?.id === eventoIdNum);
+
+        // DEBUG: Mostra os dados completos do convidado
+        console.log('Dados completos do convidado:', convidado);
+        
+        // Pega todos os acompanhantes do convidado que pertencem a este evento
+        const acompanhantesDoEvento = Array.isArray(convidado.acompanhantes) 
+          ? convidado.acompanhantes.filter(a => {
+              // Verifica múltiplas possibilidades de como o evento pode estar referenciado
+              const eventoAcompanhante = a.eventoId || a.evento_id;
+              return eventoAcompanhante == eventoIdNum;
+            })
+          : [];
+
+        // DEBUG: Mostra os acompanhantes filtrados
+        console.log(`Acompanhantes de ${convidado.nome} para evento ${eventoId}:`, acompanhantesDoEvento);
+
+        return {
+          ...convidado,
+          confirmado: eventoRelacao?.confirmado || false,
+          presente: Number(eventoRelacao?.token_usado) === 1,
+          limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
+          acompanhantes: acompanhantesDoEvento.map(a => ({
+            ...a,
+            id: a.id || Math.random().toString(36).substr(2, 9), // Garante um ID
+            presente: Number(a.token_usado) === 1,
+            confirmado: a.confirmado || 0
+          }))
+        };
+      } catch (error) {
+        console.error('Error mapping convidado:', error, convidado);
+        return {
+          ...convidado,
+          confirmado: false,
+          presente: false,
+          limite_acompanhante: 0,
+          acompanhantes: []
+        };
+      }
+    });
+};
 
   const contarParticipantes = (convidadosEvento) => {
     if (!Array.isArray(convidadosEvento)) return 0;

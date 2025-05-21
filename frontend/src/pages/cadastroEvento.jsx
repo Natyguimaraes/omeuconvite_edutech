@@ -165,7 +165,7 @@ function CadastroEventos() {
 
       toast.success("Evento cadastrado com sucesso!");
       resetForm();
-      navigate("/eventos");
+      navigate("/Pagina_Inicial_Seus_eventos");
     } catch (err) {
       console.error("Erro na requisição:", err);
       setError(err.message || "Erro ao cadastrar evento. Tente novamente mais tarde.");
