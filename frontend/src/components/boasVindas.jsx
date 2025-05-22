@@ -20,7 +20,7 @@ function BemVindo() {
 
   return (
     <h1 className="text-3xl font-semibold text-center text-gray-800 -mt-8 mb-8">
-  Bem-vindo{" "}
+  Bem-vindo (a) {" "}
   <span className="text-purple-700 font-bold">
     {nome || "..."}
   </span>

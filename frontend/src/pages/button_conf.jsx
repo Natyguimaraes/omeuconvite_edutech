@@ -10,7 +10,7 @@ import {
   Phone,
   Loader2,
   Sparkles,
-  HeartCrack, SquarePen,
+  HeartCrack, SquarePen, PartyPopper,
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
@@ -218,7 +218,7 @@ function EventCredential() {
         data_evento: eventoFormatado.data_evento || new Date().toISOString(),
         data_gerar_qrcode: eventoFormatado.data_gerar_qrcode || eventoFormatado.dataGerarQrCode || null,
         local: eventoFormatado.local || "Local não especificado",
-        imagem_evento: eventoFormatado.imagem_evento || "/convite.jpg"
+        imagem_evento: eventoFormatado.imagem_evento
       });
 
 
@@ -238,7 +238,7 @@ function EventCredential() {
         descricao: "Descrição do evento",
         data_evento: new Date().toISOString(),
         local: "Local não especificado",
-        imagem_evento: "/convite.jpg"
+        imagem_evento: ""
       });
     } finally {
       setIsLoading(false);
@@ -506,13 +506,13 @@ function EventCredential() {
               className="text-center"
             >
               <div className="relative h-32 mb-6">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(8)].map((_, i) => (
                   <motion.div
                     key={i}
                     className="absolute rounded-full bg-gradient-to-br from-pink-300 to-purple-400"
                     style={{
-                      width: Math.random() * 60 + 40,
-                      height: Math.random() * 60 + 40,
+                      width: Math.random() * 70 + 50,
+                      height: Math.random() * 50 + 20,
                       left: `${Math.random() * 80 + 10}%`,
                       bottom: 0,
                     }}
@@ -522,22 +522,22 @@ function EventCredential() {
                       scale: [1, 1.1, 1.2],
                     }}
                     transition={{
-                      duration: Math.random() * 3 + 2,
+                      duration: Math.random() * 5 + 3,
                       ease: "easeOut",
                       repeat: Infinity,
-                      repeatDelay: Math.random() * 5,
+                      repeatDelay: Math.random() * 4,
                     }}
                   />
                 ))}
               </div>
   
               <motion.h3
-                className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-600 mb-6 tracking-tight"
+                className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-indigo-500 mb-6 tracking-normal"
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
               >
-                PRESENÇA CONFIRMADA! 🎊
+                PRESENÇA CONFIRMADA!
               </motion.h3>
   
               <motion.div
@@ -562,11 +562,11 @@ function EventCredential() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.7 }}
               >
-                Estou <span className="font-bold text-emerald-600">radiante</span> com sua confirmação!
+                Estou <span className="font-bold text-indigo-600">radiante</span> com sua confirmação!
               </motion.p>
   
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {[...Array(30)].map((_, i) => (
+                {[...Array(50)].map((_, i) => (
                   <motion.div
                     key={i}
                     className="absolute text-yellow-400 text-xl"
@@ -581,11 +581,11 @@ function EventCredential() {
                       rotate: [0, 360],
                     }}
                     transition={{
-                      duration: Math.random() * 3 + 2,
-                      delay: Math.random() * 1.5,
+                      duration: Math.random() * 5 + 3,
+                      delay: Math.random() * 1.0,
                     }}
                   >
-                    {['🎉', '✨', '🎊', '🥳', '🎈'][Math.floor(Math.random() * 5)]}
+                    {['🎉', '✨', '🎊', '🥳', '🎈'][Math.floor(Math.random() * 8)]}
                   </motion.div>
                 ))}
               </div>
@@ -608,7 +608,7 @@ function EventCredential() {
                   rotate: [0, 5, -5, 0],
                 }}
                 transition={{ 
-                  duration: 3,
+                  duration: 6,
                   repeat: Infinity,
                   repeatType: "reverse",
                 }}
@@ -731,7 +731,17 @@ function EventCredential() {
         />
       )}
 
-      <div className="min-h-screen pt-6 bg-gradient-to-b from-pink-50 via-purple-50 to-indigo-50 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+
+      <div className="min-h-screen bg-white pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden pt-10">
+        <div className ="absolute bg-gradient-to-r from-indigo-200 to-purple-300 w-40 h-40 rounded-full top-10 left-10 z-0 blur-lg"></div>
+        <div className ="absolute bg-gradient-to-r from-indigo-200 to-purple-300 w-40 h-40 rounded-full top-40 left-285 z-0 blur-lg"></div>
+        <div className ="absolute bg-gradient-to-r from-indigo-200 to-purple-300 w-40 h-40 rounded-full bottom-50 right-10 z-0 blur-lg"></div>
+        <div className ="absolute bg-gradient-to-r from-indigo-200 to-purple-300 w-40 h-40 rounded-full bottom-10 z-0 blur-lg"></div>
+        <div className ="absolute bg-gradient-to-r from-indigo-200 to-purple-300 w-70 h-70 rounded-full bottom-300 left-285 z-0 blur-lg"></div>
+        <div className ="absolute bg-gradient-to-r from-indigo-200 to-purple-300 w-70 h-70 rounded-full bottom-150 z-0 blur-lg"></div>
+        <div classname="absolute bg-gradient-to-r from-indigo-200 to-purple-300 w-40 h-40 rounded-full z-0 blur-lg top-30 left-100"></div>
+
+
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           {[...Array(20)].map((_, i) => (
             <motion.div
@@ -777,7 +787,7 @@ function EventCredential() {
                   loading="eager"
                   onError={(e) => {
                     console.error("Erro ao carregar imagem:", e);
-                    e.target.src = "/convite.jpg";
+                    
                   }}
                 />
               </motion.div>
@@ -1214,7 +1224,7 @@ function EventCredential() {
                           : "0 10px 25px -5px rgba(16, 185, 129, 0.3)",
                     }}
                     whileTap={{ scale: isLoading || isConfirmed ? 1 : 0.98 }}
-                    className={`flex-1 cursor-pointer disabled:cursor-default bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-emerald-300/50
+                    className={`flex-1 cursor-pointer disabled:cursor-default bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-5 rounded-xl flex items-center justify-center gap-4 transition-all text-lg md:text-xl shadow-lg hover:shadow-purple-300/50
                     ${isLoading ? "opacity-70" : ""} 
                     ${isConfirmed ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
