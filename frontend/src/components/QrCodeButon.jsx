@@ -51,7 +51,10 @@ export default function QRCodeScanButton() {
     alert("Erro ao registrar presença.");
   }
 
-  setIsScanning(false); // permite ler outro QR
+  setTimeout(() => {
+  setIsScanning(false);
+}, 5000); // 3 segundos
+
 };
 
     try {
