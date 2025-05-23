@@ -345,6 +345,15 @@ function Eventos() {
     <>
       <NavBar />
       <div className="min-h-screen bg-white py-16 px-4 sm:px-6 lg:px-8 pt-15 relative overflow-hidden">
+        <div className="absolute bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 w-32 h-32 rounded-full top-10 left-10 z-0 blur-xl animate-float opacity-60"></div>
+      <div className="absolute bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-400 w-40 h-40 rounded-full top-20 right-20 z-0 blur-lg animate-pulse-glow opacity-50"></div>
+      <div className="absolute bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-400 w-36 h-36 rounded-full top-1/3 left-1/4 z-0 blur-xl animate-float-slow opacity-40"></div>
+      <div className="absolute bg-gradient-to-r from-orange-300 via-pink-300 to-rose-400 w-48 h-48 rounded-full bottom-32 right-10 z-0 blur-2xl animate-pulse-glow opacity-30"></div>
+      <div className="absolute bg-gradient-to-r from-violet-300 via-purple-300 to-fuchsia-400 w-28 h-28 rounded-full bottom-10 left-16 z-0 blur-lg animate-float opacity-50"></div>
+      <div className="absolute bg-gradient-to-r from-cyan-300 via-blue-300 to-indigo-400 w-52 h-52 rounded-full bottom-1/3 left-1/3 z-0 blur-3xl animate-float-slow opacity-25"></div>
+      <div className="absolute bg-gradient-to-r from-lime-300 via-green-300 to-emerald-400 w-44 h-44 rounded-full top-1/2 right-1/4 z-0 blur-2xl animate-pulse-glow opacity-35"></div>
+      <div className="absolute bg-gradient-to-r from-yellow-300 via-orange-300 to-red-400 w-20 h-20 rounded-full top-2/3 left-20 z-0 blur-md animate-float opacity-60"></div>
+      
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-20">
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-purple-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "0s" }}></div>
           <div className="absolute top-40 right-20 w-72 h-72 rounded-full bg-pink-300 mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
