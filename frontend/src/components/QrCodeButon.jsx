@@ -22,14 +22,11 @@ export default function QRCodeScanButton() {
   const startScanner = async (cameraId) => {
     const html5QrCode = new Html5Qrcode("reader");
 
-  const [ultimoTokenLido, setUltimoTokenLido] = useState(null); // novo estado
-
-const handleScanSuccess = async (decodedText) => {
-  if (isScanning || decodedText === ultimoTokenLido) return;
-
+   const handleScanSuccess = async (decodedText) => {
+  if (isScanning) return;
   setIsScanning(true);
-  setUltimoTokenLido(decodedText);
 
+  // Toca o beep
   const beep = new Audio("/beep.wav");
   beep.play();
 
@@ -54,11 +51,8 @@ const handleScanSuccess = async (decodedText) => {
     alert("Erro ao registrar presença.");
   }
 
-  // Libera para nova leitura após 5 segundos
-  setTimeout(() => setUltimoTokenLido(null), 5000);
-  setIsScanning(false);
+  setIsScanning(false); // permite ler outro QR
 };
-
 
     try {
       await html5QrCode.start(
