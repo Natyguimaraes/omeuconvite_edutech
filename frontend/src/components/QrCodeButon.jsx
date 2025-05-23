@@ -145,49 +145,54 @@ export default function QRCodeScanButton() {
         <span>Ler QR Code</span>
       </button>
 
-      {showScanner && (
-        <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-xl shadow-lg relative w-[360px]">
-            <button
-              onClick={async () => {
-                await stopScanner();
-                setShowScanner(false);
-              }}
-              className="absolute top-2 right-2 text-gray-600 hover:text-black"
-            >
-              <X size={18} />
-            </button>
-            <p className="text-center font-semibold mb-2">
-              Aponte a câmera para o <span className="text-indigo-800">QR Code</span>
-            </p>
-            <div className="mb-2 text-center text-sm text-gray-600">
-              {cameras[currentCameraIndex]?.label || "Carregando..."}
-            </div>
-            <div id="reader" className="w-full" />
-            {cameras.length > 1 && (
-              <button
-                onClick={switchCamera}
-                disabled={isSwitching}
-                className="mt-3 w-full text-center text-blue-600 text-sm hover:underline flex items-center justify-center gap-1"
-              >
-                <RefreshCcw size={14} className={isSwitching ? "animate-spin" : ""} />
-                Alternar câmera
-              </button>
-            )}
+     {showScanner && (
+  <div className="fixed inset-0 bg-white bg-opacity-60 flex items-center justify-center z-50 p-2">
+    <div className="bg-white p-4 rounded-xl shadow-lg relative w-full max-w-[360px] max-h-screen overflow-y-auto">
+      <button
+        onClick={async () => {
+          await stopScanner();
+          setShowScanner(false);
+        }}
+        className="absolute top-2 right-2 text-gray-600 hover:text-black"
+      >
+        <X size={18} />
+      </button>
 
-            {ultimosNomes.length > 0 && (
-              <div className="mt-4 bg-gray-100 rounded-lg p-2 text-sm text-gray-700 max-h-32 overflow-y-auto">
-                <p className="font-semibold mb-1">Últimos confirmados:</p>
-                <ul className="list-disc list-inside">
-                  {ultimosNomes.map((nome, i) => (
-                    <li key={i}>{nome}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+      <p className="text-center font-semibold mb-2">
+        Aponte a câmera para o <span className="text-indigo-800">QR Code</span>
+      </p>
+
+      <div className="mb-2 text-center text-sm text-gray-600">
+        {cameras[currentCameraIndex]?.label || "Carregando..."}
+      </div>
+
+      <div id="reader" className="w-full" />
+
+      {cameras.length > 1 && (
+        <button
+          onClick={switchCamera}
+          disabled={isSwitching}
+          className="mt-3 w-full text-center text-blue-600 text-sm hover:underline flex items-center justify-center gap-1"
+        >
+          <RefreshCcw size={14} className={isSwitching ? "animate-spin" : ""} />
+          Alternar câmera
+        </button>
+      )}
+
+      {ultimosNomes.length > 0 && (
+        <div className="mt-4 bg-gray-100 rounded-lg p-2 text-sm text-gray-700 max-h-32 overflow-y-auto">
+          <p className="font-semibold mb-1">Últimos confirmados:</p>
+          <ul className="list-disc list-inside">
+            {ultimosNomes.map((nome, i) => (
+              <li key={i}>{nome}</li>
+            ))}
+          </ul>
         </div>
       )}
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
