@@ -23,10 +23,11 @@ export default function QRCodeScanButton() {
     const html5QrCode = new Html5Qrcode("reader");
 
    const handleScanSuccess = async (decodedText) => {
-  if (isScanning) return;
-  setIsScanning(true);
+  if (isScanning || decodedText === ultimoTokenLido) return;
 
-  // Toca o beep
+  setIsScanning(true);
+  setUltimoTokenLido(decodedText);
+
   const beep = new Audio("/beep.wav");
   beep.play();
 
@@ -51,7 +52,8 @@ export default function QRCodeScanButton() {
     alert("Erro ao registrar presença.");
   }
 
-  setIsScanning(false); // permite ler outro QR
+  setTimeout(() => setUltimoTokenLido(null), 5000); // permite repetir após 5s
+  setIsScanning(false);
 };
 
     try {
@@ -146,48 +148,54 @@ export default function QRCodeScanButton() {
       </button>
 
       {showScanner && (
-        <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-xl shadow-xl relative w-[340px]">
-            <button
-              onClick={async () => {
-                await stopScanner();
-                setShowScanner(false);
-              }}
-              className="absolute top-2 right-2 text-gray-600 hover:text-black"
-            >
-              <X size={18} />
-            </button>
-            <p className="text-center font-semibold mb-2">
-              Aponte a câmera para o QR Code
-            </p>
-            <div className="mb-2 text-center text-sm text-gray-600">
-              {cameras[currentCameraIndex]?.label || "Carregando..."}
-            </div>
-            <div id="reader" className="w-full" />
-            {cameras.length > 1 && (
-              <button
-                onClick={switchCamera}
-                disabled={isSwitching}
-                className="mt-3 w-full text-center text-blue-600 text-sm hover:underline flex items-center justify-center gap-1"
-              >
-                <RefreshCcw size={14} className={isSwitching ? "animate-spin" : ""} />
-                Alternar câmera
-              </button>
-            )}
+  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-4">
+    <div className="relative w-full max-w-sm bg-white pt-10 p-4 rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
 
-            {ultimosNomes.length > 0 && (
-              <div className="mt-4 bg-gray-100 rounded-lg p-2 text-sm text-gray-700">
-                <p className="font-semibold mb-1">Últimos confirmados:</p>
-                <ul className="list-disc list-inside">
-                  {ultimosNomes.map((nome, i) => (
-                    <li key={i}>{nome}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+      {/* Botão de fechar */}
+      <button
+        onClick={async () => {
+          await stopScanner();
+          setShowScanner(false);
+        }}
+        className="absolute top-3 right-3 z-50 text-gray-600 hover:text-black bg-white rounded-full p-1 shadow"
+      >
+        <X size={20} />
+      </button>
+
+      <p className="text-center font-semibold text-base mb-2">
+        Aponte a câmera para o QR Code
+      </p>
+
+      <div className="mb-2 text-center text-sm text-gray-600">
+        {cameras[currentCameraIndex]?.label || "Carregando..."}
+      </div>
+
+      <div id="reader" className="w-full" />
+
+      {cameras.length > 1 && (
+        <button
+          onClick={switchCamera}
+          disabled={isSwitching}
+          className="mt-3 w-full text-center text-blue-600 text-sm hover:underline flex items-center justify-center gap-1"
+        >
+          <RefreshCcw size={14} className={isSwitching ? "animate-spin" : ""} />
+          Alternar câmera
+        </button>
+      )}
+
+      {ultimosNomes.length > 0 && (
+        <div className="mt-4 bg-gray-100 rounded-lg p-3 text-sm text-gray-700">
+          <p className="font-semibold mb-1">Últimos confirmados:</p>
+          <ul className="list-disc list-inside space-y-1">
+            {ultimosNomes.map((nome, i) => (
+              <li key={i}>{nome}</li>
+            ))}
+          </ul>
         </div>
       )}
+    </div>
+  </div>
+)}
     </div>
   );
 }
