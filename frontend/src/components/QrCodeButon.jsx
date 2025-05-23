@@ -147,7 +147,7 @@ export default function QRCodeScanButton() {
 
       {showScanner && (
         <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-xl shadow-xl relative w-[340px]">
+          <div className="bg-white p-4 rounded-xl shadow-lg relative w-[360px]">
             <button
               onClick={async () => {
                 await stopScanner();
@@ -158,7 +158,7 @@ export default function QRCodeScanButton() {
               <X size={18} />
             </button>
             <p className="text-center font-semibold mb-2">
-              Aponte a câmera para o QR Code
+              Aponte a câmera para o <span className="text-indigo-800">QR Code</span>
             </p>
             <div className="mb-2 text-center text-sm text-gray-600">
               {cameras[currentCameraIndex]?.label || "Carregando..."}
@@ -176,7 +176,7 @@ export default function QRCodeScanButton() {
             )}
 
             {ultimosNomes.length > 0 && (
-              <div className="mt-4 bg-gray-100 rounded-lg p-2 text-sm text-gray-700">
+              <div className="mt-4 bg-gray-100 rounded-lg p-2 text-sm text-gray-700 max-h-32 overflow-y-auto">
                 <p className="font-semibold mb-1">Últimos confirmados:</p>
                 <ul className="list-disc list-inside">
                   {ultimosNomes.map((nome, i) => (
