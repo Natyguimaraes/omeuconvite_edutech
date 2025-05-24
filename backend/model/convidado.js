@@ -65,64 +65,94 @@ export async function getConvidadosModel() {
 // )
 export async function getConvidadosModelOtimized() {
   return new Promise((resolve, reject) => {
-    conexao.query(`
-      SELECT id, nome, telefone, email, limite_acompanhante,
-        (
-          SELECT
-            CONCAT('[',
-              GROUP_CONCAT(
-                JSON_OBJECT('id', acompanhante.id, 'convidado_id', acompanhante.convidado_id, 'nome', IFNULL(acompanhante.nome, ''), 'telefone', IFNULL(acompanhante.telefone, ''), 'email', IFNULL(acompanhante.email, ''), 'confirmado', IFNULL(acompanhante.confirmado, ''), 'eventoId', IFNULL(acompanhante.evento_id, ''), 'token_usado', IFNULL(acompanhante.token_usado, 0))
-                    
-                SEPARATOR ", ")
-            ,"]")
-          FROM acompanhante WHERE convidado_id = convidados.id AND ativo_acompanhante = 1
-        ) AS acompanhantes,
+    // 1. Primeiro aumenta o limite do GROUP_CONCAT para 10MB
+    conexao.query("SET SESSION group_concat_max_len = 10000000;", (err) => {
+      if (err) return reject(err);
 
-        (
-            SELECT
-                CONCAT('[',
-                    GROUP_CONCAT(
-                        DISTINCT CONCAT(
-                            '{',
-                                '"id": ', e.id,
-                                ', "administrador_id": "', IFNULL(e.administrador_id, ''), '"',
-                                ', "ativo": "', IFNULL(e.ativo, ''), '"',
-                                ', "limite_acompanhante": ', IFNULL(ce.limite_acompanhante, ''),
-                                ', "confirmado": ', IFNULL(ce.confirmado, ''),
-                                ', "token_usado": ', IFNULL(ce.token_usado, 0),
-                            '}'
-                        )
-                    )
-                ,']')
+      // 2. Usa JSON_ARRAYAGG que é mais robusto
+      conexao.query(`
+        SELECT 
+          c.id, 
+          c.nome, 
+          c.telefone, 
+          c.email, 
+          c.limite_acompanhante,
+          (
+            SELECT JSON_ARRAYAGG(
+              JSON_OBJECT(
+                'id', a.id,
+                'convidado_id', a.convidado_id,
+                'nome', a.nome,
+                'telefone', IFNULL(a.telefone, ''),
+                'email', IFNULL(a.email, ''),
+                'confirmado', IFNULL(a.confirmado, ''),
+                'eventoId', IFNULL(a.evento_id, ''),
+                'token_usado', IFNULL(a.token_usado, 0)
+              )
+            )
+            FROM acompanhante a
+            WHERE a.convidado_id = c.id AND a.ativo_acompanhante = 1
+          ) AS acompanhantes,
+          (
+            SELECT JSON_ARRAYAGG(
+              JSON_OBJECT(
+                'id', e.id,
+                'administrador_id', IFNULL(e.administrador_id, ''),
+                'ativo', IFNULL(e.ativo, ''),
+                'limite_acompanhante', IFNULL(ce.limite_acompanhante, ''),
+                'confirmado', IFNULL(ce.confirmado, ''),
+                'token_usado', IFNULL(ce.token_usado, 0)
+              )
+            )
             FROM eventos e
             JOIN convidado_evento ce ON e.id = ce.evento_id
-            WHERE ce.convidado_id = convidados.id
-        ) AS eventos
-
-        FROM convidados;
-      `,
-      async (err, convidados) => {
+            WHERE ce.convidado_id = c.id
+          ) AS eventos
+        FROM convidados c;
+      `, async (err, convidados) => {
         if (err) return reject(err);
-        console.log(convidados);
 
         try {
-          const convidadosCompleto = await Promise.all(
-            convidados.map(async c => {
-              return {
-                ...c,
-                acompanhantes: JSON.parse(c.acompanhantes || "[]"),
-                eventos: JSON.parse(c.eventos || "[]"),
-              }
-            })
-          );
+          const convidadosCompleto = convidados.map(c => ({
+            ...c,
+            acompanhantes: safeParseJson(c.acompanhantes),
+            eventos: safeParseJson(c.eventos)
+          }));
           resolve(convidadosCompleto);
         } catch (error) {
-          console.error(error);
+          console.error('Erro ao processar convidados:', error);
           reject(error);
         }
       });
+    });
   });
 }
+
+// Parser seguro com tratamento de vários cenários
+function safeParseJson(data) {
+  // Se já for array (alguns drivers convertem automaticamente)
+  if (Array.isArray(data)) return data;
+  
+  // Se for objeto (alguns drivers convertem JSON MySQL para objeto)
+  if (typeof data === 'object' && data !== null) return Object.values(data);
+  
+  // Se for string vazia ou null/undefined
+  if (!data || data === '[]' || data === 'null') return [];
+  
+  // Se for string JSON
+  try {
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [parsed];
+  } catch (e) {
+    console.error('Falha ao parsear JSON:', {
+      input: data,
+      error: e.message
+    });
+    return [];
+  }
+}
+
+
 // Modelo atualizado para getConvidadoById
 export async function getConvidadoByIdModel(id) {
   return new Promise((resolve, reject) => {
