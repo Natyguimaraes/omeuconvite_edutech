@@ -125,68 +125,99 @@ function Eventos() {
   }, [apiUrlEventos, apiUrlConvidados, adminId]);
 
   const getConvidadosPorEvento = (eventoId) => {
-    if (!Array.isArray(convidados)) return [];
+  if (!Array.isArray(convidados)) return [];
+  
+  return convidados.filter(c => 
+    c.eventos?.some(e => e.id === eventoId)
+  );
+};
+
+const getTotalAcompanhantes = (convidadosEvento, eventoId) => {
+  if (!Array.isArray(convidadosEvento)) return 0;
+
+  return convidadosEvento.reduce((total, convidado) => {
+    if (!convidado?.acompanhantes || !Array.isArray(convidado.acompanhantes)) return total;
     
-    return convidados.filter(c => 
-      c.eventos?.some(e => e.id === eventoId)
-    );
-  };
+    // Filtrar acompanhantes deste evento específico
+    return total + convidado.acompanhantes.filter(a => 
+      String(a.eventoId) === String(eventoId)
+    ).length;
+  }, 0);
+};
 
-  const getTotalAcompanhantes = (convidadosEvento, eventoId) => {
-    if (!Array.isArray(convidadosEvento)) return 0;
+const getConfirmadosPorEvento = (eventoId) => {
+  const convidadosEvento = getConvidadosPorEvento(eventoId);
 
-    return convidadosEvento.reduce((total, convidado) => {
-      if (!convidado?.acompanhantes) return total;
+  let totalConfirmados = 0;
 
-      if (Array.isArray(convidado.acompanhantes))
-        return total + convidado.acompanhantes.filter(a => String(a.eventoId) === String(eventoId)).length;
-    }, 0);
-  };
+  convidadosEvento.forEach(convidado => {
+    const eventoConvidado = convidado.eventos?.find(e => e.id === eventoId);
+    if (eventoConvidado?.confirmado === 1) {
+      totalConfirmados += 1;
 
-  const getConfirmadosPorEvento = (eventoId) => {
-    const convidadosEvento = getConvidadosPorEvento(eventoId);
-  
-    let totalConfirmados = 0;
-  
-    convidadosEvento.forEach(convidado => {
-      const eventoConvidado = convidado.eventos?.find(e => e.id === eventoId);
-      if (eventoConvidado?.confirmado === 1) {
-        totalConfirmados += 1;
-  
-        if (Array.isArray(convidado.acompanhantes)) {
-          totalConfirmados += convidado.acompanhantes.filter(a => String(a.eventoId) === String(eventoId)).length;
-        }
+      // Contar apenas acompanhantes confirmados deste evento
+      if (Array.isArray(convidado.acompanhantes)) {
+        totalConfirmados += convidado.acompanhantes.filter(a => 
+          String(a.eventoId) === String(eventoId) && Number(a.confirmado) === 1
+        ).length;
       }
-    });
+    }
+  });
+
+  return totalConfirmados;
+};
+
+const getAusentesPorEvento = (eventoId) => {
+  const convidadosEvento = getConvidadosPorEvento(eventoId);
+
+  let totalConvidadosAusentes = 0;
+  let totalAcompanhantesAusentes = 0;
+
+  for (const convidado of convidadosEvento) {
+    // Verifica se o convidado está ausente neste evento específico
+    const evento = convidado.eventos?.find(e => e.id === eventoId);
+    if (Number(evento?.confirmado) === 2) {
+      totalConvidadosAusentes++;
+    }
+
+    // Conta acompanhantes ausentes DESTE EVENTO ESPECÍFICO
+    if (Array.isArray(convidado.acompanhantes)) {
+      totalAcompanhantesAusentes += convidado.acompanhantes.filter(a => 
+        String(a.eventoId) === String(eventoId) && Number(a.confirmado) === 2
+      ).length;
+    }
+  }
+
+  console.log(`Evento ${eventoId} - Convidados ausentes: ${totalConvidadosAusentes}, Acompanhantes ausentes: ${totalAcompanhantesAusentes}`);
   
-    return totalConfirmados;
-  };
+  return totalConvidadosAusentes + totalAcompanhantesAusentes;
+};
+
+const getPendentesPorEvento = (eventoId) => {
+  const convidadosEvento = getConvidadosPorEvento(eventoId);
+
+  let totalConvidadosPendentes = 0;
+  let totalAcompanhantesPendentes = 0;
+
+  for (const convidado of convidadosEvento) {
+    // Verifica se o convidado está pendente neste evento específico
+    const evento = convidado.eventos?.find(e => e.id === eventoId);
+    if (!evento?.confirmado || Number(evento.confirmado) === 0) {
+      totalConvidadosPendentes++;
+    }
+
+    // Conta acompanhantes pendentes DESTE EVENTO ESPECÍFICO
+    if (Array.isArray(convidado.acompanhantes)) {
+      totalAcompanhantesPendentes += convidado.acompanhantes.filter(a => 
+        String(a.eventoId) === String(eventoId) && (!a.confirmado || Number(a.confirmado) === 0)
+      ).length;
+    }
+  }
+
+  console.log(`Evento ${eventoId} - Convidados pendentes: ${totalConvidadosPendentes}, Acompanhantes pendentes: ${totalAcompanhantesPendentes}`);
   
-  const getAusentesPorEvento = (eventoId) => {
-    const convidadosEvento = getConvidadosPorEvento(eventoId);
-
-    const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
-      if (!convidado?.acompanhantes) return total;
-      return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => a.confirmado === 2).length : 0);
-    }, 0);
-
-    return convidadosEvento.filter(c =>
-      c.eventos?.find(e => e.id === eventoId)?.confirmado === 2
-    ).length + acompanhatesAusentes;
-  };
-
-  const getPendentesPorEvento = (eventoId) => {
-    const convidadosEvento = getConvidadosPorEvento(eventoId);
-
-    const acompanhatesAusentes = convidadosEvento.reduce((total, convidado) => {
-      if (!convidado?.acompanhantes) return total;
-      return total + (Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.filter(a => !a.confirmado).length : 0);
-    }, 0);
-
-    return convidadosEvento.filter(c =>
-      !c.eventos?.find(e => e.id === eventoId)?.confirmado
-    ).length + acompanhatesAusentes;
-  };
+  return totalConvidadosPendentes + totalAcompanhantesPendentes;
+};
 
   const handleEventoClick = (eventoId, e) => {
     if (e?.target?.closest('button')) return;

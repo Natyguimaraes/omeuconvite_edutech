@@ -65,93 +65,157 @@ export async function getConvidadosModel() {
 // )
 export async function getConvidadosModelOtimized() {
   return new Promise((resolve, reject) => {
-    // 1. Primeiro aumenta o limite do GROUP_CONCAT para 10MB
-    conexao.query("SET SESSION group_concat_max_len = 10000000;", (err) => {
-      if (err) return reject(err);
-
-      // 2. Usa JSON_ARRAYAGG que é mais robusto
-      conexao.query(`
-        SELECT 
-          c.id, 
-          c.nome, 
-          c.telefone, 
-          c.email, 
-          c.limite_acompanhante,
-          (
-            SELECT JSON_ARRAYAGG(
-              JSON_OBJECT(
-                'id', a.id,
-                'convidado_id', a.convidado_id,
-                'nome', a.nome,
-                'telefone', IFNULL(a.telefone, ''),
-                'email', IFNULL(a.email, ''),
-                'confirmado', IFNULL(a.confirmado, ''),
-                'eventoId', IFNULL(a.evento_id, ''),
-                'token_usado', IFNULL(a.token_usado, 0)
-              )
-            )
-            FROM acompanhante a
-            WHERE a.convidado_id = c.id AND a.ativo_acompanhante = 1
-          ) AS acompanhantes,
-          (
-            SELECT JSON_ARRAYAGG(
-              JSON_OBJECT(
-                'id', e.id,
-                'administrador_id', IFNULL(e.administrador_id, ''),
-                'ativo', IFNULL(e.ativo, ''),
-                'limite_acompanhante', IFNULL(ce.limite_acompanhante, ''),
-                'confirmado', IFNULL(ce.confirmado, ''),
-                'token_usado', IFNULL(ce.token_usado, 0)
-              )
-            )
-            FROM eventos e
-            JOIN convidado_evento ce ON e.id = ce.evento_id
-            WHERE ce.convidado_id = c.id
-          ) AS eventos
-        FROM convidados c;
-      `, async (err, convidados) => {
-        if (err) return reject(err);
-
-        try {
-          const convidadosCompleto = convidados.map(c => ({
-            ...c,
-            acompanhantes: safeParseJson(c.acompanhantes),
-            eventos: safeParseJson(c.eventos)
-          }));
-          resolve(convidadosCompleto);
-        } catch (error) {
-          console.error('Erro ao processar convidados:', error);
-          reject(error);
-        }
-      });
+    // Aumenta o limite do GROUP_CONCAT para evitar truncamento
+    conexao.query('SET SESSION group_concat_max_len = 1000000;', (err) => {
+      if (err) console.warn('Aviso: Não foi possível aumentar group_concat_max_len');
+    });
+    
+    conexao.query(`
+      SELECT id, nome, telefone, email,
+        (
+          SELECT
+            CASE 
+              WHEN COUNT(*) > 0 THEN
+                CONCAT('[',
+                  GROUP_CONCAT(
+                    JSON_OBJECT(
+                      'id', acompanhante.id, 
+                      'convidado_id', acompanhante.convidado_id, 
+                      'nome', COALESCE(acompanhante.nome, ''), 
+                      'telefone', COALESCE(acompanhante.telefone, ''), 
+                      'email', COALESCE(acompanhante.email, ''), 
+                      'confirmado', COALESCE(acompanhante.confirmado, ''), 
+                      'eventoId', COALESCE(acompanhante.evento_id, ''), 
+                      'token_usado', COALESCE(acompanhante.token_usado, 0)
+                    )
+                    SEPARATOR ", "
+                  ),
+                ']')
+              ELSE '[]'
+            END
+          FROM acompanhante 
+          WHERE convidado_id = convidados.id AND ativo_acompanhante = 1
+        ) AS acompanhantes,
+        (
+          SELECT
+            CASE 
+              WHEN COUNT(*) > 0 THEN
+                CONCAT('[',
+                  GROUP_CONCAT(
+                    DISTINCT JSON_OBJECT(
+                      'id', e.id,
+                      'administrador_id', COALESCE(e.administrador_id, ''),
+                      'ativo', COALESCE(e.ativo, ''),
+                      'limite_acompanhante', COALESCE(ce.limite_acompanhante, 0),
+                      'confirmado', COALESCE(ce.confirmado, 0),
+                      'token_usado', COALESCE(ce.token_usado, 0)
+                    )
+                    SEPARATOR ", "
+                  ),
+                ']')
+              ELSE '[]'
+            END
+          FROM eventos e
+          JOIN convidado_evento ce ON e.id = ce.evento_id
+          WHERE ce.convidado_id = convidados.id
+        ) AS eventos
+      FROM convidados;
+    `,
+    async (err, convidados) => {
+      if (err) {
+        console.error('Erro na query:', err);
+        return reject(err);
+      }
+      
+      console.log('Dados brutos:', convidados);
+      
+      try {
+        const convidadosCompleto = await Promise.all(
+          convidados.map(async c => {
+            let acompanhantes = [];
+            let eventos = [];
+            
+            // Parse seguro dos acompanhantes
+            try {
+              if (c.acompanhantes && c.acompanhantes !== 'null') {
+                // Verifica se o JSON está completo antes de parsear
+                const acompData = c.acompanhantes.trim();
+                if (acompData.startsWith('[') && acompData.endsWith(']')) {
+                  acompanhantes = JSON.parse(acompData);
+                } else {
+                  console.warn('JSON truncado detectado para acompanhantes. Usando query alternativa.');
+                  // Fallback: buscar acompanhantes separadamente
+                  acompanhantes = await getAcompanhantesSeparadamente(c.id);
+                }
+              }
+            } catch (parseError) {
+              console.error('Erro ao parsear acompanhantes:', parseError);
+              console.error('Dados truncados:', c.acompanhantes.substring(0, 100) + '...');
+              // Fallback: buscar acompanhantes separadamente
+              acompanhantes = await getAcompanhantesSeparadamente(c.id);
+            }
+            
+            // Parse seguro dos eventos
+            try {
+              if (c.eventos && c.eventos !== 'null') {
+                const eventData = c.eventos.trim();
+                if (eventData.startsWith('[') && eventData.endsWith(']')) {
+                  eventos = JSON.parse(eventData);
+                } else {
+                  console.warn('JSON truncado detectado para eventos. Usando query alternativa.');
+                  eventos = await getEventosSeparadamente(c.id);
+                }
+              }
+            } catch (parseError) {
+              console.error('Erro ao parsear eventos:', parseError);
+              console.error('Dados truncados:', c.eventos.substring(0, 100) + '...');
+              eventos = await getEventosSeparadamente(c.id);
+            }
+            
+            return {
+              ...c,
+              acompanhantes,
+              eventos
+            };
+          })
+        );
+        
+        resolve(convidadosCompleto);
+      } catch (error) {
+        console.error('Erro no processamento:', error);
+        reject(error);
+      }
     });
   });
 }
 
-// Parser seguro com tratamento de vários cenários
-function safeParseJson(data) {
-  // Se já for array (alguns drivers convertem automaticamente)
-  if (Array.isArray(data)) return data;
-  
-  // Se for objeto (alguns drivers convertem JSON MySQL para objeto)
-  if (typeof data === 'object' && data !== null) return Object.values(data);
-  
-  // Se for string vazia ou null/undefined
-  if (!data || data === '[]' || data === 'null') return [];
-  
-  // Se for string JSON
-  try {
-    const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : [parsed];
-  } catch (e) {
-    console.error('Falha ao parsear JSON:', {
-      input: data,
-      error: e.message
+// Funções auxiliares para buscar dados separadamente quando há truncamento
+async function getAcompanhantesSeparadamente(convidadoId) {
+  return new Promise((resolve, reject) => {
+    conexao.query(`
+      SELECT id, nome, telefone, email, confirmado, evento_id as eventoId, token_usado, convidado_id
+      FROM acompanhante 
+      WHERE convidado_id = ? AND ativo_acompanhante = 1
+    `, [convidadoId], (err, results) => {
+      if (err) return reject(err);
+      resolve(results || []);
     });
-    return [];
-  }
+  });
 }
 
+async function getEventosSeparadamente(convidadoId) {
+  return new Promise((resolve, reject) => {
+    conexao.query(`
+      SELECT e.id, e.administrador_id, e.ativo, ce.limite_acompanhante, ce.confirmado, ce.token_usado
+      FROM eventos e
+      JOIN convidado_evento ce ON e.id = ce.evento_id
+      WHERE ce.convidado_id = ?
+    `, [convidadoId], (err, results) => {
+      if (err) return reject(err);
+      resolve(results || []);
+    });
+  });
+}
 
 // Modelo atualizado para getConvidadoById
 export async function getConvidadoByIdModel(id) {
@@ -290,7 +354,7 @@ export function createAcompanhanteModel(dados) {
     const { nome, telefone, email, convidado_id, evento_id } = dados;
     conexao.query(
       "INSERT INTO acompanhante SET ?",
-      { nome, telefone, email, convidado_id, confirmado: 1, evento_id },
+      { nome, telefone, email, convidado_id, confirmado: 0, evento_id },
       (err, result) => {
         if (err) return reject(err);
         resolve(result);

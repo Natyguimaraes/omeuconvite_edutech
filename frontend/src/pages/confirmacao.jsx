@@ -655,15 +655,26 @@ const Confirmacao = () => {
   };
 
   const handleAddAcompanhante = () => {
-    if (editData.acompanhantes.length >= (editData.limite_acompanhante || 0)) {
-      toast.error(`Limite de ${editData.limite_acompanhante} acompanhantes atingido`);
-      return;
-    }
-    setEditData((prev) => ({
-      ...prev,
-      acompanhantes: [...prev.acompanhantes, { nome: "", telefone: "", email: "" }],
-    }));
+  if (editData.acompanhantes.length >= (editData.limite_acompanhante || 0)) {
+    toast.error(`Limite de ${editData.limite_acompanhante} acompanhantes atingido`);
+    return;
+  }
+  
+  const novoAcompanhante = { 
+    nome: "", 
+    telefone: "", 
+    email: "",
+    confirmado: 0, // Explicitamente pendente
+    eventoId: editData.id
   };
+  
+  console.log("Novo acompanhante criado:", novoAcompanhante);
+  
+  setEditData((prev) => ({
+    ...prev,
+    acompanhantes: [...prev.acompanhantes, novoAcompanhante],
+  }));
+};
 
   // Enviar WhatsApp
   const handleSendWhatsapp = async (convidado) => {
