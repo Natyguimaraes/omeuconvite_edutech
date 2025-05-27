@@ -205,7 +205,7 @@ const getPendentesPorEvento = (eventoId) => {
     if (!evento?.confirmado || Number(evento.confirmado) === 0) {
       totalConvidadosPendentes++;
     }
-
+    
     // Conta acompanhantes pendentes DESTE EVENTO ESPECÍFICO
     if (Array.isArray(convidado.acompanhantes)) {
       totalAcompanhantesPendentes += convidado.acompanhantes.filter(a => 
