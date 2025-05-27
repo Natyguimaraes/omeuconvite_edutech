@@ -362,7 +362,7 @@ export async function createAcompanhante(req, res) {
       telefone: telefone || null,
       email: email || null,
       convidado_id: convidadoId,
-      confirmado: false, //true
+      confirmado: true,
       evento_id: eventoId
     });
     console.log(result)

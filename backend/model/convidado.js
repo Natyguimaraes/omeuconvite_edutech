@@ -354,7 +354,7 @@ export function createAcompanhanteModel(dados) {
     const { nome, telefone, email, convidado_id, evento_id } = dados;
     conexao.query(
       "INSERT INTO acompanhante SET ?",
-      { nome, telefone, email, convidado_id, confirmado: 0, evento_id },
+      { nome, telefone, email, convidado_id, confirmado: 1, evento_id },
       (err, result) => {
         if (err) return reject(err);
         resolve(result);

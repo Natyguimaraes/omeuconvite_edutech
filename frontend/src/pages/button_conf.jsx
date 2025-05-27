@@ -377,7 +377,7 @@ function EventCredential() {
                 nome: acompanhante.nome,
                 telefone: acompanhante.telefone || null,
                 email: acompanhante.email || null,
-                confirmado: true,
+                confirmado: 1,
                 eventoId: evento.id,
               }),
             }
@@ -403,7 +403,7 @@ function EventCredential() {
                 nome: acompanhante.nome,
                 telefone: acompanhante.telefone || null,
                 email: acompanhante.email || null,
-                confirmado: true,
+                confirmado: 1,
                 evento_id: evento.id,
               }),
             }
@@ -422,7 +422,7 @@ function EventCredential() {
         ...prev.filter(a => a.id),
         ...resultados.map(r => ({
           ...r.data,
-          confirmado: true,
+          confirmado: 1,
         })),
       ]);
 
