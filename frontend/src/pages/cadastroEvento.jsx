@@ -527,7 +527,7 @@ function CadastroEventos() {
                   <button
                     onClick={handleCadastro}
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-3.5 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 flex items-center justify-center"
+                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-3.5 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-200/50 flex items-center justify-center cursor-pointer"
                   >
                     {isSubmitting ? (
                       <>

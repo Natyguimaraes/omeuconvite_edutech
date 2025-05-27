@@ -348,7 +348,7 @@ export function removeConvidadoFromEventoModel(convidado_id, evento_id) {
   });
 }
 
-// Funções para acompanhantes (permanecem as mesmas)
+// Funções para acompanhantes
 export function createAcompanhanteModel(dados) {
   return new Promise((resolve, reject) => {
     const { nome, telefone, email, convidado_id, evento_id } = dados;

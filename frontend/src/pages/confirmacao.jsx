@@ -664,11 +664,11 @@ const Confirmacao = () => {
     nome: "", 
     telefone: "", 
     email: "",
-    confirmado: 0, // Explicitamente pendente
+    confirmado: 0, // Explicitamente pendente o acompanhante
     eventoId: editData.id
   };
   
-  console.log("Novo acompanhante criado:", novoAcompanhante);
+  console.log("Novo acompanhante criado aqui :", novoAcompanhante);
   
   setEditData((prev) => ({
     ...prev,
@@ -1173,8 +1173,8 @@ const togglePresenca = async (convidadoId, acompanhanteId = null) => {
                                                                 ];
                                                                 updatedAcompanhantes[index] = {
                                                                   ...updatedAcompanhantes[index],
-                                                                  telefone: e.target
-                                                                    .value,
+                                                                  telefone: formatPhoneNumber(e.target
+                                                                    .value),
                                                                 };
                                                                 setEditData({
                                                                   ...editData,

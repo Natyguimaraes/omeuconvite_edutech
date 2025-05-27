@@ -16,6 +16,7 @@ import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import GerarCredencialButton from "../components/GerarCredencialButton"
 import NavBar from "../components/menu";
+import { formatPhoneNumber } from "../components/phoneUtils";
 
 function EventCredential() {
 
@@ -962,7 +963,7 @@ function EventCredential() {
       />
     </div>
 
-    {/* E-mail (ocupa 2 colunas para alinhar melhor visualmente) */}
+ 
     <div className="relative md:col-span-2">
       <div className="absolute inset-y-0 left-4 flex items-center text-gray-400">
         <Mail size={22} />
@@ -1103,14 +1104,13 @@ function EventCredential() {
                                 className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-5 text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
                                   isConfirmed ? "cursor-not-allowed" : ""
                                 }`}
+                              
                                 type="tel"
                                 placeholder="Telefone com DDD (opcional)"
                                 value={acompanhante.telefone || ""}
                                 onChange={(e) =>
                                   handleChangeAcompanhante(
-                                    index,
-                                    "telefone",
-                                    e.target.value
+                                    index, "telefone", formatPhoneNumber(e.target.value)
                                   )
                                 }
                                 disabled={
