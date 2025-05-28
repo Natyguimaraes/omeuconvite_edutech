@@ -571,8 +571,8 @@ const getPendentesPorEvento = (eventoId) => {
                       Parece que você ainda não tem eventos cadastrados. Que tal começar criando seu primeiro evento?
                     </p>
                     <button
-                      className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg active:scale-95 inline-flex items-center"
-                      onClick={() => navigate("/cadastroEvento")}
+                      className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg active:scale-95 inline-flex items-center cursor-pointer"
+                      onClick={() => navigate("/cadastrar_evento")}
                     >
                       <PlusCircle className="h-5 w-5 mr-2" />
                       <span>Criar Primeiro Evento</span>

@@ -228,7 +228,7 @@ const GuestSearchAdd = ({
       {/* Resultados da busca */}
       {searchTerm && searchResults.length > 0 && (
         <div className="mt-2 bg-white rounded-md shadow-lg overflow-hidden border border-gray-200">
-          <ul className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+          <ul className="divide-y divide-gray-300 max-h-96 overflow-y-auto">
             {searchResults.map((convidado) => {
               // Encontra o primeiro evento do convidado que pertence ao admin
               const eventoConvidado = convidado.eventos?.find(e => 
@@ -263,7 +263,7 @@ const GuestSearchAdd = ({
                     </div>
                   </div>
                   <button
-                    className="ml-4 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors"
+                    className="ml-4 bg-indigo-800 text-white p-2 rounded-full hover:bg-indigo-600 transition-colors cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleAddToEvent(convidado);
