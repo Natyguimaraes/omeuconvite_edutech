@@ -116,7 +116,7 @@ const Confirmacao = () => {
           
         const eventoRelacao = eventosConvidado.find(e => e?.id === eventoIdNum);
 
-        // DEBUG: Mostra os dados completos do convidado
+        // Mostra os dados completos do convidado
         console.log('Dados completos do convidado:', convidado);
         
         // Pega todos os acompanhantes do convidado que pertencem a este evento
@@ -205,7 +205,7 @@ const Confirmacao = () => {
     setSearchResults(results);
   }, [searchTerm, convidados, eventoId, eventos]);
 
-  // Adicionar convidado existente ao evento
+  // Adicionar convidado existente ao evento através da barra de busca
  const handleAddToEvent = async (convidado) => {
   setAddingGuest(true);
   try {
@@ -327,7 +327,7 @@ const Confirmacao = () => {
 
       const responseData = await responseConvidado.json();
       
-      // Verificação crítica - adapte conforme a estrutura real da sua API
+      // Verificação crítica 
       const novoConvidadoId = responseData.id || responseData.data?.id;
       if (!novoConvidadoId) {
         throw new Error("Não foi possível obter o ID do convidado criado");
@@ -664,7 +664,7 @@ const Confirmacao = () => {
     nome: "", 
     telefone: "", 
     email: "",
-    confirmado: 0, // Explicitamente pendente o acompanhante
+    confirmado: 1, // acompanhante confirmado
     eventoId: editData.id
   };
   
@@ -723,7 +723,7 @@ const Confirmacao = () => {
       if (!acompanhanteId) {
         // Toggle confirmação do convidado no evento
         const convidado = convidados.find(c => c.id === convidadoId);
-        const estaConfirmado = convidado.eventos?.find(e => e.id === parseInt(eventoId))?.confirmado;
+        const estaConfirmado = convidado.eventos?.find(e => e.id === parseInt(eventoId))?.confirmad;
         
         const response = await fetch(
           `${apiConvidados}/${convidadoId}/eventos/${eventoId}/confirmar`,
@@ -780,7 +780,7 @@ const Confirmacao = () => {
               a.id === acompanhanteId 
                 ? { 
                     ...a, 
-                    confirmado: !a.confirmado,
+                    confirmado: !a.confirmado==1,
                     token_usado: data.token_usado // Atualiza o token_usado com a resposta da API
                   } 
                 : a

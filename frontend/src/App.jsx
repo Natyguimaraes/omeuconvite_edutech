@@ -34,8 +34,8 @@ const handleLogout = () => {
     <Router>
       {isLoggedIn && (
         <InactivityHandlerWithModal
-          timeout={48 * 60 * 60 * 1000}         // 1 minuto total
-          warningBefore={5 * 60 * 1000}      // Avisar 30 segundos antes
+          timeout={48 * 60 * 60 * 1000}         // 48h minuto total
+          warningBefore={5 * 60 * 1000}      // Avisar z segundos antes
           onLogout={handleLogout}
         />
       )}
@@ -65,7 +65,8 @@ const handleLogout = () => {
         <Route path="/credenciais" element={<CredenciaisPage />} />
       </Routes>
     </Router>
-    <Rodape /></>
+    <Rodape />
+    </>
   );
 }
 

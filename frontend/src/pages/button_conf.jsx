@@ -382,14 +382,16 @@ function EventCredential() {
               }),
             }
           );
-
+                   
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || "Erro ao salvar acompanhante");
           }
 
           return await response.json();
+           
         })
+        
       );
 
       const resultadoAcompanhanteComId = await Promise.all(
@@ -415,16 +417,25 @@ function EventCredential() {
           }
 
           return await response.json();
+        
+
         })
       )
 
       setAcompanhantes(prev => [
-        ...prev.filter(a => a.id),
-        ...resultados.map(r => ({
-          ...r.data,
-          confirmado: 1,
-        })),
-      ]);
+  ...prev.filter(a => a.id),
+  ...resultados.map(r => ({
+    ...r.data,
+    confirmado: 1,
+    evento_id: evento.id,
+  })),
+  ...resultadoAcompanhanteComId.map(r => ({
+    ...r.data,
+    confirmado: 1,
+    evento_id: evento.id,
+  })),
+]);
+
 
     } catch (error) {
       console.error("Erro ao salvar acompanhantes:", error);

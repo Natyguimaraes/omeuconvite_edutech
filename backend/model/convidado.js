@@ -210,7 +210,6 @@ async function getEventosSeparadamente(convidadoId) {
       FROM eventos e
       JOIN convidado_evento ce ON e.id = ce.evento_id
       WHERE ce.convidado_id = ?
-
     `, [convidadoId], (err, results) => {
       if (err) return reject(err);
       resolve(results || []);
@@ -355,7 +354,7 @@ export function createAcompanhanteModel(dados) {
     const { nome, telefone, email, convidado_id, evento_id } = dados;
     conexao.query(
       "INSERT INTO acompanhante SET ?",
-      { nome, telefone, email, convidado_id, confirmado: 1, evento_id },
+      { nome, telefone, email, convidado_id, confirmado: 0, evento_id }, //para saber que mudei o confirmado aqui
       (err, result) => {
         if (err) return reject(err);
         resolve(result);
