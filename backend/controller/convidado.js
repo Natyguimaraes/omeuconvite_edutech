@@ -325,67 +325,69 @@ export async function confirmarPresencaConvidado(req, res) {
 export async function createAcompanhante(req, res) {
   try {
     const { convidadoId } = req.params;
-    const { nome, telefone, email, eventoId } = req.body;
+       const { nome, telefone, email, eventoId, confirmado } = req.body; // <-- Adicionado 'confirmado' para receber do frontend
 
-    console.log("Dados do acompanhante:", req.params);
-    console.log("Dados do acompanhante:", req.body);
+    console.log("Dados do acompanhante (params):", req.params);
+    console.log("Dados do acompanhante (body):", req.body);
 
-    // Verifica se o convidado existe
-    const convidado = await getConvidadoByIdModel(convidadoId);
-    if (!convidado) {
-      return res.status(404).json({ 
-        success: false,
-        error: "Convidado não encontrado" 
-      });
-    }
+    // Verifica se o convidado existe
+    const convidado = await getConvidadoByIdModel(convidadoId);
+    if (!convidado) {
+      return res.status(404).json({
+        success: false,
+        error: "Convidado não encontrado"
+      });
+    }
 
-    // Verifica o limite de acompanhantes para cada evento
-    const acompanhantes = (await getAcompanhantesByConvidadoIdModel(convidadoId, eventoId)).filter(a => String(a.evento_id) === String(eventoId));
-    const eventosComLimiteExcedido = convidado.eventos?.filter(e => 
-      acompanhantes.length >= (e.limite_acompanhante || 0) && String(e.id) === String(eventoId)
-    );
+    // Verifica o limite de acompanhantes para cada evento
+    // Sugestão: Acompanhantes já buscados pelo model retornam o evento_id. Use isso.
+    const acompanhantesExistentes = (await getAcompanhantesByConvidadoIdModel(convidadoId))
+      .filter(a => String(a.evento_id) === String(eventoId));
 
-    console.log("convidado", convidado)
-    console.log("eventosComLimiteExcedido", eventosComLimiteExcedido)
-    console.log("acompanhantes", acompanhantes)
+    const limiteAcompanhanteDoEvento = convidado.eventos?.find(e => String(e.id) === String(eventoId))?.limite_acompanhante || 0;
 
-    if (eventosComLimiteExcedido?.length > 0) {
-      return res.status(400).json({ 
-        success: false,
-        error: `Limite de acompanhantes atingido para o(s) evento(s): ${eventosComLimiteExcedido.map(e => e.nome).join(', ')}`
-      });
-    }
+    console.log("convidado", convidado)
+    console.log("acompanhantes Existentes (filtrados pelo evento):", acompanhantesExistentes)
+    console.log("Limite de acompanhantes para este evento:", limiteAcompanhanteDoEvento)
 
-    // Cria o acompanhante
-    const result = await createAcompanhanteModel({
-      nome,
-      telefone: telefone || null,
-      email: email || null,
-      convidado_id: convidadoId,
-      confirmado: false,
-      evento_id: eventoId
-    });
-    console.log(result)
 
-    res.status(201).json({ 
-      success: true,
-      message: "Acompanhante adicionado com sucesso",
-      data: {
-        id: result.insertId,
-        nome,
-        telefone,
-        email,
-        confirmado: false,
-        evento_id: eventoId
-      }
-    });
-  } catch (err) {
-    console.error("Erro ao criar acompanhante:", err);
-    res.status(500).json({ 
-      success: false,
-      error: "Erro interno ao processar solicitação" 
-    });
-  }
+    if (acompanhantesExistentes.length >= limiteAcompanhanteDoEvento) {
+      return res.status(400).json({
+        success: false,
+        error: `Limite de ${limiteAcompanhanteDoEvento} acompanhantes atingido para o evento.`
+      });
+    }
+
+    // Cria o acompanhante
+    const result = await createAcompanhanteModel({
+      nome,
+      telefone: telefone || null,
+      email: email || null,
+      convidado_id: convidadoId,
+      confirmado: confirmado, // <-- AGORA PASSA O VALOR RECEBIDO DO FRONTEND (0 ou 1)
+      evento_id: eventoId
+    });
+    console.log("Resultado da criação do acompanhante:", result)
+
+    res.status(201).json({
+      success: true,
+      message: "Acompanhante adicionado com sucesso",
+      data: {
+        id: result.insertId,
+        nome,
+        telefone,
+        email,
+        confirmado: confirmado, // <-- E RETORNA ESSE MESMO VALOR NA RESPOSTA
+        evento_id: eventoId
+      }
+    });
+  } catch (err) {
+    console.error("Erro ao criar acompanhante:", err);
+    res.status(500).json({
+      success: false,
+      error: "Erro interno ao processar solicitação"
+    });
+  }
 }
 
 export async function getAcompanhantesByConvidadoId(req, res) {

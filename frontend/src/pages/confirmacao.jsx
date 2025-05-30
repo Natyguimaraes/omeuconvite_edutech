@@ -654,22 +654,27 @@ const Confirmacao = () => {
     }
   };
 
-  const handleAddAcompanhante = () => {
+const handleAddAcompanhante = () => {
   if (editData.acompanhantes.length >= (editData.limite_acompanhante || 0)) {
     toast.error(`Limite de ${editData.limite_acompanhante} acompanhantes atingido`);
     return;
   }
-  
-  const novoAcompanhante = { 
-    nome: "", 
-    telefone: "", 
+
+  // Encontra o convidado que está sendo editado para pegar o status de confirmação
+  const convidadoEmEdicao = convidados.find(c => c.id === editIndex);
+  const statusConvidadoPrincipal = convidadoEmEdicao?.eventos?.find(e => e.id === parseInt(eventoId))?.confirmado || 0;
+
+  const novoAcompanhante = {
+    nome: "",
+    telefone: "",
     email: "",
-    confirmado: 1, // acompanhante confirmado
-    eventoId: editData.id
+    // Define o status do acompanhante com base no status do convidado principal
+    confirmado: statusConvidadoPrincipal === 1 ? 1 : 0, // Se convidado principal está confirmado (1), o acompanhante tbm. Senão, 0.
+    eventoId: parseInt(eventoId) // Garante que o eventoId é um número inteiro
   };
-  
+
   console.log("Novo acompanhante criado aqui :", novoAcompanhante);
-  
+
   setEditData((prev) => ({
     ...prev,
     acompanhantes: [...prev.acompanhantes, novoAcompanhante],
