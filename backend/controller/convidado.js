@@ -3,7 +3,7 @@ import {
   updateConvidadoModel,
   deleteConvidadoModel,
   createAcompanhanteModel,
-  getAcompanhantesByConvidadoIdModel,
+  getAcompanhantesByConvidadoEvento, // <--- Esta é a função DO MODEL
   deleteAcompanhanteModel,
   updateAcompanhanteModel,
   confirmarAcompanhantesModel,
@@ -11,240 +11,292 @@ import {
   addConvidadoToEventoModel,
   updateConvidadoEventoModel,
   removeConvidadoFromEventoModel,
-  removeConvidadoFromAllEventosModel, inativaAcompanhanteModel, getConvidadosModelOtimized,
+  removeConvidadoFromAllEventosModel,
+  inativaAcompanhanteModel,
+  getConvidadosModel,
   getConvidadoByTokenModel,
-  confirmarPresencaPorTokenModel
+  confirmarPresencaPorTokenModel,
 } from "../model/convidado.js";
-import conexao from '../configuracao/banco.js'
+import conexao from '../configuracao/banco.js';
 
+/**
+ * @async
+ * @function createConvidado
+ * @description Cria um novo convidado, associa a eventos e adiciona acompanhantes.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function createConvidado(req, res) {
   try {
     const { nome, telefone, email, limite_padrao, eventos, acompanhantes } = req.body;
-    
-    // 1. Cria o convidado com limite padrão
-    const result = await createConvidadoModel({
-      nome, 
-      telefone, 
+
+    const resultConvidado = await createConvidadoModel({
+      nome,
+      telefone,
       email,
-      limite_acompanhante: limite_padrao || 0
+      limite_acompanhante: limite_padrao || 0,
     });
 
-    const convidadoId = result.insertId;
+    const convidadoId = resultConvidado.insertId;
 
-    // 2. Associa a eventos usando o limite padrão ou sobrescrevendo
     if (eventos?.length > 0) {
       await Promise.all(
-        eventos.map(evento => 
+        eventos.map((evento) =>
           addConvidadoToEventoModel(
-            convidadoId, 
-            evento.id, 
+            convidadoId,
+            evento.id,
             evento.limite_acompanhante || limite_padrao || 0,
-            evento.confirmado
+            evento.confirmado || 0
           )
         )
       );
     }
 
-    // 3. Adiciona acompanhantes
     if (acompanhantes?.length > 0) {
       await Promise.all(
-        acompanhantes.map(a => 
-          createAcompanhanteModel({ ...a, convidado_id: convidadoId })
-        )
-      );
-    }
-
-    res.status(201).json({ 
-      success: true,
-      data: { 
-        id: convidadoId,
-        limite_padrao: limite_padrao || 0
-      }
-    });
-  } catch (error) {
-    console.error("Erro ao criar convidado:", error);
-    res.status(500).json({ 
-      success: false,
-      error: error.message 
-    });
-  }
-}
-export async function getAllConvidados(req, res) {
-  try {
-    console.log()
-    // const convidados = await getConvidadosModel();
-    const convidados = await getConvidadosModelOtimized();
-    res.json({
-      success: true,
-      data: convidados 
-    });
-  } catch (err) {
-    console.error("Erro ao buscar convidados:", err);
-    res.status(500).json({ 
-      success: false,
-      error: "Erro ao buscar convidados"
-    });
-  }
-}
-
-export async function updateConvidado(req, res) {
-  try {
-    const { id } = req.params;
-    const { eventos, ...dadosConvidado } = req.body;
-    
-    // Atualiza dados básicos do convidado
-    const result = await updateConvidadoModel(id, dadosConvidado);
-    
-    if (!result.affectedRows) {
-      return res.status(404).json({ 
-        success: false,
-        error: "Convidado não encontrado" 
-      });
-    }
-    
-    // Se houver eventos para atualizar
-    if (eventos) {
-      // Primeiro remove todas as associações existentes
-      await removeConvidadoFromAllEventosModel(id);
-      
-      // Depois adiciona as novas associações
-      await Promise.all(
-        eventos.map(evento => 
-          addConvidadoToEventoModel(id, evento.id, {
-            limite_acompanhante: evento.limite_acompanhante,
-            confirmado: evento.confirmado
+        acompanhantes.map((a) =>
+          createAcompanhanteModel({
+            ...a,
+            convidado_id: convidadoId,
+            evento_id: a.eventoId,
           })
         )
       );
     }
-    
-    res.json({ 
+
+    res.status(201).json({
       success: true,
-      message: "Convidado atualizado com sucesso" 
+      data: {
+        id: convidadoId,
+        limite_padrao: limite_padrao || 0,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao criar convidado:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+}
+
+/**
+ * @async
+ * @function getAllConvidados
+ * @description Retorna todos os convidados com seus detalhes completos.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
+export async function getAllConvidados(req, res) {
+  try {
+    const convidados = await getConvidadosModel();
+    res.json({
+      success: true,
+      data: convidados,
+    });
+  } catch (err) {
+    console.error("Erro ao buscar convidados:", err);
+    res.status(500).json({
+      success: false,
+      error: "Erro ao buscar convidados",
+    });
+  }
+}
+
+/**
+ * @async
+ * @function updateConvidado
+ * @description Atualiza os dados de um convidado e suas associações com eventos.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
+export async function updateConvidado(req, res) {
+  try {
+    const { id } = req.params;
+    const { eventos, ...dadosConvidado } = req.body;
+
+    const resultUpdateConvidado = await updateConvidadoModel(id, dadosConvidado);
+
+    if (!resultUpdateConvidado.affectedRows) {
+      const convidadoExistente = await getConvidadoByIdModel(id);
+      if (!convidadoExistente) {
+          return res.status(404).json({
+              success: false,
+              error: "Convidado não encontrado",
+          });
+      }
+    }
+
+    if (eventos) {
+        await removeConvidadoFromAllEventosModel(id);
+
+        await Promise.all(
+            eventos.map((evento) =>
+                addConvidadoToEventoModel(
+                    id,
+                    evento.id,
+                    evento.limite_acompanhante,
+                    evento.confirmado
+                )
+            )
+        );
+    }
+
+    res.json({
+      success: true,
+      message: "Convidado atualizado com sucesso",
     });
   } catch (err) {
     console.error("Erro ao atualizar convidado:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Erro ao atualizar convidado"
+      error: "Erro ao atualizar convidado",
     });
   }
 }
 
+/**
+ * @async
+ * @function deleteConvidadoById
+ * @description Inativa um convidado e remove suas associações com eventos.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function deleteConvidadoById(req, res) {
   try {
     const { id } = req.params;
-    
-    // Remove todas as associações com eventos primeiro
-    await removeConvidadoFromAllEventosModel(id);
-    
-    // Depois remove o convidado
+
     const result = await deleteConvidadoModel(id);
-    
+
     if (!result.affectedRows) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Convidado não encontrado" 
+        error: "Convidado não encontrado",
       });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: "Convidado removido com sucesso" 
+      message: "Convidado inativado com sucesso (e associações removidas se configurado em cascata)",
     });
   } catch (err) {
-    console.error("Erro ao remover convidado:", err);
-    res.status(500).json({ 
+    console.error("Erro ao inativar convidado:", err);
+    res.status(500).json({
       success: false,
-      error: "Erro ao remover convidado"
+      error: "Erro ao inativar convidado",
     });
   }
 }
 
+/**
+ * @async
+ * @function getConvidadoById
+ * @description Busca os detalhes de um convidado específico.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function getConvidadoById(req, res) {
   try {
     const { id } = req.params;
     const convidado = await getConvidadoByIdModel(id);
-    
+
     if (!convidado) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Convidado não encontrado" 
+        error: "Convidado não encontrado",
       });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      data: convidado 
+      data: convidado,
     });
   } catch (err) {
     console.error("Erro ao buscar convidado:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Erro ao buscar convidado" 
+      error: "Erro ao buscar convidado",
     });
   }
 }
 
-// Corrigindo addConvidadoToEvento
-// Certifique-se que a função existe e está exportada
+/**
+ * @async
+ * @function addConvidadoToEvento
+ * @description Associa um convidado a um evento.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function addConvidadoToEvento(req, res) {
   try {
     const { convidadoId, eventoId } = req.params;
     const { limite_acompanhante, confirmado } = req.body;
 
     const result = await addConvidadoToEventoModel(
-      convidadoId, 
-      eventoId, 
-      limite_acompanhante, // valor direto, não objeto
-      confirmado // valor direto, não objeto
+      convidadoId,
+      eventoId,
+      limite_acompanhante,
+      confirmado
     );
 
     res.status(201).json({
       success: true,
       message: "Convidado associado ao evento com sucesso",
-      data: result
+      data: result,
     });
   } catch (err) {
     console.error("Erro ao associar convidado ao evento:", err);
     res.status(500).json({
       success: false,
-      error: "Erro ao associar convidado ao evento"
+      error: "Erro ao associar convidado ao evento",
     });
   }
 }
 
+/**
+ * @async
+ * @function updateConvidadoEvento
+ * @description Atualiza os detalhes da associação de um convidado a um evento.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function updateConvidadoEvento(req, res) {
   try {
     const { convidadoId, eventoId } = req.params;
     const { limite_acompanhante, confirmado } = req.body;
 
-    const result = await updateConvidadoEventoModel(
-      convidadoId,
-      eventoId,
-      { limite_acompanhante, confirmado }
-    );
+    const result = await updateConvidadoEventoModel(convidadoId, eventoId, {
+      limite_acompanhante,
+      confirmado,
+    });
 
     if (!result.affectedRows) {
       return res.status(404).json({
         success: false,
-        error: "Relação convidado-evento não encontrada"
+        error: "Relação convidado-evento não encontrada",
       });
     }
 
     res.json({
       success: true,
-      message: "Relação convidado-evento atualizada com sucesso"
+      message: "Relação convidado-evento atualizada com sucesso",
     });
   } catch (err) {
     console.error("Erro ao atualizar relação convidado-evento:", err);
     res.status(500).json({
       success: false,
-      error: "Erro ao atualizar relação convidado-evento"
+      error: "Erro ao atualizar relação convidado-evento",
     });
   }
 }
 
+/**
+ * @async
+ * @function removeConvidadoFromEvento
+ * @description Remove a associação de um convidado a um evento.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function removeConvidadoFromEvento(req, res) {
   try {
     const { convidadoId, eventoId } = req.params;
@@ -254,120 +306,75 @@ export async function removeConvidadoFromEvento(req, res) {
     if (!result.affectedRows) {
       return res.status(404).json({
         success: false,
-        error: "Relação convidado-evento não encontrada"
+        error: "Relação convidado-evento não encontrada",
       });
     }
 
     res.json({
       success: true,
-      message: "Convidado removido do evento com sucesso"
+      message: "Convidado removido do evento com sucesso",
     });
   } catch (err) {
     console.error("Erro ao remover convidado do evento:", err);
     res.status(500).json({
       success: false,
-      error: "Erro ao remover convidado do evento"
+      error: "Erro ao remover convidado do evento",
     });
   }
 }
 
-export async function confirmarPresencaConvidado(req, res) {
-  try {
-    const { convidadoId, eventoId } = req.params;
-    const { confirmado } = req.body;
-    
-    // Primeiro busca o convidado para pegar o limite
-    const convidado = await getConvidadoByIdModel(convidadoId);
-    if (!convidado) {
-      return res.status(404).json({ 
-        success: false,
-        error: "Convidado não encontrado" 
-      });
-    }
-    
-    // Atualiza a confirmação na tabela de relação
-    const result = await updateConvidadoEventoModel(
-      convidadoId, 
-      eventoId, 
-      { 
-        confirmado,
-        // Mantém o limite existente ou usa o do convidado
-        limite_acompanhante: convidado.limite_acompanhante 
-      }
-    );
-
-    if (confirmado == 2) {
-      await inativaAcompanhanteByIdConvidado(convidadoId)
-    }
-    
-    if (!result.affectedRows) {
-      return res.status(404).json({ 
-        success: false,
-        error: "Relação convidado-evento não encontrada" 
-      });
-    }
-    
-    res.json({ 
-      success: true,
-      message: "Presença do convidado confirmada com sucesso",
-      data: {
-        limite_acompanhante: convidado.limite_acompanhante
-      }
-    });
-  } catch (err) {
-    console.error("Erro ao confirmar presença do convidado:", err);
-    res.status(500).json({ 
-      success: false,
-      error: "Erro ao confirmar presença do convidado" 
-    });
-  }
-}
+/**
+ * @async
+ * @function createAcompanhante
+ * @description Cria um novo acompanhante e o associa a um convidado e evento específicos.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function createAcompanhante(req, res) {
   try {
     const { convidadoId } = req.params;
-    const { nome, telefone, email, eventoId } = req.body;
+    const { nome, telefone, email, evento_id } = req.body;
 
-    console.log("Dados do acompanhante:", req.params);
-    console.log("Dados do acompanhante:", req.body);
-
-    // Verifica se o convidado existe
     const convidado = await getConvidadoByIdModel(convidadoId);
     if (!convidado) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Convidado não encontrado" 
+        error: "Convidado não encontrado",
       });
     }
 
-    // Verifica o limite de acompanhantes para cada evento
-    const acompanhantes = (await getAcompanhantesByConvidadoIdModel(convidadoId, eventoId)).filter(a => String(a.evento_id) === String(eventoId));
-    const eventosComLimiteExcedido = convidado.eventos?.filter(e => 
-      acompanhantes.length >= (e.limite_acompanhante || 0) && String(e.id) === String(eventoId)
+    const eventoDesteConvidado = convidado.eventos?.find(
+      (e) => String(e.id) === String(evento_id)
     );
 
-    console.log("convidado", convidado)
-    console.log("eventosComLimiteExcedido", eventosComLimiteExcedido)
-    console.log("acompanhantes", acompanhantes)
-
-    if (eventosComLimiteExcedido?.length > 0) {
-      return res.status(400).json({ 
+    if (!eventoDesteConvidado) {
+      return res.status(404).json({
         success: false,
-        error: `Limite de acompanhantes atingido para o(s) evento(s): ${eventosComLimiteExcedido.map(e => e.nome).join(', ')}`
+        error: "Convidado não associado a este evento. Não é possível adicionar acompanhante.",
       });
     }
 
-    // Cria o acompanhante
+    const acompanhantesExistente = await getAcompanhantesByConvidadoEvento(
+      convidadoId,
+      evento_id
+    );
+
+    if (acompanhantesExistente.length >= (eventoDesteConvidado.limite_acompanhante || 0)) {
+      return res.status(400).json({
+        success: false,
+        error: `Limite de acompanhantes (${eventoDesteConvidado.limite_acompanhante}) atingido para o evento: ${eventoDesteConvidado.nome}`,
+      });
+    }
+
     const result = await createAcompanhanteModel({
       nome,
       telefone: telefone || null,
       email: email || null,
       convidado_id: convidadoId,
-      confirmado: true,
-      evento_id: eventoId
+      evento_id: evento_id,
     });
-    console.log(result)
 
-    res.status(201).json({ 
+    res.status(201).json({
       success: true,
       message: "Acompanhante adicionado com sucesso",
       data: {
@@ -375,72 +382,96 @@ export async function createAcompanhante(req, res) {
         nome,
         telefone,
         email,
-        confirmado: true,
-        evento_id: eventoId
-      }
+        confirmado: 1,
+        convidado_evento_convidado_id: convidadoId,
+        convidado_evento_evento_id: evento_id,
+      },
     });
   } catch (err) {
     console.error("Erro ao criar acompanhante:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Erro interno ao processar solicitação" 
+      error: "Erro interno ao processar solicitação",
     });
   }
 }
 
-export async function getAcompanhantesByConvidadoId(req, res) {
+/**
+ * @async
+ * @function handleGetAcompanhantes
+ * @description Retorna todos os acompanhantes de um convidado em um evento específico.
+ * RENOMEADA para `handleGetAcompanhantes` para evitar conflito com a função do model de mesmo nome.
+ * @param {Object} req - Objeto de requisição (params: convidadoId, eventoId).
+ * @param {Object} res - Objeto de resposta.
+ */
+export async function handleGetAcompanhantes(req, res) { // <-- AQUI É A MUDANÇA
   try {
-    const { convidadoId } = req.params;
-    
-    const acompanhantes = await getAcompanhantesByConvidadoIdModel(convidadoId);
-    
+    const { convidadoId, eventoId } = req.params;
+
+    const acompanhantes = await getAcompanhantesByConvidadoEvento(convidadoId, eventoId);
+
     res.json({
       success: true,
-      data: acompanhantes
+      data: acompanhantes,
     });
   } catch (err) {
     console.error("Erro ao buscar acompanhantes:", err);
     res.status(500).json({
       success: false,
-      error: "Erro ao buscar acompanhantes do convidado"
+      error: "Erro ao buscar acompanhantes do convidado",
     });
   }
 }
 
+
+/**
+ * @async
+ * @function updateAcompanhanteById
+ * @description Atualiza os dados de um acompanhante.
+ * @param {Object} req - Objeto de requisição (params: acompanhanteId; body: novos dados).
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function updateAcompanhanteById(req, res) {
   try {
     const { acompanhanteId } = req.params;
     const result = await updateAcompanhanteModel(acompanhanteId, req.body);
-    
+
     if (!result.affectedRows) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Acompanhante não encontrado" 
+        error: "Acompanhante não encontrado",
       });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: "Acompanhante atualizado com sucesso" 
+      message: "Acompanhante atualizado com sucesso",
     });
   } catch (err) {
     console.error("Erro ao atualizar acompanhante:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Erro ao atualizar acompanhante"
+      error: "Erro ao atualizar acompanhante",
     });
   }
 }
 
+/**
+ * @async
+ * @function confirmarAcompanhantes
+ * @description Confirma a presença de múltiplos acompanhantes para um dado convidado E EVENTO.
+ * @param {Object} req - Objeto de requisição (params: convidadoId, eventoId; body: { acompanhantes: Array<Object> }).
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function confirmarAcompanhantes(req, res) {
   try {
-    const { convidadoId } = req.params;
+    const { convidadoId, eventoId } = req.params;
     const { acompanhantes } = req.body;
 
     if (!Array.isArray(acompanhantes)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: "Lista de acompanhantes inválida" 
+        error: "Lista de acompanhantes inválida",
       });
     }
 
@@ -449,70 +480,92 @@ export async function confirmarAcompanhantes(req, res) {
       .map(a => a.id);
 
     if (!ids.length) {
-      return res.json({ 
+      return res.json({
         success: true,
         message: "Nenhum acompanhante válido para confirmar",
-        data: { confirmados: 0 }
+        data: { confirmados: 0 },
       });
     }
 
-    const result = await confirmarAcompanhantesModel(convidadoId, ids);
-    
+    const result = await confirmarAcompanhantesModel(convidadoId, eventoId, ids);
+
     res.json({
       success: true,
       message: `${result.affectedRows} acompanhante(s) confirmado(s)`,
-      data: { confirmados: result.affectedRows }
+      data: { confirmados: result.affectedRows },
     });
   } catch (error) {
     console.error("Erro ao confirmar acompanhantes:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Erro ao confirmar acompanhantes"
+      error: "Erro ao confirmar acompanhantes",
     });
   }
 }
 
+/**
+ * @async
+ * @function deleteAcompanhanteById
+ * @description Inativa um acompanhante (muda o status `ativo_acompanhante` para 0).
+ * @param {Object} req - Objeto de requisição (params: id).
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function deleteAcompanhanteById(req, res) {
   try {
     const { id } = req.params;
-    
+
     if (isNaN(id) || id <= 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: "ID do acompanhante inválido" 
+        error: "ID do acompanhante inválido",
       });
     }
 
     const result = await deleteAcompanhanteModel(id);
-    
+
     if (!result.affectedRows) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Acompanhante não encontrado" 
+        error: "Acompanhante não encontrado",
       });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: "Acompanhante removido com sucesso" 
+      message: "Acompanhante inativado com sucesso",
     });
   } catch (err) {
-    console.error("Erro ao remover acompanhante:", err);
-    res.status(500).json({ 
+    console.error("Erro ao inativar acompanhante:", err);
+    res.status(500).json({
       success: false,
-      error: "Erro ao remover acompanhante"
+      error: "Erro ao inativar acompanhante",
     });
   }
 }
 
-export async function inativaAcompanhanteByIdConvidado(convidadoId) {
+/**
+ * @async
+ * @function inativaAcompanhanteByIdConvidado
+ * @description Função auxiliar para inativar acompanhantes de um convidado em um evento.
+ * Não é um endpoint direto, mas pode ser chamada por outros controllers.
+ * @param {number} convidadoId - O ID do convidado.
+ * @param {number} eventoId - O ID do evento.
+ */
+export async function inativaAcompanhanteByIdConvidado(convidadoId, eventoId) {
   try {
-    await inativaAcompanhanteModel(convidadoId);
+    await inativaAcompanhanteModel(convidadoId, eventoId);
   } catch (err) {
-    console.error("Erro ao atualizar acompanhante:", err);
+    console.error("Erro ao inativar acompanhantes:", err);
   }
 }
 
+/**
+ * @async
+ * @function validarTokenController
+ * @description Valida um token e retorna os dados do convidado associado.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function validarTokenController(req, res) {
   try {
     const token = req.params.token;
@@ -532,6 +585,13 @@ export async function validarTokenController(req, res) {
   }
 }
 
+/**
+ * @async
+ * @function confirmarPresencaPorToken
+ * @description Confirma a presença de um convidado ou acompanhante através de um token.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export async function confirmarPresencaPorToken(req, res) {
   const { token } = req.body;
 
@@ -540,68 +600,46 @@ export async function confirmarPresencaPorToken(req, res) {
   }
 
   try {
-    // Verifica se é um convidado
-    const [convidadoResult] = await conexao.promise().query(
-      `SELECT ce.*, c.nome 
-       FROM convidado_evento ce
-       JOIN convidados c ON ce.convidado_id = c.id
-       WHERE ce.token = ?`,
-      [token]
-    );
+    const result = await confirmarPresencaPorTokenModel(token);
 
-    if (convidadoResult.length > 0) {
-      if (convidadoResult[0].token_usado === 1) {
-        return res.status(409).json({ mensagem: "Essa credencial já foi lida"})
-      }
+    if (!result) {
+      return res.status(404).json({ mensagem: "Token inválido ou não encontrado." });
+    }
 
-      await conexao.promise().query(
-        "UPDATE convidado_evento SET token_usado = 1 WHERE token = ?",
-        [token]
-      );
+    if (result.token_usado === 1) {
+      return res.status(409).json({ mensagem: "Essa credencial já foi lida" });
+    }
 
+    if (result.tipo === "convidado") {
       return res.json({
         tipo: "convidado",
-        nome: convidadoResult[0].nome,
-        mensagem: `🎉 Convidado ${convidadoResult[0].nome} presente na festa!`,
+        nome: result.nome,
+        mensagem: `🎉 Convidado ${result.nome} presente na festa!`,
       });
-    }
-
-    // Verifica se é um acompanhante
-    const [acompanhanteResult] = await conexao.promise().query(
-      "SELECT * FROM acompanhante WHERE token = ?",
-      [token]
-    );
-
-    if (acompanhanteResult.length > 0) {
-      if (acompanhanteResult[0].token_usado === 1) {
-        return res.status(409).json({ mensagem: "Essa credencial já foi lida"})
-      }
-      await conexao.promise().query(
-        "UPDATE acompanhante SET token_usado = 1 WHERE token = ?",
-        [token]
-      );
-
+    } else if (result.tipo === "acompanhante") {
       return res.json({
         tipo: "acompanhante",
-        nome: acompanhanteResult[0].nome,
-        mensagem: `🎉 Acompanhante ${acompanhanteResult[0].nome} presente na festa!`,
+        nome: result.nome,
+        mensagem: `🎉 Acompanhante ${result.nome} presente na festa!`,
       });
     }
-
-    return res.status(404).json({ mensagem: "Token inválido ou não encontrado." });
   } catch (error) {
     console.error("Erro ao confirmar presença por token:", error);
     return res.status(500).json({ mensagem: "Erro interno ao confirmar presença." });
   }
 }
 
-// Adicione estas funções ao seu controller
-
+/**
+ * @async
+ * @function togglePresencaConvidado
+ * @description Alterna o status de presença (token_usado) de um convidado em um evento.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export const togglePresencaConvidado = async (req, res) => {
   try {
     const { convidadoId, eventoId } = req.params;
-    
-    // 1. Verifica o status atual
+
     const convidadoEvento = await new Promise((resolve, reject) => {
       conexao.query(
         "SELECT token_usado FROM convidado_evento WHERE convidado_id = ? AND evento_id = ?",
@@ -614,45 +652,41 @@ export const togglePresencaConvidado = async (req, res) => {
     });
 
     if (!convidadoEvento) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Relação convidado-evento não encontrada' 
+        error: "Relação convidado-evento não encontrada",
       });
     }
 
-    // 2. Alterna o status
     const novoStatus = convidadoEvento.token_usado ? 0 : 1;
-    
-    await new Promise((resolve, reject) => {
-      conexao.query(
-        "UPDATE convidado_evento SET token_usado = ? WHERE convidado_id = ? AND evento_id = ?",
-        [novoStatus, convidadoId, eventoId],
-        (err, result) => {
-          if (err) return reject(err);
-          resolve(result);
-        }
-      );
-    });
 
-    res.json({ 
+    await updateConvidadoEventoModel(convidadoId, eventoId, { token_usado: novoStatus });
+
+    res.json({
       success: true,
       token_usado: novoStatus,
-      message: `Presença ${novoStatus ? 'marcada' : 'desmarcada'} com sucesso`
+      message: `Presença ${novoStatus ? "marcada" : "desmarcada"} com sucesso`,
     });
   } catch (error) {
-    console.error('Erro ao alternar presença:', error);
-    res.status(500).json({ 
+    console.error("Erro ao alternar presença do convidado:", error);
+    res.status(500).json({
       success: false,
-      error: error.message 
+      error: error.message,
     });
   }
 };
 
+/**
+ * @async
+ * @function togglePresencaAcompanhante
+ * @description Alterna o status de presença (token_usado) de um acompanhante.
+ * @param {Object} req - Objeto de requisição.
+ * @param {Object} res - Objeto de resposta.
+ */
 export const togglePresencaAcompanhante = async (req, res) => {
   try {
     const { acompanhanteId } = req.params;
-    
-    // 1. Verifica o status atual
+
     const acompanhante = await new Promise((resolve, reject) => {
       conexao.query(
         "SELECT token_usado FROM acompanhante WHERE id = ?",
@@ -665,36 +699,26 @@ export const togglePresencaAcompanhante = async (req, res) => {
     });
 
     if (!acompanhante) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Acompanhante não encontrado' 
+        error: "Acompanhante não encontrado",
       });
     }
 
-    // 2. Alterna o status
     const novoStatus = acompanhante.token_usado ? 0 : 1;
-    
-    await new Promise((resolve, reject) => {
-      conexao.query(
-        "UPDATE acompanhante SET token_usado = ? WHERE id = ?",
-        [novoStatus, acompanhanteId],
-        (err, result) => {
-          if (err) return reject(err);
-          resolve(result);
-        }
-      );
-    });
 
-    res.json({ 
+    await updateAcompanhanteModel(acompanhanteId, { token_usado: novoStatus });
+
+    res.json({
       success: true,
       token_usado: novoStatus,
-      message: `Presença ${novoStatus ? 'marcada' : 'desmarcada'} com sucesso`
+      message: `Presença ${novoStatus ? "marcada" : "desmarcada"} com sucesso`,
     });
   } catch (error) {
-    console.error('Erro ao alternar presença do acompanhante:', error);
-    res.status(500).json({ 
+    console.error("Erro ao alternar presença do acompanhante:", error);
+    res.status(500).json({
       success: false,
-      error: error.message 
+      error: error.message,
     });
   }
 };

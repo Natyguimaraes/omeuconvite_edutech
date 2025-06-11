@@ -1,13 +1,12 @@
 
-import { CheckCircle, XCircle } from "lucide-react";
-import { FaSadCry } from "react-icons/fa";
+import { CheckCircle, XCircle, Clock} from "lucide-react";
 
 export default function BadgeConvidadoStatus({ status }) {
   const statusConfig = {
     0: {
       text: "Pendente",
-      icon: <XCircle className="h-3 w-3 mr-1" />,
-      style: "bg-red-100 text-red-800",
+      icon: <Clock className="h-3 w-3 mr-1" />,
+      style: "bg-yellow-100 text-yellow-800",
     },
     1: {
       text: "Confirmado",
@@ -17,7 +16,7 @@ export default function BadgeConvidadoStatus({ status }) {
     2: {
       text: "Não comparecerá",
       icon: <XCircle className="h-3 w-3 mr-1" />,
-      style: "bg-yellow-100 text-yellow-800",
+      style: "bg-red-100 text-red-800",
     },
   };
 

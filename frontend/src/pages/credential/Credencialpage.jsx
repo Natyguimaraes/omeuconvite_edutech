@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Download, ChevronLeft, Users } from "lucide-react";
 import QRCode from "react-qr-code";
 import domtoimage from "dom-to-image-more";
-import Navbar from "../components/menu";
 
 export default function CredenciaisPage() {
   const location = useLocation();

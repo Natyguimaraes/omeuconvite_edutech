@@ -1,6 +1,6 @@
 
 import { Check, Loader2, Plus, User, Phone, Mail, Users, CalendarIcon, X, Search } from "lucide-react";
-import { formatPhoneNumber, isValidPhoneNumber } from '../components/phoneUtils';
+import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils"
 
 const GuestSearchAdd = ({
   eventos,

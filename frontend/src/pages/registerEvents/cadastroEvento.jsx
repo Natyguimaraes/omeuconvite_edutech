@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ArrowLeft, CalendarIcon, ImagePlus, MapPin, PenLine, Sparkles, Loader2, MessageCircle, Clock } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
-import NavBar from "../components/menu";
 
 function CadastroEventos() {
   const navigate = useNavigate();
@@ -84,7 +83,7 @@ function CadastroEventos() {
     setIsSubmitting(true);
 
     // 1. Validação do adminId
-    const adminId = localStorage.getItem("adminId");
+    const adminId = localStorage.getItem("adminId") || 1;
     if (!adminId) {
       setError("ID do administrador não encontrado.");
       toast.error("ID do administrador não encontrado.");

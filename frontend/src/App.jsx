@@ -3,21 +3,16 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import LoginAdministrador from "./pages/login";
-import CadastroAdministrador from "./pages/cadastroAdm"; 
-import NavBar from "./components/menu";
-import CadastroConvidados from "./pages/cadastroConvidado";
-import CadastroEventos from "./pages/cadastroEvento";
-import Confirmacao from "./pages/confirmacao";
-import Eventos from "./pages/eventos";
-import ButtonConf from "./pages/button_conf";
-import PaginaInicial from "./pages/PaginaInicial";
-import SuperAdminDashboard from "./pages/superadmin/SuperAdminDashboard";
-import CadastrarPlano from "./pages/superadmin/CadastrarPlano";
-import LiberarAdministrador from "./pages/superadmin/LiberarAdministrador";
-import Rodape from "././components/rodape"
-import CredenciaisPage from "./pages/Credencialpage";
-import InactivityHandlerWithModal from "./components/InactivityHandler";
+
+import NavBar from "./components/menu"
+import CadastroConvidados from "./pages/registerGuest/cadastroConvidado"
+import CadastroEventos from "./pages/registerEvents/cadastroEvento";
+import Confirmacao from "./pages/guestList/confirmacao";
+import Eventos from "./pages/home/eventos";
+import ButtonConf from "./pages/invitation/button_conf";
+import Rodape from "././components/rodape";
+import CredenciaisPage from "./pages/credential/Credencialpage";
+import InactivityHandlerWithModal from "./components/inativeModal/InactivityHandler"
 
 function App() {
 
@@ -31,6 +26,7 @@ const handleLogout = () => {
 
   return (
     <>
+    <NavBar />
     <Router>
       {isLoggedIn && (
         <InactivityHandlerWithModal
@@ -41,21 +37,7 @@ const handleLogout = () => {
       )}
       <Routes>
         
-        <Route path="/" element={<LoginAdministrador />} />
-
-        {/* Rotas de superadmin (mantidas, mas não acessíveis diretamente) */}
-        <Route
-          path="/superadmin/SuperAdminDashboard"
-          element={<SuperAdminDashboard />}
-        >
-          <Route path="CadastrarPlano" element={<CadastrarPlano />} />
-          <Route
-            path="LiberarAdministrador"
-            element={<LiberarAdministrador />} />
-        </Route>
-
-        <Route path="/cadastroAdm" element={<CadastroAdministrador />} />
-        <Route path="/PaginaInicial" element={<PaginaInicial />} />
+        <Route path="/" element={<Eventos />} />
         <Route path="/menu" element={<NavBar />} />
         <Route path="/cadastrar_convidado" element={<CadastroConvidados />} />
         <Route path="/cadastrar_evento" element={<CadastroEventos />} />
@@ -65,7 +47,8 @@ const handleLogout = () => {
         <Route path="/credenciais" element={<CredenciaisPage />} />
       </Routes>
     </Router>
-    <Rodape /></>
+    <Rodape />
+    </>
   );
 }
 

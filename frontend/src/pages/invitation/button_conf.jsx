@@ -14,9 +14,8 @@ import {
 } from "lucide-react";
 import Confetti from "react-confetti";
 import { motion, AnimatePresence } from "framer-motion";
-import GerarCredencialButton from "../components/GerarCredencialButton"
-import NavBar from "../components/menu";
-import { formatPhoneNumber } from "../components/phoneUtils";
+import GerarCredencialButton from "../../components/qrcode/GerarCredencialButton";
+import { formatPhoneNumber } from "../../utils/phoneUtils";
 
 function EventCredential() {
 

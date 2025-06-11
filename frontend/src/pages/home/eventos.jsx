@@ -14,10 +14,8 @@ import {
   Check,
   X
 } from "lucide-react";
-
-import NavBar from "../components/menu";
-import EventCard from "../components/EventCard";
-import BemVindo from "../components/boasVindas";
+import EventCard from "../../components/pageEvents/EventCard";
+import BemVindo from "../../components/pageEvents/boasVindas";
 
 function Eventos() {
   const [eventos, setEventos] = useState([]);
@@ -28,7 +26,7 @@ function Eventos() {
   const navigate = useNavigate();
 
   // Obter o ID do administrador logado
-  const adminId = localStorage.getItem('adminId') || sessionStorage.getItem('adminId');
+  const adminId = 1;
 
   const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState({
@@ -374,7 +372,6 @@ const getPendentesPorEvento = (eventoId) => {
 
   return (
     <>
-      <NavBar />
       <div className="min-h-screen bg-white py-16 px-4 sm:px-6 lg:px-8 pt-15 relative overflow-hidden">
         <div className="absolute bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 w-32 h-32 rounded-full top-10 left-10 z-0 blur-xl animate-float opacity-60"></div>
       <div className="absolute bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-400 w-40 h-40 rounded-full top-20 right-20 z-0 blur-lg animate-pulse-glow opacity-50"></div>

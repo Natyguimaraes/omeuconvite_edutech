@@ -165,3 +165,160 @@ ADD COLUMN `token_usado` TINYINT(0) NULL DEFAULT NULL AFTER `token`;
 -- INNER JOIN convidado_evento ON convidados.id = convidado_evento.convidado_id
 --
 -- SET acompanhante.evento_id = convidado_evento.evento_id;
+
+
+--criar a tabela pessoa
+
+CREATE TABLE IF NOT EXISTS `edutecconsult_omeuconvite_teste`.`pessoa` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(255) NOT NULL,
+  `telefone` VARCHAR(20) NULL DEFAULT NULL,
+  `email` VARCHAR(255) NULL DEFAULT NULL,
+  `data_criacao` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_telefone` (`telefone` ASC) VISIBLE,
+  INDEX `idx_email` (`email` ASC) VISIBLE
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+--apagando colunas em comum entre convidados e acompanhantes
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`convidados`
+DROP COLUMN `nome`,
+DROP COLUMN `telefone`,
+DROP COLUMN `email`,
+DROP COLUMN `data_criacao`; 
+
+--adicionando chave estrangeira na tabela de convidados
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`convidados`
+ADD COLUMN `pessoa_id` INT(11) NOT NULL AFTER `id`,
+ADD INDEX `fk_convidado_pessoa` (`pessoa_id` ASC) VISIBLE,
+ADD CONSTRAINT `fk_convidado_pessoa`
+  FOREIGN KEY (`pessoa_id`)
+  REFERENCES `edutecconsult_omeuconvite_teste`.`pessoa` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;
+
+--apagando colunas da tabela de acompanhante
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`. `acompanhante`
+DROP COLUMN `nome`,
+DROP COLUMN `telefone`,
+DROP COLUMN `email`,
+DROP COLUMN `data_criacao`;
+
+--adicionando chave estrangeira na tabela de acompanhantes
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`acompanhante`
+ADD COLUMN `pessoa_id` INT(11) NOT NULL AFTER `convidado_id`,
+ADD INDEX `fk_acompanhante_pessoa` (`pessoa_id` ASC) VISIBLE,
+ADD CONSTRAINT `fk_acompanhante_pessoa`
+  FOREIGN KEY (`pessoa_id`)
+  REFERENCES `edutecconsult_omeuconvite_teste`.`pessoa` (`id`)
+  ON DELETE RESTRICT 
+  ON UPDATE CASCADE;
+
+
+--Desabilitando temporariamente a verificação de chaves estrangeiras
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+--modificar o nome da tabela administradores para cliente
+
+RENAME TABLE `edutecconsult_omeuconvite_teste`.`administradores` TO `edutecconsult_omeuconvite_teste`.`cliente`
+
+--removendo a fk_administrador_id (cliente) da tabela de convidados
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`convidados`
+DROP FOREIGN KEY `fk_administrador`;
+
+---
+-- Removendo a coluna `administrador_id` da tabela `convidados`
+---
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`convidados`
+DROP COLUMN `administrador_id`;
+
+---
+-- reabilitando a verificação de chaves estrangeiras
+---
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`eventos`
+DROP FOREIGN KEY `eventos_ibfk_1`;
+
+
+--renomenando a coluna administrador_id para cliente_id na tabela de eventos
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`eventos`
+CHANGE COLUMN `administrador_id` `cliente_id` INT NULL DEFAULT NULL; -- Mantendo NULL DEFAULT NULL
+
+--recriando a chave estrangeira na tabela de eventos
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`eventos`
+ADD CONSTRAINT `fk_evento_cliente` -- Novo nome para a constraint 
+FOREIGN KEY (`cliente_id`)
+REFERENCES `edutecconsult_omeuconvite_teste`.`cliente` (`id`)
+ON DELETE CASCADE ON UPDATE CASCADE; -- Regras ON DELETE/ON UPDATE
+
+
+--Adicionando a referência a foreign key a tabela de convidados também
+
+ALTER TABLE `edutecconsult_omeuconvite_teste`. `convidados`
+ADD COLUMN `cliente_id` INT
+
+--criando a chave estrangeira na tabela de convidados
+ALTER TABLE `edutecconsult_omeuconvite_teste`.`convidados`
+ADD CONSTRAINT `fk_convidados_cliente`
+FOREIGN KEY (`cliente_id`)
+REFERENCES `edutecconsult_omeuconvite_teste`.`cliente` (`id`)
+ON DELETE CASCADE ON UPDATE CASCADE;
+
+--criando a tabela de tipos de evento
+
+CREATE TABLE IF NOT EXISTS `edutecconsult_omeuconvite_teste`.`tipo` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `nome` VARCHAR(100) NOT NULL
+);
+
+--para habilitar de novo as chaves estrangeiras
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+---editando
+
+ALTER TABLE `omeuconvite_revisado`.`acompanhante` 
+DROP FOREIGN KEY `fk_acompanhante_evento`,
+DROP FOREIGN KEY `acompanhante_ibfk_1`;
+
+ALTER TABLE `omeuconvite_revisado`.`eventos` 
+DROP FOREIGN KEY `eventos_ibfk_1`;
+
+ALTER TABLE `omeuconvite_revisado`.`acompanhante` 
+DROP COLUMN `evento_id`,
+DROP COLUMN `convidado_id`,
+ADD COLUMN `convidado_evento_convidado_id` INT(11) NOT NULL AFTER `ativo_acompanhante`,
+ADD COLUMN `convidado_evento_evento_id` INT(11) NOT NULL AFTER `convidado_evento_convidado_id`,
+ADD INDEX `fk_acompanhante_convidado_evento1_idx` (`convidado_evento_convidado_id` ASC, `convidado_evento_evento_id` ASC) VISIBLE,
+DROP INDEX `fk_acompanhante_evento` ,
+DROP INDEX `convidado_id` ;
+;
+
+ALTER TABLE `omeuconvite_revisado`.`convidados` 
+ADD COLUMN `administrador_id` INT(11) NULL DEFAULT NULL AFTER `ativo_convidado`;
+
+ALTER TABLE `omeuconvite_revisado`.`eventos` 
+DROP INDEX `administrador_id` ;
+;
+
+DROP TABLE IF EXISTS `omeuconvite_revisado`.`superadministradores` ;
+
+DROP TABLE IF EXISTS `omeuconvite_revisado`.`planos` ;
+
+DROP TABLE IF EXISTS `omeuconvite_revisado`.`administradores` ;
+
+ALTER TABLE `omeuconvite_revisado`.`acompanhante` 
+ADD CONSTRAINT `fk_acompanhante_convidado_evento1`
+  FOREIGN KEY (`convidado_evento_convidado_id` , `convidado_evento_evento_id`)
+  REFERENCES `omeuconvite_revisado`.`convidado_evento` (`convidado_id` , `evento_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;

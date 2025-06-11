@@ -3,10 +3,8 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from 'url'; 
 import eventoRoutes from "./rotas/eventos.js";
-import adminRoutes from "./rotas/administradores.js";
 import convidadoRoutes from "./rotas/convidados.js";
 import { credenciaisRouter } from './rotas/credenciais.js';
-import superadminRoutes from "./rotas/superadmin.js";
 import process from 'process';
 import dotenv from 'dotenv';
 import presencaRouter from "./rotas/convidados.js";
@@ -36,9 +34,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' })); 
 // Rotas da API
 app.use("/api/eventos", eventoRoutes);
-app.use("/api/administradores", adminRoutes);
 app.use("/api/convidados", convidadoRoutes);
-app.use("/api/superadmin", superadminRoutes);
 app.use('/api/credenciais', credenciaisRouter);
 
 //para confirmar presença

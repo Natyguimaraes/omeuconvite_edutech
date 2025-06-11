@@ -2,8 +2,7 @@ import { useState } from "react";
 import { User, Phone, Mail, ChevronLeft, Loader2, X, Users } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import NavBar from "../components/menu";
-import { formatPhoneNumber } from "../components/phoneUtils";
+import { formatPhoneNumber } from "../../utils/phoneUtils"
 
 function CadastroConvidados() {
   const { eventoId } = useParams();

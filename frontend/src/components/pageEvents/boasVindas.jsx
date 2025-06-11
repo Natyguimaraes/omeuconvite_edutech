@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 function BemVindo() {
   const [nome, setNome] = useState("");
-  const adminId = localStorage.getItem("adminId") || sessionStorage.getItem("adminId");
+  const adminId = 1;
 
   useEffect(() => {
     if (adminId) {
