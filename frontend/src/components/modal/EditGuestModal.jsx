@@ -1,6 +1,6 @@
 import { Check, Trash2, Plus, X } from "lucide-react";
-import { formatPhoneNumber } from "../../utils/phoneUtils"; // Mantenha a importação para formatação na exibição
-import { toast } from "sonner"; // Adicionar importação para toast
+import { formatPhoneNumber } from "../../utils/phoneUtils"; 
+import { toast } from "sonner"; 
 
 export default function EditGuestModal({
   show,
@@ -10,19 +10,18 @@ export default function EditGuestModal({
   onSave,
   onDeleteAcompanhante,
   onAddAcompanhante,
-  convidadoId, // O ID do convidado principal que está sendo editado
-  eventoId, // O ID do evento atual
+  convidadoId, 
+  eventoId, 
 }) {
-  if (!show) return null; // Não renderiza nada se o modal não deve ser exibido
+  if (!show) return null;
 
-  // Handle mudança nos campos do convidado principal no modal
   const handleConvidadoChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
 
     if (name === "telefone") {
-      // Formata para exibição no input, mas salva o número puro no estado
-      newValue = value.replace(/\D/g, ""); // Remove não dígitos para salvar no estado
+      
+      newValue = value.replace(/\D/g, ""); 
       setEditData((prev) => ({
         ...prev,
         [name]: newValue,
@@ -38,7 +37,6 @@ export default function EditGuestModal({
   const handleAcompanhanteChange = (e, index) => {
   const { name, value } = e.target;
   
-  // Para telefone, remove formatação antes de salvar no estado
   const newValue = name === 'telefone' ? value.replace(/\D/g, '') : value;
 
   const updatedAcompanhantes = editData.acompanhantes.map((acompanhante, i) =>
@@ -52,15 +50,12 @@ export default function EditGuestModal({
       return;
     }
 
-    // Remover do estado local imediatamente
     const updatedAcompanhantes = editData.acompanhantes.filter(
       (a) => a.id !== acompanhanteToDelete.id
     );
     setEditData((prev) => ({ ...prev, acompanhantes: updatedAcompanhantes }));
     toast.info(`Acompanhante ${acompanhanteToDelete.nome || 'temporário'} removido do formulário. Salve as alterações para finalizar.`);
 
-    // Se o acompanhante já tem um ID do banco de dados (não é temporário),
-    // chame a função de deleção da API.
     if (acompanhanteToDelete.id && !String(acompanhanteToDelete.id).startsWith('temp-')) {
       onDeleteAcompanhante(convidadoId, acompanhanteToDelete.id); // Esta função já chamará fetchDados
     }
@@ -118,8 +113,8 @@ export default function EditGuestModal({
                 <input
                   type="text"
                   name="telefone"
-                  value={formatPhoneNumber(editData.telefone || "")} // Formata para exibição
-                  onChange={handleConvidadoChange} // Salva o número puro no estado
+                  value={formatPhoneNumber(editData.telefone || "")} 
+                  onChange={handleConvidadoChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 text-gray-800 placeholder-gray-400"
                   placeholder="(11) 99999-9999"
                 />
@@ -130,7 +125,7 @@ export default function EditGuestModal({
                 <input
                   type="email"
                   name="email"
-                  value={editData.email || ""} // Garante string vazia
+                  value={editData.email || ""}
                   onChange={handleConvidadoChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 text-gray-800 placeholder-gray-400"
                   placeholder="email@exemplo.com"
@@ -181,7 +176,7 @@ export default function EditGuestModal({
               {editData.acompanhantes?.length > 0 ? (
                 editData.acompanhantes.map((acompanhante, index) => (
                   <div
-                    key={acompanhante.id || `modal-temp-${index}`} // Use o ID real ou o temporário
+                    key={acompanhante.id || `modal-temp-${index}`}
                     className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group"
                   >
                     <div className="flex items-start space-x-4">
@@ -193,7 +188,7 @@ export default function EditGuestModal({
                           <input
                             type="text"
                             name="nome"
-                            value={acompanhante.nome || ""} // Garante string vazia
+                            value={acompanhante.nome || ""}
                             onChange={(e) => handleAcompanhanteChange(e, index)}
                             placeholder="Nome do acompanhante"
                             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 transition-all duration-200"
@@ -221,7 +216,7 @@ export default function EditGuestModal({
                           <input
                             type="email"
                             name="email"
-                            value={acompanhante.email || ""} // Garante string vazia
+                            value={acompanhante.email || ""}
                             onChange={(e) => handleAcompanhanteChange(e, index)}
                             placeholder="email@exemplo.com"
                             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 transition-all duration-200"
@@ -255,7 +250,6 @@ export default function EditGuestModal({
           </div>
         </div>
 
-        {/* Footer com botões de ação */}
         <div className="bg-gray-50/80 backdrop-blur-sm border-t border-gray-200 p-6">
           <div className="flex justify-end space-x-4">
             <button

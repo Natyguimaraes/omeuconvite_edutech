@@ -165,9 +165,8 @@ const PrintList = ({
     Escolha um filtro abaixo e clique em “Imprimir Lista” para gerar a versão desejada.
   </p>
 
-  {/* Filtro e botão */}
   <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-center">
-    {/* Label e select */}
+
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <label htmlFor="filtro" className="text-sm font-medium text-purple-700">
         Filtro para impressão:
@@ -192,7 +191,6 @@ const PrintList = ({
       </select>
     </div>
 
-    {/* Botão */}
     <button
       onClick={handlePrint}
       className="flex items-center justify-center gap-2 px-3 py-2 text-white rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer self-start sm:self-auto"

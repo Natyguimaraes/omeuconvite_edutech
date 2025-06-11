@@ -16,12 +16,10 @@ const GuestSearchAdd = ({
   handleAddToEvent,
   handleAddNewGuest,
 }) => {
-  // Função para lidar com mudanças nos campos do formulário
   const handleNewGuestChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'telefone') {
-      // Aplica a máscara apenas para o campo de telefone
       const formattedValue = formatPhoneNumber(value);
       setNewGuest(prev => ({
         ...prev,
@@ -61,7 +59,6 @@ const GuestSearchAdd = ({
           )}
         </div>
 
-{/* botão para adioionar o convidado */}
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 duration-300 text-sm font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-white px-5 py-3 rounded-lg flex items-center justify-center transition-all cursor-pointer"
@@ -71,7 +68,6 @@ const GuestSearchAdd = ({
         </button>
       </div>
 
-      {/* Formulário para adicionar novo convidado */}
       {showAddForm && (
         <div className="mt-5 p-3 bg-gray-50 rounded-lg border border-gray-200">
               <div className="text-center mb-10">
@@ -225,12 +221,10 @@ const GuestSearchAdd = ({
         </div>
       )}
 
-      {/* Resultados da busca */}
       {searchTerm && searchResults.length > 0 && (
         <div className="mt-2 bg-white rounded-md shadow-lg overflow-hidden border border-gray-200">
           <ul className="divide-y divide-gray-300 max-h-96 overflow-y-auto">
             {searchResults.map((convidado) => {
-              // Encontra o primeiro evento do convidado que pertence ao admin
               const eventoConvidado = convidado.eventos?.find(e => 
                 eventos.some(ev => ev.id === e.id)
               );

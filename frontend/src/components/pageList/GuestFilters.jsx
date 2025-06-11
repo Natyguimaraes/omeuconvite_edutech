@@ -12,7 +12,6 @@ const GuestActions = ({
          style={{
            background: "linear-gradient(135deg, rgba(252,246,255,1) 0%, rgba(240,237,255,1) 100%)"
          }}>
-      {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-gradient-to-r from-purple-200/40 to-indigo-300/30"
            style={{ 
              filter: "blur(80px)", 

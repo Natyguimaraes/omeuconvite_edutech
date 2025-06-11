@@ -2,13 +2,6 @@ import conexao from "../configuracao/banco.js";
 
 // --- Funções Auxiliares ---
 
-/**
- * @async
- * @function getPessoaById
- * @description Busca os dados de uma pessoa na tabela `pessoa` pelo ID.
- * @param {number} pessoa_id - O ID da pessoa a ser buscada.
- * @returns {Promise<Object|null>} Uma Promise que resolve com o objeto da pessoa ou null se não encontrada.
- */
 export async function getPessoaById(pessoa_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -22,13 +15,6 @@ export async function getPessoaById(pessoa_id) {
   });
 }
 
-/**
- * @async
- * @function getEventosByConvidadoId
- * @description Busca os eventos aos quais um convidado está associado, incluindo detalhes de `convidado_evento`.
- * @param {number} convidado_id - O ID do convidado.
- * @returns {Promise<Array<Object>>} Uma Promise que resolve com um array de objetos de eventos.
- */
 export async function getEventosByConvidadoId(convidado_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -45,14 +31,6 @@ export async function getEventosByConvidadoId(convidado_id) {
   });
 }
 
-/**
- * @async
- * @function getAcompanhantesByConvidadoEvento
- * @description Busca os acompanhantes associados a um registro específico de `convidado_evento`.
- * @param {number} convidado_id - O ID do convidado.
- * @param {number} evento_id - O ID do evento.
- * @returns {Promise<Array<Object>>} Uma Promise que resolve com um array de objetos de acompanhantes.
- */
 export async function getAcompanhantesByConvidadoEvento(convidado_id, evento_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -74,12 +52,6 @@ export async function getAcompanhantesByConvidadoEvento(convidado_id, evento_id)
 
 // --- Modelos Principais ---
 
-/**
- * @async
- * @function getConvidadosModel
- * @description Retorna uma lista completa de convidados, incluindo seus dados de pessoa, eventos associados e acompanhantes para cada evento.
- * @returns {Promise<Array<Object>>} Uma Promise que resolve com um array de objetos de convidados detalhados.
- */
 export async function getConvidadosModel() {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -142,13 +114,7 @@ export async function getConvidadosModel() {
     );
   });
 }
-/**
- * @async
- * @function getConvidadoByIdModel
- * @description Retorna os dados de um convidado específico pelo ID, incluindo seus eventos e acompanhantes.
- * @param {number} id - O ID do convidado.
- * @returns {Promise<Object|null>} Uma Promise que resolve com o objeto do convidado detalhado ou null se não encontrado.
- */
+
 export async function getConvidadoByIdModel(id) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -193,13 +159,6 @@ export async function getConvidadoByIdModel(id) {
   });
 }
 
-/**
- * @async
- * @function createConvidadoModel
- * @description Cria um novo convidado, inserindo primeiro na tabela `pessoa` e depois em `convidados`.
- * @param {Object} dados - Objeto contendo os dados do convidado (nome, telefone, email, limite_acompanhante).
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da inserção.
- */
 export async function createConvidadoModel(dados) {
   return new Promise((resolve, reject) => {
     const { nome, telefone, email, limite_acompanhante = 0, administrador_id } = dados;
@@ -227,16 +186,6 @@ export async function createConvidadoModel(dados) {
   });
 }
 
-/**
- * @async
- * @function addConvidadoToEventoModel
- * @description Adiciona um convidado a um evento específico, registrando na tabela `convidado_evento`.
- * @param {number} convidado_id - O ID do convidado.
- * @param {number} evento_id - O ID do evento.
- * @param {number} [limite_acompanhante=0] - O limite de acompanhantes para este evento.
- * @param {number} [confirmado=0] - Status de confirmação (0 para não, 1 para sim).
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da inserção.
- */
 export async function addConvidadoToEventoModel(
   convidado_id,
   evento_id,
@@ -255,14 +204,6 @@ export async function addConvidadoToEventoModel(
   });
 }
 
-/**
- * @async
- * @function updateConvidadoModel
- * @description Atualiza os dados de um convidado e, se aplicável, os dados da pessoa associada.
- * @param {number} id - O ID do convidado a ser atualizado.
- * @param {Object} novosDados - Objeto com os novos dados (pode conter nome, telefone, email, limite_acompanhante, ativo_convidado).
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function updateConvidadoModel(id, novosDados) {
   return new Promise((resolve, reject) => {
     // Primeiro, busca o pessoa_id do convidado
@@ -359,13 +300,6 @@ export function updateConvidadoEventoModel(convidado_id, evento_id, novosDados) 
   });
 }
 
-/**
- * @async
- * @function deleteConvidadoModel
- * @description Inativa um convidado (marca como inativo em `convidados`) e sua pessoa associada.
- * @param {number} id - O ID do convidado a ser inativado.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function deleteConvidadoModel(id) {
   return new Promise((resolve, reject) => {
     // Primeiro, busca o pessoa_id do convidado
@@ -391,13 +325,6 @@ export function deleteConvidadoModel(id) {
   });
 }
 
-/**
- * @function removeConvidadoFromEventoModel
- * @description Remove a associação de um convidado com um evento.
- * @param {number} convidado_id - O ID do convidado.
- * @param {number} evento_id - O ID do evento.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da exclusão.
- */
 export function removeConvidadoFromEventoModel(convidado_id, evento_id) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -413,13 +340,6 @@ export function removeConvidadoFromEventoModel(convidado_id, evento_id) {
 
 // --- Funções para Acompanhantes ---
 
-/**
- * @async
- * @function createAcompanhanteModel
- * @description Cria um novo acompanhante, inserindo primeiro na tabela `pessoa` e depois em `acompanhante`.
- * @param {Object} dados - Objeto contendo os dados do acompanhante (nome, telefone, email, convidado_id, evento_id).
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da inserção.
- */
 export function createAcompanhanteModel(dados) {
   return new Promise((resolve, reject) => {
     const { nome, telefone, email, convidado_id, evento_id } = dados;
@@ -448,12 +368,6 @@ export function createAcompanhanteModel(dados) {
   });
 }
 
-/**
- * @function deleteAcompanhanteModel
- * @description Inativa um acompanhante (muda `ativo_acompanhante` para 0).
- * @param {number} id - O ID do acompanhante a ser inativado.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function deleteAcompanhanteModel(id) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -467,14 +381,6 @@ export function deleteAcompanhanteModel(id) {
   });
 }
 
-/**
- * @async
- * @function updateAcompanhanteModel
- * @description Atualiza os dados de um acompanhante e, se aplicável, os dados da pessoa associada.
- * @param {number} id - O ID do acompanhante a ser atualizado.
- * @param {Object} novosDados - Objeto com os novos dados (pode conter nome, telefone, email, confirmado, convidado_evento_convidado_id, convidado_evento_evento_id, ativo_acompanhante).
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function updateAcompanhanteModel(id, novosDados) {
   return new Promise((resolve, reject) => {
     // Busca o pessoa_id e as chaves de convidado_evento do acompanhante
@@ -549,14 +455,6 @@ export function updateAcompanhanteModel(id, novosDados) {
   });
 }
 
-/**
- * @function confirmarAcompanhantesModel
- * @description Confirma a presença de múltiplos acompanhantes para um dado convidado.
- * @param {number} convidadoId - O ID do convidado.
- * @param {number} eventoId - O ID do evento (novo parâmetro para filtrar corretamente).
- * @param {Array<number>} idsAcompanhantes - Um array de IDs dos acompanhantes a serem confirmados.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function confirmarAcompanhantesModel(convidadoId, eventoId, idsAcompanhantes) {
   return new Promise((resolve, reject) => {
     if (!Array.isArray(idsAcompanhantes) || idsAcompanhantes.length === 0) {
@@ -578,12 +476,6 @@ export function confirmarAcompanhantesModel(convidadoId, eventoId, idsAcompanhan
   });
 }
 
-/**
- * @function removeConvidadoFromAllEventosModel
- * @description Remove um convidado de todos os eventos aos quais ele está associado.
- * @param {number} convidadoId - O ID do convidado.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da exclusão.
- */
 export function removeConvidadoFromAllEventosModel(convidadoId) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -597,13 +489,6 @@ export function removeConvidadoFromAllEventosModel(convidadoId) {
   });
 }
 
-/**
- * @function inativaAcompanhanteModel
- * @description Inativa acompanhantes para um dado registro de convidado_evento (muda `confirmado` para 2 - assumindo que 2 significa inativo/não vai).
- * @param {number} convidadoId - O ID do convidado.
- * @param {number} eventoId - O ID do evento.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function inativaAcompanhanteModel(convidadoId, eventoId) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -620,13 +505,6 @@ export function inativaAcompanhanteModel(convidadoId, eventoId) {
   });
 }
 
-/**
- * @async
- * @function getConvidadoByTokenModel
- * @description Busca um convidado e seus detalhes completos (eventos e acompanhantes) através de um token de `convidado_evento`.
- * @param {string} token - O token a ser buscado.
- * @returns {Promise<Object|null>} Uma Promise que resolve com o objeto do convidado detalhado ou null se não encontrado.
- */
 export async function getConvidadoByTokenModel(token) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -673,12 +551,6 @@ export async function getConvidadoByTokenModel(token) {
   });
 }
 
-/**
- * @function confirmarPresencaPorTokenModel
- * @description Confirma a presença de um convidado ou acompanhante através de um token.
- * @param {string} token - O token de presença.
- * @returns {Promise<Object|null>} Uma Promise que resolve com um objeto contendo o tipo (convidado/acompanhante) e nome, ou null se o token for inválido.
- */
 export function confirmarPresencaPorTokenModel(token) {
   return new Promise((resolve, reject) => {
     // Tenta encontrar o token em convidado_evento
@@ -734,14 +606,6 @@ export function confirmarPresencaPorTokenModel(token) {
   });
 }
 
-/**
- * @function salvarTokenConvidado
- * @description Salva um token para um registro de convidado_evento.
- * @param {number} convidadoId - O ID do convidado.
- * @param {number} eventoId - O ID do evento.
- * @param {string} token - O token a ser salvo.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function salvarTokenConvidado(convidadoId, eventoId, token) {
   return new Promise((resolve, reject) => {
     conexao.query(
@@ -755,13 +619,6 @@ export function salvarTokenConvidado(convidadoId, eventoId, token) {
   });
 }
 
-/**
- * @function salvarTokenAcompanhante
- * @description Salva um token para um acompanhante.
- * @param {number} acompanhanteId - O ID do acompanhante.
- * @param {string} token - O token a ser salvo.
- * @returns {Promise<Object>} Uma Promise que resolve com o resultado da atualização.
- */
 export function salvarTokenAcompanhante(acompanhanteId, token) {
   return new Promise((resolve, reject) => {
     conexao.query(

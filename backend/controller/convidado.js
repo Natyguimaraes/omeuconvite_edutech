@@ -3,7 +3,7 @@ import {
   updateConvidadoModel,
   deleteConvidadoModel,
   createAcompanhanteModel,
-  getAcompanhantesByConvidadoEvento, // <--- Esta é a função DO MODEL
+  getAcompanhantesByConvidadoEvento,
   deleteAcompanhanteModel,
   updateAcompanhanteModel,
   confirmarAcompanhantesModel,
@@ -19,13 +19,6 @@ import {
 } from "../model/convidado.js";
 import conexao from '../configuracao/banco.js';
 
-/**
- * @async
- * @function createConvidado
- * @description Cria um novo convidado, associa a eventos e adiciona acompanhantes.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function createConvidado(req, res) {
   try {
     const { nome, telefone, email, limite_padrao, eventos, acompanhantes } = req.body;
@@ -80,13 +73,6 @@ export async function createConvidado(req, res) {
   }
 }
 
-/**
- * @async
- * @function getAllConvidados
- * @description Retorna todos os convidados com seus detalhes completos.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function getAllConvidados(req, res) {
   try {
     const convidados = await getConvidadosModel();
@@ -103,13 +89,6 @@ export async function getAllConvidados(req, res) {
   }
 }
 
-/**
- * @async
- * @function updateConvidado
- * @description Atualiza os dados de um convidado e suas associações com eventos.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function updateConvidado(req, res) {
   try {
     const { id } = req.params;
@@ -155,13 +134,6 @@ export async function updateConvidado(req, res) {
   }
 }
 
-/**
- * @async
- * @function deleteConvidadoById
- * @description Inativa um convidado e remove suas associações com eventos.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function deleteConvidadoById(req, res) {
   try {
     const { id } = req.params;
@@ -188,13 +160,6 @@ export async function deleteConvidadoById(req, res) {
   }
 }
 
-/**
- * @async
- * @function getConvidadoById
- * @description Busca os detalhes de um convidado específico.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function getConvidadoById(req, res) {
   try {
     const { id } = req.params;
@@ -220,13 +185,6 @@ export async function getConvidadoById(req, res) {
   }
 }
 
-/**
- * @async
- * @function addConvidadoToEvento
- * @description Associa um convidado a um evento.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function addConvidadoToEvento(req, res) {
   try {
     const { convidadoId, eventoId } = req.params;
@@ -253,13 +211,6 @@ export async function addConvidadoToEvento(req, res) {
   }
 }
 
-/**
- * @async
- * @function updateConvidadoEvento
- * @description Atualiza os detalhes da associação de um convidado a um evento.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function updateConvidadoEvento(req, res) {
   try {
     const { convidadoId, eventoId } = req.params;
@@ -290,13 +241,6 @@ export async function updateConvidadoEvento(req, res) {
   }
 }
 
-/**
- * @async
- * @function removeConvidadoFromEvento
- * @description Remove a associação de um convidado a um evento.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function removeConvidadoFromEvento(req, res) {
   try {
     const { convidadoId, eventoId } = req.params;
@@ -323,13 +267,6 @@ export async function removeConvidadoFromEvento(req, res) {
   }
 }
 
-/**
- * @async
- * @function createAcompanhante
- * @description Cria um novo acompanhante e o associa a um convidado e evento específicos.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function createAcompanhante(req, res) {
   try {
     const { convidadoId } = req.params;
@@ -396,14 +333,6 @@ export async function createAcompanhante(req, res) {
   }
 }
 
-/**
- * @async
- * @function handleGetAcompanhantes
- * @description Retorna todos os acompanhantes de um convidado em um evento específico.
- * RENOMEADA para `handleGetAcompanhantes` para evitar conflito com a função do model de mesmo nome.
- * @param {Object} req - Objeto de requisição (params: convidadoId, eventoId).
- * @param {Object} res - Objeto de resposta.
- */
 export async function handleGetAcompanhantes(req, res) { // <-- AQUI É A MUDANÇA
   try {
     const { convidadoId, eventoId } = req.params;
@@ -423,14 +352,6 @@ export async function handleGetAcompanhantes(req, res) { // <-- AQUI É A MUDAN�
   }
 }
 
-
-/**
- * @async
- * @function updateAcompanhanteById
- * @description Atualiza os dados de um acompanhante.
- * @param {Object} req - Objeto de requisição (params: acompanhanteId; body: novos dados).
- * @param {Object} res - Objeto de resposta.
- */
 export async function updateAcompanhanteById(req, res) {
   try {
     const { acompanhanteId } = req.params;
@@ -456,13 +377,6 @@ export async function updateAcompanhanteById(req, res) {
   }
 }
 
-/**
- * @async
- * @function confirmarAcompanhantes
- * @description Confirma a presença de múltiplos acompanhantes para um dado convidado E EVENTO.
- * @param {Object} req - Objeto de requisição (params: convidadoId, eventoId; body: { acompanhantes: Array<Object> }).
- * @param {Object} res - Objeto de resposta.
- */
 export async function confirmarAcompanhantes(req, res) {
   try {
     const { convidadoId, eventoId } = req.params;
@@ -503,13 +417,6 @@ export async function confirmarAcompanhantes(req, res) {
   }
 }
 
-/**
- * @async
- * @function deleteAcompanhanteById
- * @description Inativa um acompanhante (muda o status `ativo_acompanhante` para 0).
- * @param {Object} req - Objeto de requisição (params: id).
- * @param {Object} res - Objeto de resposta.
- */
 export async function deleteAcompanhanteById(req, res) {
   try {
     const { id } = req.params;
@@ -543,14 +450,6 @@ export async function deleteAcompanhanteById(req, res) {
   }
 }
 
-/**
- * @async
- * @function inativaAcompanhanteByIdConvidado
- * @description Função auxiliar para inativar acompanhantes de um convidado em um evento.
- * Não é um endpoint direto, mas pode ser chamada por outros controllers.
- * @param {number} convidadoId - O ID do convidado.
- * @param {number} eventoId - O ID do evento.
- */
 export async function inativaAcompanhanteByIdConvidado(convidadoId, eventoId) {
   try {
     await inativaAcompanhanteModel(convidadoId, eventoId);
@@ -559,13 +458,6 @@ export async function inativaAcompanhanteByIdConvidado(convidadoId, eventoId) {
   }
 }
 
-/**
- * @async
- * @function validarTokenController
- * @description Valida um token e retorna os dados do convidado associado.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function validarTokenController(req, res) {
   try {
     const token = req.params.token;
@@ -585,13 +477,6 @@ export async function validarTokenController(req, res) {
   }
 }
 
-/**
- * @async
- * @function confirmarPresencaPorToken
- * @description Confirma a presença de um convidado ou acompanhante através de um token.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export async function confirmarPresencaPorToken(req, res) {
   const { token } = req.body;
 
@@ -629,13 +514,6 @@ export async function confirmarPresencaPorToken(req, res) {
   }
 }
 
-/**
- * @async
- * @function togglePresencaConvidado
- * @description Alterna o status de presença (token_usado) de um convidado em um evento.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export const togglePresencaConvidado = async (req, res) => {
   try {
     const { convidadoId, eventoId } = req.params;
@@ -676,13 +554,6 @@ export const togglePresencaConvidado = async (req, res) => {
   }
 };
 
-/**
- * @async
- * @function togglePresencaAcompanhante
- * @description Alterna o status de presença (token_usado) de um acompanhante.
- * @param {Object} req - Objeto de requisição.
- * @param {Object} res - Objeto de resposta.
- */
 export const togglePresencaAcompanhante = async (req, res) => {
   try {
     const { acompanhanteId } = req.params;
