@@ -15,6 +15,8 @@ import {
   UserPlus,
   CheckCircle,
   XCircle,
+  Clock,
+
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
@@ -44,9 +46,9 @@ const Confirmacao = () => {
     return savedFilters
       ? JSON.parse(savedFilters)
       : {
-          status: "all",
-          searchName: "",
-        };
+        status: "all",
+        searchName: "",
+      };
   });
 
   const [eventos, setEventos] = useState([]);
@@ -107,51 +109,63 @@ const Confirmacao = () => {
           (e) => e?.id === eventoIdNum
         );
 
-        // Filtra acompanhantes que pertencem a este convidado E a este evento
+        // Filtra acompanhantes que pertencem a este convidado e a este evento
         const acompanhantesDoEvento = Array.isArray(convidado.acompanhantes)
           ? convidado.acompanhantes.filter(
-              (a) =>
-                Number(a.convidado_evento_evento_id) === eventoIdNum &&
-                Number(a.convidado_evento_convidado_id) === convidado.id
-            )
+            (a) =>
+              Number(a.convidado_evento_evento_id) === eventoIdNum &&
+              Number(a.convidado_evento_convidado_id) === convidado.id
+          )
           : [];
 
         return {
           ...convidado,
-          confirmado: Number(eventoRelacao?.confirmado) === 1,
+          confirmado: Number(eventoRelacao?.confirmado),
           presente: Number(eventoRelacao?.token_usado) === 1,
           limite_acompanhante: Number(eventoRelacao?.limite_acompanhante) || 0,
           acompanhantes: acompanhantesDoEvento.map((a) => ({
             ...a,
             presente: Number(a.token_usado) === 1,
-            confirmado: Number(a.confirmado) === 1,
+            confirmado: Number(a.confirmado),
           })),
         };
       });
   };
 
-  const contarParticipantes = (convidadosEvento) => {
-    if (!Array.isArray(convidadosEvento)) return 0;
-    return convidadosEvento.reduce((acc, convidado) => {
-      const acompanhantesCount = Array.isArray(convidado.acompanhantes)
-        ? convidado.acompanhantes.length
-        : 0;
-      return acc + 1 + acompanhantesCount;
+  // Funções de contagem
+  const contarParticipantes = (convidados) => {
+    if (!Array.isArray(convidados)) return 0;
+
+    return convidados.reduce((total, convidado) => {
+      const acompanhantesValidos = Array.isArray(convidado.acompanhantes) ? convidado.acompanhantes.length : 0;
+      return total + 1 + acompanhantesValidos;
     }, 0);
   };
 
-  const contarConfirmados = (convidadosEvento) => {
-    if (!Array.isArray(convidadosEvento)) return 0;
+  const contarConfirmados = (convidados) => contarPorStatus(convidados, 1);
+  const contarPendentes = (convidados) => contarPorStatus(convidados, 0);
+  const contarNaoComparecera = (convidados) => contarPorStatus(convidados, 2);
 
-    let count = 0;
-    convidadosEvento.forEach((convidado) => {
-      if (convidado.confirmado) count++;
+  // Função base (reutilizável)
+  const contarPorStatus = (convidados, statusAlvo) => {
+    if (!Array.isArray(convidados)) return 0;
+
+    return convidados.reduce((total, convidado) => {
+      const statusConvidado = Number(convidado.confirmado);
+      const countConvidado = statusConvidado === statusAlvo ? 1 : 0;
+
+      let countAcompanhantes = 0;
       if (Array.isArray(convidado.acompanhantes)) {
-        count += convidado.acompanhantes.filter((a) => a.confirmado).length;
+        countAcompanhantes = convidado.acompanhantes.filter(a =>
+          Number(a.confirmado) === statusAlvo
+        ).length;
       }
-    });
-    return count;
+
+      return total + countConvidado + countAcompanhantes;
+    }, 0);
   };
+
+
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -249,7 +263,7 @@ const Confirmacao = () => {
         telefone: phoneDigits,
         email: newGuest.email.trim() || null,
         limite_acompanhante: Number(newGuest.limite_acompanhante) || 0,
-        evento_id: parseInt(eventoId || newGuest.evento_id),
+        evento_id: parseInt(eventoId || newGuest.evento_id), //parseInt serve para converter números em strings
         // administrador_id: localStorage.getItem('adminId'), // Se você tiver um adminId no frontend
       };
 
@@ -349,36 +363,36 @@ const Confirmacao = () => {
 
       const eventosProcessados = Array.isArray(eventosData)
         ? eventosData
-            .filter((e) => (adminId ? e.administrador_id == adminId : true))
-            .map((e) => ({
-              ...e,
-              id: Number(e.id),
-              data_evento: e.data_evento || new Date().toISOString(),
-            }))
+          .filter((e) => (adminId ? e.administrador_id == adminId : true))
+          .map((e) => ({
+            ...e,
+            id: Number(e.id),
+            data_evento: e.data_evento || new Date().toISOString(),
+          }))
         : [];
 
       setEventos(eventosProcessados);
 
       const convidadosProcessados = Array.isArray(convidadosData.data)
         ? convidadosData.data.map((c) => ({
-            id: c.id,
-            nome: c.nome,
-            telefone: formatPhoneNumber(c.telefone),
-            email: c.email,
-            limite_acompanhante: c.limite_acompanhante,
-            ativo_convidado: c.ativo_convidado,
-            administrador_id: c.administrador_id,
-            eventos: Array.isArray(c.eventos)
-              ? c.eventos
-              : c.eventos_json // Se vier como JSON string, parseie
+          id: c.id,
+          nome: c.nome,
+          telefone: formatPhoneNumber(c.telefone),
+          email: c.email,
+          limite_acompanhante: c.limite_acompanhante,
+          ativo_convidado: c.ativo_convidado,
+          administrador_id: c.administrador_id,
+          eventos: Array.isArray(c.eventos)
+            ? c.eventos
+            : c.eventos_json // Se vier como JSON string, parseie
               ? JSON.parse(c.eventos_json)
               : [],
-            acompanhantes: Array.isArray(c.acompanhantes)
-              ? c.acompanhantes
-              : c.acompanhantes_json // Se vier como JSON string, parseie
+          acompanhantes: Array.isArray(c.acompanhantes)
+            ? c.acompanhantes
+            : c.acompanhantes_json // Se vier como JSON string, parseie
               ? JSON.parse(c.acompanhantes_json)
               : [],
-          }))
+        }))
         : [];
 
       setConvidados(convidadosProcessados);
@@ -398,6 +412,14 @@ const Confirmacao = () => {
     const convidado = convidados.find((c) => c.id === id);
     if (!convidado) return;
 
+    // Filtra os acompanhantes para incluir APENAS aqueles que pertencem ao evento atual
+    // (onde o convidado está sendo editado)
+    const acompanhantesDoEventoAtual = (convidado.acompanhantes || []).filter(
+      (acompanhante) =>
+        Number(acompanhante.convidado_evento_evento_id) === parseInt(eventoId) &&
+        Number(acompanhante.convidado_evento_convidado_id) === id
+    );
+
     setEditIndex(id);
     setEditData({
       nome: convidado.nome || "",
@@ -406,7 +428,8 @@ const Confirmacao = () => {
       limite_acompanhante:
         convidado.eventos?.find((e) => e.id === parseInt(eventoId))
           ?.limite_acompanhante || 0,
-      acompanhantes: [...(convidado.acompanhantes || [])],
+      // Agora, passamos apenas os acompanhantes filtrados para o evento atual
+      acompanhantes: acompanhantesDoEventoAtual,
     });
     setAcompanhantesToDelete([]);
   };
@@ -480,43 +503,34 @@ const Confirmacao = () => {
     }));
   };
 
-  const handleSendWhatsapp = async (convidado) => {
-    const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
-    const linkConfirmacao = `${frontendUrl}/convite/${convidado.id}?eventoId=${eventoId}`;
 
-    const evento = eventos.find((e) => e.id === parseInt(eventoId));
-    const mensagem = `${convidado.nome}! ${
-      evento?.mensagem_whatsapp || "Você está convidado para nosso evento!"
-    }: ${linkConfirmacao}`;
+const handleSendWhatsapp = async (convidado) => {
+  const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+  const linkConfirmacao = `${frontendUrl}/convite/${convidado.id}?eventoId=${eventoId}`;
 
-    const linkWhatsapp = `https://api.whatsapp.com/send?phone=55${convidado.telefone.replace(/\D/g, '')}&text=${encodeURIComponent(
-      mensagem
-    )}`;
+  const evento = eventos.find((e) => e.id === parseInt(eventoId));
+  const mensagem = `${convidado.nome}! ${
+    evento?.mensagem_whatsapp || "Você está convidado para nosso evento!"
+  }: ${linkConfirmacao}`;
 
-    try {
-      const resposta = await fetch(
-        `${apiConvidados}/${convidado.id}/eventos/${eventoId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ confirmado: 1 }),
-        }
-      );
+  const linkWhatsapp = `https://api.whatsapp.com/send?phone=55${convidado.telefone.replace(/\D/g, "")}&text=${encodeURIComponent(
+    mensagem
+  )}`;
 
-      if (!resposta.ok) {
-        const errorData = await resposta.json();
-        throw new Error(errorData.message || "Erro ao atualizar a confirmação");
-      }
-
-      await fetchDados();
-      toast.success("Confirmação enviada via WhatsApp!");
-    } catch (error) {
-      toast.error(`Erro ao enviar a mensagem: ${error.message}`);
-      console.error("Erro ao enviar whatsapp/confirmar:", error);
-    }
-
+  try {
+    
+    toast.success("Link de convite enviado via WhatsApp!");
+  } catch (error) {
+  
+    toast.error(`Erro ao preparar a mensagem: ${error.message}`);
+    console.error("Erro ao preparar mensagem para WhatsApp:", error);
+  } finally {
+    
     window.open(linkWhatsapp, "_blank");
-  };
+  }
+};
+
+
 
   const toggleConfirmacao = async (convidadoId, acompanhanteId = null) => {
     try {
@@ -700,8 +714,12 @@ const Confirmacao = () => {
                   const convidadosEvento = aplicarFiltros(
                     getConvidadosPorEvento(evento.id)
                   );
+
                   const totalParticipantes = contarParticipantes(convidadosEvento);
                   const totalConfirmados = contarConfirmados(convidadosEvento);
+                  const totalPendentes = contarPendentes(convidadosEvento);
+                  const totalNaoComparecera = contarNaoComparecera(convidadosEvento);
+
                   return (
                     <div
                       className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
@@ -730,15 +748,40 @@ const Confirmacao = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
+
+                          {/* Total participantes */}
+                          <div className="flex items-left bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
                             <Users className="h-3 w-3 mr-1" />
                             <span>
-                              {totalConfirmados}/{totalParticipantes} confirmados
+                              {totalParticipantes} Total participantes
+                            </span>
+                          </div>
+
+                        {/* total confirmados */}
+                          <div className="flex items-left bg-green-50 text-green-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
+                            <Users className="h-3 w-3 mr-1" />
+                            <span>
+                              {totalConfirmados} Confirmados
+                            </span>
+                          </div>
+
+                        {/* total pendentes*/}
+                          <div className="flex items-center bg-yellow-50 text-yellow-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
+                            <Clock className="h-3 w-3 mr-1" />
+                            <span>
+                              {totalPendentes} Pendentes
+                            </span>
+                          </div>
+                        
+                        {/* total Não comparecerá */}
+                          <div className="flex items-center bg-red-50 text-red-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
+                            <X className="h-3 w-3 mr-1" />
+                            <span>
+                              {totalNaoComparecera} Não comparecerá
                             </span>
                           </div>
                         </div>
                       </div>
-
                       <div className="overflow-x-auto">
                         {convidadosEvento.length > 0 ? (
                           <table className="w-full text-sm">
@@ -768,14 +811,12 @@ const Confirmacao = () => {
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                              {/* Move o contador global para fora do map, antes do tbody */}
-                              {/* E itera diretamente pelos convidadosEvento */}
                               {convidadosEvento.map((convidado) => {
-                                globalIndex++; // Incrementa para o convidado principal
+                                globalIndex++;
                                 const isEditing = editIndex === convidado.id;
 
                                 return (
-                                  // Use um fragmento para retornar a linha do convidado e as linhas dos acompanhantes
+                                  // fragmento para retornar a linha do convidado e as linhas dos acompanhantes
                                   <React.Fragment key={convidado.id}>
                                     <tr className="hover:bg-gray-50/50 transition-colors">
                                       {isEditing ? (
@@ -971,9 +1012,7 @@ const Confirmacao = () => {
 
                                           <td className="px-4 py-4">
                                             <BadgeConvidadoStatus
-                                              status={
-                                                convidado.confirmado ? 1 : 0
-                                              }
+                                              status={convidado.confirmado} // Passa o número 0, 1 ou 2
                                             />
                                           </td>
                                           <td className="px-4 py-4">
@@ -1061,7 +1100,7 @@ const Confirmacao = () => {
                                               </div>
                                               <div>
                                                 <div className="font-medium text-gray-900">
-                                                  {acompanhante.nome} (Acomp.)
+                                                  {acompanhante.nome}
                                                 </div>
                                                 <div className="text-xs text-gray-500 mt-1 sm:hidden">
                                                   {acompanhante.telefone}
@@ -1081,9 +1120,7 @@ const Confirmacao = () => {
                                           </td>
                                           <td className="px-4 py-3">
                                             <BadgeConvidadoStatus
-                                              status={
-                                                acompanhante.confirmado ? 1 : 0
-                                              }
+                                              status={acompanhante.confirmado} 
                                             />
                                           </td>
                                           <td className="px-4 py-3">
@@ -1120,7 +1157,7 @@ const Confirmacao = () => {
                                           </td>
 
                                           <td className="px-4 py-3 text-right whitespace-nowrap">
-                                            {/* As ações de edição e deleção para acompanhantes agora são tratadas no modal de edição do convidado principal */}
+                                            
                                           </td>
                                         </tr>
                                       );

@@ -25,7 +25,7 @@ function Eventos() {
   const [eventoExpandido, setEventoExpandido] = useState(null);
   const navigate = useNavigate();
 
-  // Obter o ID do administrador logado
+  // Obter o ID do administrador logado, alterar para o user_admin
   const adminId = 1;
 
   const [editIndex, setEditIndex] = useState(null);
@@ -49,7 +49,7 @@ function Eventos() {
       setLoading(true);
       setError(null);
       try {
-        // Adicionar o adminId como query parameter na requisição
+       
         const eventosUrl = adminId ? `${apiUrlEventos}?administrador_id=${adminId}` : apiUrlEventos;
         
         const [eventosResponse, convidadosResponse] = await Promise.all([
@@ -65,7 +65,6 @@ function Eventos() {
           convidadosResponse.json()
         ]);
 
-        // Filtro adicional no frontend para garantir que só apareçam eventos do admin logado
         const eventosProcessados = Array.isArray(eventosData)
           ? eventosData
               .filter(e => adminId ? e.administrador_id == adminId : true)
@@ -130,91 +129,108 @@ function Eventos() {
   );
 };
 
-const getTotalAcompanhantes = (convidadosEvento, eventoId) => {
+const getTotalAcompanhantesRegistrados = (convidadosEvento, eventoId) => {
   if (!Array.isArray(convidadosEvento)) return 0;
 
-  return convidadosEvento.reduce((total, convidado) => {
-    if (!convidado?.acompanhantes || !Array.isArray(convidado.acompanhantes)) return total;
+  return convidadosEvento.reduce((totalAcompanhantes, convidado) => {
+   
+    const eventoRelacao = convidado.eventos?.find(e => e.id === eventoId);
+    if (!eventoRelacao) {
+      return totalAcompanhantes; 
+    }
+
+    if (!convidado?.acompanhantes || !Array.isArray(convidado.acompanhantes)) return totalAcompanhantes;
     
-    // Filtrar acompanhantes deste evento específico
-    return total + convidado.acompanhantes.filter(a => 
-      String(a.eventoId) === String(eventoId)
-    ).length;
+    const acompanhantesDesteEvento = convidado.acompanhantes.filter(a =>
+      Number(a.convidado_evento_evento_id) === eventoId &&
+      Number(a.convidado_evento_convidado_id) === convidado.id 
+    );
+
+    return totalAcompanhantes + acompanhantesDesteEvento.length;
   }, 0);
 };
 
 const getConfirmadosPorEvento = (eventoId) => {
+  
   const convidadosEvento = getConvidadosPorEvento(eventoId);
 
   let totalConfirmados = 0;
 
   convidadosEvento.forEach(convidado => {
-    const eventoConvidado = convidado.eventos?.find(e => e.id === eventoId);
-    if (eventoConvidado?.confirmado === 1) {
-      totalConfirmados += 1;
+    
+    const eventoRelacao = convidado.eventos?.find(e => e.id === eventoId);
 
-      // Contar apenas acompanhantes confirmados deste evento
-      if (Array.isArray(convidado.acompanhantes)) {
-        totalConfirmados += convidado.acompanhantes.filter(a => 
-          String(a.eventoId) === String(eventoId) && Number(a.confirmado) === 1
-        ).length;
-      }
+   
+    if (eventoRelacao && Number(eventoRelacao.confirmado) === 1) {
+      totalConfirmados += 1;
+    }
+
+    if (Array.isArray(convidado.acompanhantes)) {
+      
+      totalConfirmados += convidado.acompanhantes.filter(a => 
+        Number(a.convidado_evento_evento_id) === eventoId &&
+        Number(a.convidado_evento_convidado_id) === convidado.id &&
+        Number(a.confirmado) === 1
+      ).length;
     }
   });
 
   return totalConfirmados;
 };
 
+// Em Confirmacao.jsx
+
 const getAusentesPorEvento = (eventoId) => {
   const convidadosEvento = getConvidadosPorEvento(eventoId);
 
-  let totalConvidadosAusentes = 0;
-  let totalAcompanhantesAusentes = 0;
+  let totalAusentes = 0;
 
-  for (const convidado of convidadosEvento) {
-    // Verifica se o convidado está ausente neste evento específico
-    const evento = convidado.eventos?.find(e => e.id === eventoId);
-    if (Number(evento?.confirmado) === 2) {
-      totalConvidadosAusentes++;
+  convidadosEvento.forEach(convidado => {
+    
+    const eventoRelacao = convidado.eventos?.find(e => e.id === eventoId);
+
+    if (eventoRelacao && Number(eventoRelacao.confirmado) === 2) {
+      totalAusentes++;
     }
 
-    // Conta acompanhantes ausentes DESTE EVENTO ESPECÍFICO
     if (Array.isArray(convidado.acompanhantes)) {
-      totalAcompanhantesAusentes += convidado.acompanhantes.filter(a => 
-        String(a.eventoId) === String(eventoId) && Number(a.confirmado) === 2
+     
+      totalAusentes += convidado.acompanhantes.filter(a => 
+        Number(a.convidado_evento_evento_id) === eventoId &&
+        Number(a.convidado_evento_convidado_id) === convidado.id &&
+        Number(a.confirmado) === 2
       ).length;
     }
-  }
-
-  console.log(`Evento ${eventoId} - Convidados ausentes: ${totalConvidadosAusentes}, Acompanhantes ausentes: ${totalAcompanhantesAusentes}`);
+  });
   
-  return totalConvidadosAusentes + totalAcompanhantesAusentes;
+  return totalAusentes;
 };
+
 
 const getPendentesPorEvento = (eventoId) => {
   const convidadosEvento = getConvidadosPorEvento(eventoId);
 
-  let totalConvidadosPendentes = 0;
-  let totalAcompanhantesPendentes = 0;
+  let totalPendentes = 0;
 
-  for (const convidado of convidadosEvento) {
-    // Verifica se o convidado está pendente neste evento específico
-    const evento = convidado.eventos?.find(e => e.id === eventoId);
-    if (!evento?.confirmado || Number(evento.confirmado) === 0) {
-      totalConvidadosPendentes++;
+  convidadosEvento.forEach(convidado => {
+    
+    const eventoRelacao = convidado.eventos?.find(e => e.id === eventoId);
+
+    if (eventoRelacao && Number(eventoRelacao.confirmado) === 0) {
+      totalPendentes++;
     }
     
-    // Conta acompanhantes pendentes DESTE EVENTO ESPECÍFICO
     if (Array.isArray(convidado.acompanhantes)) {
-      totalAcompanhantesPendentes += convidado.acompanhantes.filter(a => 
-        String(a.eventoId) === String(eventoId) && (!a.confirmado || Number(a.confirmado) === 0)
+      
+      totalPendentes += convidado.acompanhantes.filter(a => 
+        Number(a.convidado_evento_evento_id) === eventoId &&
+        Number(a.convidado_evento_convidado_id) === convidado.id &&
+        Number(a.confirmado) === 0
       ).length;
     }
-  }
-
-  console.log(`Evento ${eventoId} - Convidados pendentes: ${totalConvidadosPendentes}, Acompanhantes pendentes: ${totalAcompanhantesPendentes}`);
+  });
   
-  return totalConvidadosPendentes + totalAcompanhantesPendentes;
+  return totalPendentes;
 };
 
   const handleEventoClick = (eventoId, e) => {
@@ -542,7 +558,7 @@ const getPendentesPorEvento = (eventoId) => {
                             <EventCard 
                               evento={evento}
                               convidados={getConvidadosPorEvento(evento.id)}
-                              totalAcompanhantes={getTotalAcompanhantes(getConvidadosPorEvento(evento.id), evento.id)}
+                              totalAcompanhantes={getTotalAcompanhantesRegistrados(getConvidadosPorEvento(evento.id), evento.id)}
                               totalConvidados={getConvidadosPorEvento(evento.id).length}
                               totalConfirmados={getConfirmadosPorEvento(evento.id)}
                               totalAusentes={getAusentesPorEvento(evento.id)}
