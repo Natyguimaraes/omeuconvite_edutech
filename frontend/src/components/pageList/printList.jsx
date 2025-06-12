@@ -141,21 +141,6 @@ const PrintList = ({
 
   return (
   <>
-
-  {/* 
-  position: fixed;
-              bottom: 20px;
-              left: 20px;
-              background: #4f46e5;
-              color: white;
-              border: none;
-              padding: 10px 16px;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-              z-index: 9999;
-  */}
    <div className="border border-purple-200 rounded-xl p-4 bg-white/60 shadow-sm mb-3">
   {/* Título e descrição */}
   <h2 className="text-base sm:text-lg font-semibold text-purple-800 mb-1">

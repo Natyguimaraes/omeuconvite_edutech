@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
@@ -14,17 +15,15 @@ import {
   UserPlus,
   CheckCircle,
   XCircle,
-  Clock // Importado para BadgeConvidadoStatus
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import BadgeConvidadoStatus from "../../components/BadgeConvidadoStatus";
-import QRCodeScanButton from '../../components/qrcode/QrCodeButon';
+import QRCodeScanButton from "../../components/qrcode/QrCodeButon";
 import GuestActions from "../../components/pageList/GuestFilters";
-import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils"
-import GuestSearchAdd from "../../components/pageList/buscaConvidado"
+import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phoneUtils";
+import GuestSearchAdd from "../../components/pageList/buscaConvidado";
 import PrintList from "../../components/pageList/printList";
-import EditGuestModal from "../../components/modal/EditGuestModal";
 
 const Confirmacao = () => {
   const navigate = useNavigate();
@@ -41,132 +40,94 @@ const Confirmacao = () => {
   }, [eventoIdFromQuery]);
 
   const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem('convidadosFilters');
-    return savedFilters ? JSON.parse(savedFilters) : {
-      status: "all",
-      searchName: "",
-    };
+    const savedFilters = localStorage.getItem("convidadosFilters");
+    return savedFilters
+      ? JSON.parse(savedFilters)
+      : {
+          status: "all",
+          searchName: "",
+        };
   });
 
   const [eventos, setEventos] = useState([]);
   const [convidados, setConvidados] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editIndex, setEditIndex] = useState(null); // ID do convidado que está sendo editado (no modal)
 
-  const [editData, setEditData] = useState({ // Dados que preenchem o formulário do modal
+  const [editIndex, setEditIndex] = useState(null);
+  const [editData, setEditData] = useState({
     nome: "",
     telefone: "",
     email: "",
     limite_acompanhante: 0,
     acompanhantes: [],
   });
+  const [acompanhantesToDelete, setAcompanhantesToDelete] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [addingGuest, setAddingGuest] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Estado para controlar a visibilidade do modal
-  const [showEditModal, setShowEditModal] = useState(false);
-
-
-  useEffect(() => {
-    console.log("Estado atual dos convidados (do React):", convidados);
-  }, [convidados]);
-
-  useEffect(() => {
-    localStorage.setItem('convidadosFilters', JSON.stringify(filters));
-  }, [filters]);
-
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGuest, setNewGuest] = useState({
     nome: "",
     telefone: "",
     email: "",
     limite_acompanhante: 0,
-    evento_id: eventoId || ""
+    evento_id: eventoId || "",
   });
 
   const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const apiEventos = `${baseUrl}/api/eventos`;
   const apiConvidados = `${baseUrl}/api/convidados`;
 
-  // Função para obter convidados de um evento específico
+  useEffect(() => {
+    localStorage.setItem("convidadosFilters", JSON.stringify(filters));
+  }, [filters]);
+
   const getConvidadosPorEvento = (currentEventoId) => {
     if (!Array.isArray(convidados)) {
-      console.warn('getConvidadosPorEvento: convidados is not an array', convidados);
+      console.warn("convidados is not an array", convidados);
       return [];
     }
 
     const eventoIdNum = parseInt(currentEventoId);
-    console.log("getConvidadosPorEvento - Evento ID selecionado (numérico):", eventoIdNum, "É NaN?", isNaN(eventoIdNum));
 
-    const filteredConvidados = convidados
-      .filter(convidado => {
-        try {
-          const eventosConvidado = Array.isArray(convidado?.eventos) ?
-            convidado.eventos : [];
-
-          // Log para depuração dos IDs dos eventos do convidado
-          if (eventosConvidado.length === 0) {
-            console.log(`getConvidadosPorEvento - Convidado "${convidado.nome}" NÃO TEM EVENTOS associados.`);
-            return false;
-          }
-
-          const isAssociated = eventosConvidado.some(evento => {
-              const eventoIdConvidado = Number(evento?.id);
-              const match = eventoIdConvidado === eventoIdNum;
-              console.log(`getConvidadosPorEvento - Convidado "${convidado.nome}" Evento ID: ${eventoIdConvidado} (Tipo: ${typeof eventoIdConvidado}) === Selecionado ID: ${eventoIdNum} (Tipo: ${typeof eventoIdNum}) -> Match: ${match}`);
-              return match;
-          });
-          console.log(`getConvidadosPorEvento - Convidado "${convidado.nome}" Associado ao evento ${eventoIdNum}?`, isAssociated);
-          return isAssociated;
-
-        } catch (error) {
-          console.error('getConvidadosPorEvento - Erro durante a filtragem de convidado:', error, convidado);
-          return false;
-        }
+    return convidados
+      .filter((convidado) => {
+        const eventosConvidado = Array.isArray(convidado?.eventos)
+          ? convidado.eventos
+          : [];
+        return eventosConvidado.some((evento) => evento?.id === eventoIdNum);
       })
-      .map(convidado => {
-        try {
-          const eventosConvidado = Array.isArray(convidado.eventos) ?
-            convidado.eventos : [];
+      .map((convidado) => {
+        const eventosConvidado = Array.isArray(convidado.eventos)
+          ? convidado.eventos
+          : [];
 
-          const eventoRelacao = eventosConvidado.find(e => Number(e?.id) === eventoIdNum);
+        const eventoRelacao = eventosConvidado.find(
+          (e) => e?.id === eventoIdNum
+        );
 
-          const acompanhantesDoEvento = Array.isArray(convidado.acompanhantes)
-            ? convidado.acompanhantes.filter(a => {
-                const acompEventoId = Number(a.convidado_evento_evento_id);
-                console.log(`   Acompanhante "${a.nome}" Ref ID: ${acompEventoId} (Tipo: ${typeof acompEventoId}) === Evento ID: ${eventoIdNum} (Tipo: ${typeof eventoIdNum}) -> Match: ${acompEventoId === eventoIdNum}`);
-                return acompEventoId === eventoIdNum;
-              })
-            : [];
+        // Filtra acompanhantes que pertencem a este convidado E a este evento
+        const acompanhantesDoEvento = Array.isArray(convidado.acompanhantes)
+          ? convidado.acompanhantes.filter(
+              (a) =>
+                Number(a.convidado_evento_evento_id) === eventoIdNum &&
+                Number(a.convidado_evento_convidado_id) === convidado.id
+            )
+          : [];
 
-          return {
-            ...convidado,
-            confirmado: eventoRelacao?.confirmado || 0,
-            presente: Number(eventoRelacao?.token_usado) === 1,
-            limite_acompanhante: eventoRelacao?.limite_acompanhante || 0,
-            acompanhantes: acompanhantesDoEvento.map(a => ({
-              ...a,
-              id: a.id || `temp-${Math.random().toString(36).substr(2, 9)}`,
-              presente: Number(a.token_usado) === 1,
-              confirmado: a.confirmado || 0
-            }))
-          };
-        } catch (error) {
-          console.error('getConvidadosPorEvento - Erro mapping convidado:', error, convidado);
-          return {
-            ...convidado,
-            confirmado: 0,
-            presente: false,
-            limite_acompanhante: 0,
-            acompanhantes: []
-          };
-        }
+        return {
+          ...convidado,
+          confirmado: Number(eventoRelacao?.confirmado) === 1,
+          presente: Number(eventoRelacao?.token_usado) === 1,
+          limite_acompanhante: Number(eventoRelacao?.limite_acompanhante) || 0,
+          acompanhantes: acompanhantesDoEvento.map((a) => ({
+            ...a,
+            presente: Number(a.token_usado) === 1,
+            confirmado: Number(a.confirmado) === 1,
+          })),
+        };
       });
-      console.log("getConvidadosPorEvento - Convidados filtrados para exibição:", filteredConvidados);
-      return filteredConvidados;
   };
 
   const contarParticipantes = (convidadosEvento) => {
@@ -179,34 +140,18 @@ const Confirmacao = () => {
     }, 0);
   };
 
-  //contar confirmados
   const contarConfirmados = (convidadosEvento) => {
     if (!Array.isArray(convidadosEvento)) return 0;
 
     let count = 0;
-    convidadosEvento.forEach(convidado => {
-      if (Number(convidado.confirmado) === 1) count++;
+    convidadosEvento.forEach((convidado) => {
+      if (convidado.confirmado) count++;
       if (Array.isArray(convidado.acompanhantes)) {
-        count += convidado.acompanhantes.filter(a => Number(a.confirmado) === 1).length;
+        count += convidado.acompanhantes.filter((a) => a.confirmado).length;
       }
     });
     return count;
   };
-
-  //contar pendentes
-  const contarPendentes = (convidadosEvento) => {
-    if (!Array.isArray(convidadosEvento)) return 0;
-
-    let count = 0;
-    convidadosEvento.forEach(convidado => {
-      if (Number(convidado.confirmado) === 0) count++;
-      if (Array.isArray(convidado.acompanhantes)) {
-        count += convidado.acompanhantes.filter(a => Number(a.confirmado) === 0).length;
-      }
-    });
-    return count;
-  };
-
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -216,37 +161,45 @@ const Confirmacao = () => {
 
     const term = searchTerm.toLowerCase();
 
-    const results = convidados.filter(c => {
+    const results = convidados.filter((c) => {
       const nomeMatch = c.nome.toLowerCase().includes(term);
-      const naoEstaNoEventoAtual = !c.eventos?.some(e => e.id === parseInt(eventoId));
+      const estaNoEventoAtual = c.eventos?.some(
+        (e) => e.id === parseInt(eventoId)
+      );
 
-      return nomeMatch && naoEstaNoEventoAtual;
+      return nomeMatch && !estaNoEventoAtual;
     });
 
     setSearchResults(results);
-  }, [searchTerm, convidados, eventoId, eventos]);
+  }, [searchTerm, convidados, eventoId]);
 
   const handleAddToEvent = async (convidado) => {
     setAddingGuest(true);
     try {
-      const response = await fetch(`${apiConvidados}/${convidado.id}/eventos/${eventoId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          limite_acompanhante: Number(convidado.limite_acompanhante) ||
-            Number(convidado.limite_padrao) || 0,
-          confirmado: false
-        }),
-      });
+      const response = await fetch(
+        `${apiConvidados}/${convidado.id}/eventos/${eventoId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            limite_acompanhante:
+              Number(convidado.limite_acompanhante) ||
+              Number(convidado.limite_padrao) ||
+              0,
+            confirmado: false,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Erro ao adicionar convidado ao evento");
       }
 
-      toast.success(`${convidado.nome} adicionado ao evento com sucesso!`);
       fetchDados();
+      toast.success(`${convidado.nome} adicionado ao evento com sucesso!`);
       setSearchTerm("");
+      setSearchResults([]);
     } catch (error) {
       console.error("Erro ao adicionar:", error);
       toast.error(error.message);
@@ -258,18 +211,15 @@ const Confirmacao = () => {
   const handleNewGuestChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === 'telefone') {
-      const formattedValue = formatPhoneNumber(value);
-      setNewGuest(prev => ({
+    if (name === "telefone") {
+      setNewGuest((prev) => ({
         ...prev,
-        [name]: formattedValue
+        [name]: formatPhoneNumber(value),
       }));
     } else {
-      setNewGuest(prev => ({
+      setNewGuest((prev) => ({
         ...prev,
-        [name]: name === 'limite_acompanhante' ?
-          (value === '' ? '' : Math.max(0, parseInt(value) || 0)) :
-          value
+        [name]: name === "limite_acompanhante" ? Math.max(0, parseInt(value) || 0) : value,
       }));
     }
   };
@@ -280,7 +230,7 @@ const Confirmacao = () => {
       return;
     }
 
-    const phoneDigits = newGuest.telefone.replace(/\D/g, '');
+    const phoneDigits = newGuest.telefone.replace(/\D/g, "");
     if (!isValidPhoneNumber(newGuest.telefone)) {
       toast.error("Por favor, insira um telefone válido com DDD (10 ou 11 dígitos)");
       return;
@@ -298,57 +248,23 @@ const Confirmacao = () => {
         nome: newGuest.nome.trim(),
         telefone: phoneDigits,
         email: newGuest.email.trim() || null,
-        limite_acompanhante: Number(newGuest.limite_acompanhante) || 0
+        limite_acompanhante: Number(newGuest.limite_acompanhante) || 0,
+        evento_id: parseInt(eventoId || newGuest.evento_id),
+        // administrador_id: localStorage.getItem('adminId'), // Se você tiver um adminId no frontend
       };
 
-      const responseConvidado = await fetch(apiConvidados, {
+      const response = await fetch(apiConvidados, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(convidadoData),
       });
 
-      if (!responseConvidado.ok) {
-        const error = await responseConvidado.json();
-        throw new Error(error.message || "Erro ao criar convidado");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao cadastrar convidado");
       }
 
-      const responseData = await responseConvidado.json();
-      const novoConvidadoId = responseData.id || responseData.data?.id;
-      if (!novoConvidadoId) {
-        throw new Error("Não foi possível obter o ID do convidado criado");
-      }
-
-      const targetEventoId = eventoId || newGuest.evento_id;
-
-      if (targetEventoId && targetEventoId !== "undefined") {
-        try {
-          const responseAssociacao = await fetch(
-            `${apiConvidados}/${novoConvidadoId}/eventos/${targetEventoId}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                limite_acompanhante: Number(newGuest.limite_acompanhante) || 0,
-                confirmado: 0
-              }),
-            }
-          );
-
-          if (!responseAssociacao.ok) {
-            const error = await responseAssociacao.json();
-            throw new Error(error.message || "Erro ao associar convidado ao evento");
-          }
-        } catch (associacaoError) {
-          try {
-            await fetch(`${apiConvidados}/${novoConvidadoId}`, {
-              method: "DELETE"
-            });
-          } catch (rollbackError) {
-            console.error("Erro no rollback:", rollbackError);
-          }
-          throw associacaoError;
-        }
-      }
+      await fetchDados();
 
       toast.success(`${newGuest.nome} cadastrado com sucesso!`);
       setShowAddForm(false);
@@ -357,10 +273,8 @@ const Confirmacao = () => {
         telefone: "",
         email: "",
         limite_acompanhante: 0,
-        evento_id: eventoId || ""
+        evento_id: eventoId || "",
       });
-      fetchDados();
-
     } catch (error) {
       console.error("Erro no cadastro:", error);
       toast.error(error.message || "Erro ao cadastrar convidado");
@@ -372,138 +286,52 @@ const Confirmacao = () => {
   const handleUpdate = async () => {
     if (!editIndex) return;
 
-    const convidadoPrincipal = convidados.find(c => c.id === editIndex);
-    const statusConvidadoPrincipal = convidadoPrincipal?.eventos?.find(e => e.id === parseInt(eventoId))?.confirmado ?? 0;
-
     try {
       setLoading(true);
 
-      // 1. Atualizar Convidado Principal
-      const responseConvidado = await fetch(`${apiConvidados}/${editIndex}`, {
+      const payload = {
+        nome: editData.nome,
+        telefone: formatPhoneNumber(editData.telefone).replace(/\D/g, ''),
+        email: editData.email,
+        limite_acompanhante: editData.limite_acompanhante,
+        eventoId: parseInt(eventoId), // Para atualizar a relação convidado_evento
+        acompanhantes: editData.acompanhantes.map((a) => ({
+          id: a.id,
+          nome: a.nome,
+          telefone: formatPhoneNumber(a.telefone || '').replace(/\D/g, ''),
+          email: a.email || null,
+          confirmado: a.confirmado,
+          convidado_evento_convidado_id: editIndex,
+          convidado_evento_evento_id: parseInt(eventoId),
+        })),
+        acompanhantes_to_delete: acompanhantesToDelete,
+      };
+
+      const response = await fetch(`${apiConvidados}/${editIndex}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: editData.nome,
-          telefone: editData.telefone.replace(/\D/g, ''),
-          email: editData.email || null,
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!responseConvidado.ok) {
-        const errorData = await responseConvidado.json();
-        throw new Error(errorData.message || "Erro ao atualizar convidado principal");
-      }
-      toast.success("Convidado principal atualizado!");
-
-      // 2. Atualizar Limite de Acompanhantes (se eventoId existir)
-      if (eventoId) {
-        await fetch(
-          `${apiConvidados}/${editIndex}/eventos/${eventoId}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              limite_acompanhante: Number(editData.limite_acompanhante) || 0,
-            }),
-          }
-        );
-        toast.info("Limite de acompanhantes atualizado.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao atualizar convidado");
       }
 
-      // 3. Processar Acompanhantes
-      const currentConvidadoData = convidados.find(c => c.id === editIndex);
-      const existingAcompanhantesIds = new Set(
-        currentConvidadoData?.acompanhantes
-          ?.filter(a => Number(a.convidado_evento_evento_id) === parseInt(eventoId))
-          .map(a => a.id) || []
-      );
-
-      const updatedAcompanhantesToProcess = new Set();
-
-      for (const acompanhante of editData.acompanhantes) {
-        const cleanPhone = acompanhante.telefone ? String(acompanhante.telefone).replace(/\D/g, '') : "";
-        const cleanEmail = acompanhante.email || "";
-
-        if (acompanhante.id && !String(acompanhante.id).startsWith('temp-') && existingAcompanhantesIds.has(acompanhante.id)) {
-          // ATUALIZAR um acompanhante existente
-          const updateResponse = await fetch(`${apiConvidados}/acompanhantes/${acompanhante.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              nome: acompanhante.nome,
-              telefone: cleanPhone,
-              email: cleanEmail,
-            }),
-          });
-
-          if (!updateResponse.ok) {
-            const errorData = await updateResponse.json();
-            throw new Error(`Erro ao atualizar acompanhante ${acompanhante.nome}: ${errorData.error || updateResponse.statusText}`);
-          }
-          updatedAcompanhantesToProcess.add(acompanhante.id);
-        } else if (String(acompanhante.id).startsWith('temp-') || !acompanhante.id) {
-          // ADICIONAR um acompanhante NOVO (com ID temporário ou sem ID)
-          if (!acompanhante.nome.trim()) {
-            throw new Error("Nome de um novo acompanhante é obrigatório.");
-          }
-          if (cleanPhone && !isValidPhoneNumber(cleanPhone)) {
-            toast.error(`Telefone do acompanhante ${acompanhante.nome} é inválido.`);
-            throw new Error(`Telefone do acompanhante ${acompanhante.nome} é inválido.`);
-          }
-
-          const addAcompanhanteResponse = await fetch(`${apiConvidados}/${editIndex}/acompanhantes`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              nome: acompanhante.nome,
-              telefone: cleanPhone,
-              email: cleanEmail,
-              convidado_id: editIndex,
-              evento_id: parseInt(eventoId),
-              confirmado: statusConvidadoPrincipal
-            }),
-          });
-
-          if (!addAcompanhanteResponse.ok) {
-            const errorData = await addAcompanhanteResponse.json();
-            throw new Error(`Erro ao adicionar acompanhante: ${errorData.error || addAcompanhanteResponse.statusText}`);
-          }
-          const newAcompData = await addAcompanhanteResponse.json();
-          updatedAcompanhantesToProcess.add(newAcompData.id || newAcompData.data?.id);
-          toast.success(`Acompanhante ${acompanhante.nome} adicionado!`);
-        }
-      }
-
-      // 4. Remover acompanhantes que estavam na lista original mas não estão mais no editData
-      const acompanhantesParaRemover = Array.from(existingAcompanhantesIds).filter(id => !updatedAcompanhantesToProcess.has(id));
-
-      for (const idToRemove of acompanhantesParaRemover) {
-        const deleteResponse = await fetch(`${apiConvidados}/acompanhantes/${idToRemove}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!deleteResponse.ok) {
-          const errorData = await deleteResponse.json();
-          console.error(`Erro ao remover acompanhante ${idToRemove}:`, errorData);
-          toast.error(`Erro ao remover acompanhante antigo (ID: ${idToRemove}).`);
-        } else {
-          toast.info(`Acompanhante removido (ID: ${idToRemove}).`);
-        }
-      }
-
+      await fetchDados();
       setEditIndex(null);
-      setShowEditModal(false);
+      setAcompanhantesToDelete([]);
       toast.success("Convidado e acompanhantes atualizados com sucesso!");
-      fetchDados();
     } catch (error) {
-      console.error("Erro geral na atualização:", error);
+      console.error("Erro na atualização:", error);
       toast.error(`Falha ao atualizar: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const adminId = localStorage.getItem('adminId');
+  const adminId = localStorage.getItem("adminId");
+
   async function fetchDados() {
     setLoading(true);
     try {
@@ -519,28 +347,38 @@ const Confirmacao = () => {
       const eventosData = await eventosRes.json();
       const convidadosData = await convidadosRes.json();
 
-      const rawEvents = eventosData.data || eventosData;
-      const rawGuests = convidadosData.data || convidadosData;
-
-
-      const eventosProcessados = Array.isArray(rawEvents)
-        ? rawEvents
-          .filter(e => adminId ? e.administrador_id == adminId : true)
-          .map(e => ({
-            ...e,
-            id: Number(e.id),
-            data_evento: e.data_evento || new Date().toISOString()
-          }))
+      const eventosProcessados = Array.isArray(eventosData)
+        ? eventosData
+            .filter((e) => (adminId ? e.administrador_id == adminId : true))
+            .map((e) => ({
+              ...e,
+              id: Number(e.id),
+              data_evento: e.data_evento || new Date().toISOString(),
+            }))
         : [];
 
       setEventos(eventosProcessados);
 
-      const convidadosProcessados = Array.isArray(rawGuests)
-        ? rawGuests.map(c => ({
-          ...c,
-          eventos: c.eventos || [],
-          acompanhantes: c.acompanhantes || []
-        }))
+      const convidadosProcessados = Array.isArray(convidadosData.data)
+        ? convidadosData.data.map((c) => ({
+            id: c.id,
+            nome: c.nome,
+            telefone: formatPhoneNumber(c.telefone),
+            email: c.email,
+            limite_acompanhante: c.limite_acompanhante,
+            ativo_convidado: c.ativo_convidado,
+            administrador_id: c.administrador_id,
+            eventos: Array.isArray(c.eventos)
+              ? c.eventos
+              : c.eventos_json // Se vier como JSON string, parseie
+              ? JSON.parse(c.eventos_json)
+              : [],
+            acompanhantes: Array.isArray(c.acompanhantes)
+              ? c.acompanhantes
+              : c.acompanhantes_json // Se vier como JSON string, parseie
+              ? JSON.parse(c.acompanhantes_json)
+              : [],
+          }))
         : [];
 
       setConvidados(convidadosProcessados);
@@ -554,122 +392,66 @@ const Confirmacao = () => {
 
   useEffect(() => {
     fetchDados();
-  }, [eventoId]);
+  }, [adminId]);
 
   const handleEdit = (id) => {
     const convidado = convidados.find((c) => c.id === id);
     if (!convidado) return;
 
     setEditIndex(id);
-
-    const convidadoEventoRelacao = convidado.eventos?.find(e => e.id === parseInt(eventoId));
-
-    const processedAcompanhantes = (convidado.acompanhantes || [])
-      .filter(a => Number(a.convidado_evento_evento_id) === parseInt(eventoId))
-      .map(a => ({
-        ...a,
-        telefone: a.telefone || '', // Garante que telefone seja string vazia se for null/undefined
-        email: a.email || ''        // Garante que email seja string vazia se for null/undefined
-      }));
-
     setEditData({
       nome: convidado.nome || "",
-      telefone: formatPhoneNumber(convidado.telefone || ""),
+      telefone: convidado.telefone || "",
       email: convidado.email || "",
-      limite_acompanhante: convidadoEventoRelacao?.limite_acompanhante || 0,
-      acompanhantes: processedAcompanhantes, // Usa a lista de acompanhantes processada
+      limite_acompanhante:
+        convidado.eventos?.find((e) => e.id === parseInt(eventoId))
+          ?.limite_acompanhante || 0,
+      acompanhantes: [...(convidado.acompanhantes || [])],
     });
-    setShowEditModal(true);
+    setAcompanhantesToDelete([]);
   };
 
   const handleDeleteConvidado = async (id) => {
-    if (!window.confirm("Tem certeza que deseja remover este convidado do evento? Isso também removerá seus acompanhantes associados a este evento."))
+    if (
+      !window.confirm("Tem certeza que deseja remover este convidado do evento?")
+    )
       return;
 
     try {
-      const response = await fetch(`${apiConvidados}/${id}/eventos/${eventoId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${apiConvidados}/${id}/eventos/${eventoId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Erro ao remover convidado do evento");
       }
 
+      await fetchDados();
       toast.success("Convidado removido do evento com sucesso!");
-      fetchDados();
     } catch (error) {
       toast.error(`Erro ao remover convidado: ${error.message}`);
     }
   };
 
-  const handleDeleteAcompanhante = async (convidadoId, acompanhanteId) => {
-    if (!acompanhanteId || isNaN(acompanhanteId) || acompanhanteId <= 0) {
-      toast.error("ID do acompanhante inválido");
-      return;
-    }
-
-    if (!window.confirm("Tem certeza que deseja inativar este acompanhante?")) return;
-
-    try {
-      const response = await fetch(
-        `${apiConvidados}/acompanhantes/${acompanhanteId}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        }
+  const handleDeleteAcompanhanteFromEditData = (acompanhanteId, index) => {
+    setEditData((prevEditData) => {
+      const updatedAcompanhantes = prevEditData.acompanhantes.filter(
+        (_, i) => i !== index
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Erro ao inativar acompanhante");
+      if (acompanhanteId) {
+        setAcompanhantesToDelete((prev) => [...prev, acompanhanteId]);
       }
 
-      toast.success("Acompanhante inativado com sucesso!");
-      // Atualiza o estado local para remover o acompanhante imediatamente
-      setConvidados(prevConvidados =>
-        prevConvidados.map(c =>
-          c.id === convidadoId
-            ? {
-                ...c,
-                acompanhantes: c.acompanhantes.filter(a => a.id !== acompanhanteId)
-              }
-            : c
-        )
-      );
-      fetchDados(); // Para garantir que os dados globais sejam atualizados
-    } catch (error) {
-      console.error("Erro na inativação:", error);
-      toast.error(`Falha: ${error.message}`);
-    }
-  };
-
-  const handleUpdateAcompanhante = async (convidadoId, acompanhanteId, newData) => {
-    try {
-      const cleanPhone = newData.telefone ? newData.telefone.replace(/\D/g, '') : null;
-      const response = await fetch(
-        `${apiConvidados}/acompanhantes/${acompanhanteId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nome: newData.nome,
-            telefone: cleanPhone,
-            email: newData.email || null,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Erro ao atualizar acompanhante");
-      }
-
-      toast.success("Acompanhante atualizado com sucesso!");
-      fetchDados();
-    } catch (error) {
-      console.error("Erro na atualização:", error);
-      toast.error(error.message);
-    }
+      return {
+        ...prevEditData,
+        acompanhantes: updatedAcompanhantes,
+      };
+    });
+    toast.info("Acompanhante marcado para exclusão (será removido ao salvar)");
   };
 
   const handleAddAcompanhante = () => {
@@ -678,52 +460,59 @@ const Confirmacao = () => {
       return;
     }
 
-    const convidadoPrincipal = convidados.find(c => c.id === editIndex);
-    const statusConvidadoPrincipal = convidadoPrincipal?.eventos?.find(e => e.id === parseInt(eventoId))?.confirmado ?? 0;
+    const convidadoEmEdicao = convidados.find((c) => c.id === editIndex);
+    const statusConvidadoPrincipal =
+      convidadoEmEdicao?.eventos?.find((e) => e.id === parseInt(eventoId))
+        ?.confirmado || 0;
 
     const novoAcompanhante = {
-      id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       nome: "",
       telefone: "",
       email: "",
       confirmado: statusConvidadoPrincipal,
-      convidado_evento_evento_id: parseInt(eventoId),
       convidado_evento_convidado_id: editIndex,
+      convidado_evento_evento_id: parseInt(eventoId),
     };
 
-    setEditData(prev => ({
+    setEditData((prev) => ({
       ...prev,
-      acompanhantes: [...prev.acompanhantes, novoAcompanhante]
+      acompanhantes: [...prev.acompanhantes, novoAcompanhante],
     }));
-
-    toast.info("Novo campo de acompanhante adicionado! Não esqueça de 'Salvar Alterações'.");
   };
 
   const handleSendWhatsapp = async (convidado) => {
     const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
     const linkConfirmacao = `${frontendUrl}/convite/${convidado.id}?eventoId=${eventoId}`;
 
-    const evento = eventos.find(e => e.id === parseInt(eventoId));
+    const evento = eventos.find((e) => e.id === parseInt(eventoId));
+    const mensagem = `${convidado.nome}! ${
+      evento?.mensagem_whatsapp || "Você está convidado para nosso evento!"
+    }: ${linkConfirmacao}`;
 
-    const mensagem = `${convidado.nome}! ${evento?.mensagem_whatsapp || "Você está convidado para nosso evento!"}: ${linkConfirmacao}`;
-
-    const linkWhatsapp = `https://api.whatsapp.com/send?phone=55${convidado.telefone}&text=${encodeURIComponent(mensagem)}`;
+    const linkWhatsapp = `https://api.whatsapp.com/send?phone=55${convidado.telefone.replace(/\D/g, '')}&text=${encodeURIComponent(
+      mensagem
+    )}`;
 
     try {
-      const resposta = await fetch(`${apiConvidados}/${convidado.id}/eventos/${eventoId}/confirmacao`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmado: 1 }),
-      });
+      const resposta = await fetch(
+        `${apiConvidados}/${convidado.id}/eventos/${eventoId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirmado: 1 }),
+        }
+      );
 
       if (!resposta.ok) {
-        throw new Error("Erro ao atualizar a confirmação após enviar WhatsApp");
+        const errorData = await resposta.json();
+        throw new Error(errorData.message || "Erro ao atualizar a confirmação");
       }
 
+      await fetchDados();
       toast.success("Confirmação enviada via WhatsApp!");
-      fetchDados();
     } catch (error) {
-      toast.error("Erro ao enviar a mensagem.");
+      toast.error(`Erro ao enviar a mensagem: ${error.message}`);
+      console.error("Erro ao enviar whatsapp/confirmar:", error);
     }
 
     window.open(linkWhatsapp, "_blank");
@@ -731,61 +520,40 @@ const Confirmacao = () => {
 
   const toggleConfirmacao = async (convidadoId, acompanhanteId = null) => {
     try {
+      let url;
+      let currentStatus;
+      let bodyData = {};
+
       if (!acompanhanteId) {
-        const convidado = convidados.find(c => c.id === convidadoId);
-        const eventoRelacao = convidado.eventos?.find(e => e.id === parseInt(eventoId));
-        const estaConfirmado = eventoRelacao?.confirmado;
-
-        let novoStatusConfirmacao;
-        if (estaConfirmado === 1) {
-          novoStatusConfirmacao = 2;
-        } else if (estaConfirmado === 0 || estaConfirmado === 2) {
-          novoStatusConfirmacao = 1;
-        }
-
-        const response = await fetch(
-          `${apiConvidados}/${convidadoId}/eventos/${eventoId}/confirmacao`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ confirmado: novoStatusConfirmacao }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Erro ao atualizar confirmação");
-        }
-
-        toast.success("Status de confirmação atualizado com sucesso!");
-        fetchDados();
+        const convidado = convidados.find((c) => c.id === convidadoId);
+        currentStatus = convidado.eventos?.find(
+          (e) => e.id === parseInt(eventoId)
+        )?.confirmado;
+        url = `${apiConvidados}/${convidadoId}/eventos/${eventoId}`;
+        bodyData = { confirmado: currentStatus === 1 ? 0 : 1 };
       } else {
-        const convidado = convidados.find(c => c.id === convidadoId);
-        const acompanhante = convidado.acompanhantes.find(a => a.id === acompanhanteId);
-        const estaConfirmado = acompanhante?.confirmado;
-
-        let novoStatusConfirmacao;
-        if (estaConfirmado === 1) {
-          novoStatusConfirmacao = 2;
-        } else if (estaConfirmado === 0 || estaConfirmado === 2) {
-          novoStatusConfirmacao = 1;
-        }
-
-        const response = await fetch(
-          `${apiConvidados}/acompanhantes/${acompanhanteId}/confirmar`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ confirmado: novoStatusConfirmacao }),
-          }
+        const convidado = convidados.find((c) => c.id === convidadoId);
+        const acompanhante = convidado.acompanhantes.find(
+          (a) => a.id === acompanhanteId
         );
-
-        if (!response.ok) {
-          throw new Error("Erro ao atualizar confirmação do acompanhante");
-        }
-
-        toast.success("Status de confirmação do acompanhante atualizado com sucesso!");
-        fetchDados();
+        currentStatus = acompanhante.confirmado;
+        url = `${apiConvidados}/acompanhantes/${acompanhanteId}`;
+        bodyData = { confirmado: currentStatus === 1 ? 0 : 1 };
       }
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao atualizar confirmação");
+      }
+
+      await fetchDados();
+      toast.success("Status de confirmação atualizado com sucesso!");
     } catch (error) {
       toast.error(`Erro: ${error.message}`);
     }
@@ -793,115 +561,68 @@ const Confirmacao = () => {
 
   const togglePresenca = async (convidadoId, acompanhanteId = null) => {
     try {
+      let url;
       if (!acompanhanteId) {
-        const response = await fetch(
-          `${apiConvidados}/${convidadoId}/eventos/${eventoId}/presenca`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Erro ao atualizar presença");
-        }
-
-        toast.success("Presença do convidado atualizada com sucesso!");
-        fetchDados();
+        url = `${apiConvidados}/${convidadoId}/eventos/${eventoId}/presenca`;
       } else {
-        const response = await fetch(
-          `${apiConvidados}/acompanhantes/${acompanhanteId}/presenca`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Erro ao atualizar presença do acompanhante");
-        }
-
-        toast.success("Presença do acompanhante atualizada com sucesso!");
-        fetchDados();
+        url = `${apiConvidados}/acompanhantes/${acompanhanteId}/presenca`;
       }
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao atualizar presença");
+      }
+
+      await fetchDados();
+
+      toast.success("Presença atualizada com sucesso!");
     } catch (error) {
       toast.error(`Erro: ${error.message}`);
     }
   };
 
-  // Funções para Contagem Contínua dos convidados e acompanhantes
-  const flattenParticipants = (convidadosEvento) => {
-    if (!Array.isArray(convidadosEvento)) return [];
+  const aplicarFiltros = (convidadosDoEvento) => {
+    if (!Array.isArray(convidadosDoEvento)) return [];
 
-    let currentGlobalIndex = 0;
-    const flattenedList = [];
+    return convidadosDoEvento.filter((convidado) => {
+      const convidadoEventoRelacao = convidado.eventos?.find(
+        (e) => e.id === parseInt(eventoId)
+      );
+      const confirmadoNoEvento = convidadoEventoRelacao?.confirmado;
 
-    convidadosEvento.forEach(convidado => {
-      // Adiciona o convidado principal
-      currentGlobalIndex++;
-      flattenedList.push({
-        type: 'convidado',
-        id: convidado.id,
-        data: convidado,
-        globalIndex: currentGlobalIndex
-      });
-
-      // Adiciona os acompanhantes do convidado
-      convidado.acompanhantes.forEach(acompanhante => {
-        currentGlobalIndex++;
-        flattenedList.push({
-          type: 'acompanhante',
-          id: acompanhante.id,
-          convidadoId: convidado.id, // Para referência ao pai
-          data: acompanhante,
-          globalIndex: currentGlobalIndex
-        });
-      });
-    });
-
-    return flattenedList;
-  };
-
-
-  //filtros pendentes/confirmados e ausentes
-  const aplicarFiltros = (convidados) => {
-    if (!Array.isArray(convidados)) return [];
-
-    return convidados.filter(convidado => {
-      const convidadoEventoRelacao = convidado.eventos?.find(e => Number(e.id) === parseInt(eventoId));
-
-      if (!convidadoEventoRelacao) {
-          return false;
+      if (filters.status === "confirmed" && confirmadoNoEvento !== true) {
+        return false;
+      }
+      if (filters.status === "pending" && confirmadoNoEvento !== false) {
+        return false;
+      }
+      if (filters.status === "present" && !convidado.presente) {
+        return false;
+      }
+      if (filters.status === "absent" && convidado.presente) {
+        return false;
       }
 
-      const confirmadoNoEvento = Number(convidadoEventoRelacao.confirmado);
-
-      let passesStatusFilter = true;
-      if (filters.status === "confirmed" && confirmadoNoEvento !== 1) {
-        passesStatusFilter = false;
-      }
-      if (filters.status === "pending" && confirmadoNoEvento !== 0) {
-        passesStatusFilter = false;
-      }
-      if (filters.status === "cancelled" && confirmadoNoEvento !== 2) {
-        passesStatusFilter = false;
-      }
-
-      let passesSearchFilter = true;
       if (filters.searchName) {
-        const searchTerm = filters.searchName.toLowerCase();
-        const nomeMatch = convidado.nome?.toLowerCase()?.includes(searchTerm) || false;
-        const acompanhanteMatch = convidado.acompanhantes?.some(a =>
-          a.nome?.toLowerCase()?.includes(searchTerm)
-        ) || false;
+        const searchTermLower = filters.searchName.toLowerCase();
+        const nomeMatch = convidado.nome
+          ?.toLowerCase()
+          ?.includes(searchTermLower);
+        const acompanhanteMatch = convidado.acompanhantes?.some((a) =>
+          a.nome?.toLowerCase()?.includes(searchTermLower)
+        );
 
         if (!nomeMatch && !acompanhanteMatch) {
-          passesSearchFilter = false;
+          return false;
         }
       }
 
-      const finalPass = passesStatusFilter && passesSearchFilter;
-      return finalPass;
+      return true;
     });
   };
 
@@ -914,23 +635,8 @@ const Confirmacao = () => {
     );
   }
 
-  //caso nenhum evento seja passado na url redireciona para a página de eventos
-  if (!eventoId || isNaN(parseInt(eventoId))) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
-        <div className="text-center text-gray-700">
-          <p className="text-xl font-semibold mb-4">Nenhum evento selecionado.</p>
-          <p className="mb-6">Por favor, selecione um evento para visualizar os convidados.</p>
-          <button
-            onClick={() => navigate('/eventos')} // Redireciona para a página de eventos
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <CalendarIcon className="h-5 w-5 mr-2" /> Ir para Eventos
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Novo contador global para as linhas da tabela
+  let globalIndex = 0;
 
   return (
     <>
@@ -946,22 +652,19 @@ const Confirmacao = () => {
             </button>
 
             <div className="flex items-center gap-2">
-              <QRCodeScanButton
-                onScan={(data) => console.log("QR Lido:", data)}
-              />
+              <QRCodeScanButton onScan={(data) => console.log("QR Lido:", data)} />
             </div>
           </div>
 
-
           <div className="max-w-5xl mx-auto text-center">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight mt-2 sm:mt-0">
-              Lista de <span className="bg-gradient-to-br from-indigo-600 to-violet-500 bg-clip-text text-transparent">Convidados</span>
+              Lista de{" "}
+              <span className="bg-gradient-to-br from-indigo-600 to-violet-500 bg-clip-text text-transparent">
+                Convidados
+              </span>
             </h1>
           </div>
 
-
-
-          {/* Barra de busca e adicionar convidado */}
           <GuestSearchAdd
             eventos={eventos}
             convidados={convidados}
@@ -978,9 +681,8 @@ const Confirmacao = () => {
             setNewGuest={setNewGuest}
             handleAddToEvent={handleAddToEvent}
             handleAddNewGuest={handleAddNewGuest}
+            handleNewGuestChange={handleNewGuestChange}
           />
-
-{/*Para filtrar */}
 
           <PrintList
             filters={filters}
@@ -993,30 +695,19 @@ const Confirmacao = () => {
           <div className="space-y-10 shadow-lg">
             {Array.isArray(eventos) &&
               eventos
-                .filter((evento) => !eventoId || evento.id == parseInt(eventoId))
+                .filter((evento) => !eventoId || evento.id == eventoId)
                 .map((evento) => {
                   const convidadosEvento = aplicarFiltros(
                     getConvidadosPorEvento(evento.id)
                   );
-
-                  const totalParticipantes =
-                    contarParticipantes(convidadosEvento);
+                  const totalParticipantes = contarParticipantes(convidadosEvento);
                   const totalConfirmados = contarConfirmados(convidadosEvento);
-
-                  const totalPendentes = contarPendentes(convidadosEvento);
-
-
-                  // Achatamos a lista de participantes para numeração contínua
-                  const allParticipants = flattenParticipants(convidadosEvento);
-
                   return (
                     <div
                       className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
                       key={evento.id}
                     >
-                      <GuestActions
-                        filters={filters}
-                        setFilters={setFilters} />
+                      <GuestActions filters={filters} setFilters={setFilters} />
                       <div className="p-4 md:p-6 border-b border-gray-100">
                         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                           <div className="flex items-center space-x-3">
@@ -1028,39 +719,28 @@ const Confirmacao = () => {
                                 {evento.nome}
                               </h3>
                               <p className="text-xs md:text-sm text-gray-500">
-                                {new Date(
-                                  evento.data_evento
-                                ).toLocaleDateString("pt-BR", {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric",
-                                })}
+                                {new Date(evento.data_evento).toLocaleDateString(
+                                  "pt-BR",
+                                  {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                  }
+                                )}
                               </p>
                             </div>
                           </div>
-                          {/* Contagem Separada de Participantes e Confirmados */}
-                          <div className="flex items-center gap-3">
-                            {/* Badge Total de Participantes */}
-                            <div className="flex items-center bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-medium">
-                              <Users className="h-3 w-3 mr-1" />
-                              <span>Total: {totalParticipantes}</span>
-                            </div>
-                            {/* Badge Total de Confirmados */}
-                            <div className="flex items-center bg-green-50 text-green-600 py-1 px-3 rounded-full text-xs font-medium">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              <span>Confirmados: {totalConfirmados}</span>
-                            </div>
-                              {/* Badge total de pendentes */}
-                            <div className="flex items-center bg-yellow-50 text-yellow-600 py-1 px-3 rounded-full text-xs font-medium">
-                              <Clock className="h-3 w-3 mr-1" /> {/* Ícone de relógio para pendente */}
-                              <span>Pendentes: {totalPendentes}</span>
-                            </div>
+                          <div className="flex items-center bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-medium self-start md:self-auto">
+                            <Users className="h-3 w-3 mr-1" />
+                            <span>
+                              {totalConfirmados}/{totalParticipantes} confirmados
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       <div className="overflow-x-auto">
-                        {allParticipants.length > 0 ? (
+                        {convidadosEvento.length > 0 ? (
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="bg-gray-50">
@@ -1068,10 +748,10 @@ const Confirmacao = () => {
                                   <Users className="w-4 h-4" />
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider">
-                                  Nome
+                                  Convidado
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider hidden sm:table-cell">
-                                  Contato
+                                  Telefone
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium text-gray-600 tracking-wider hidden sm:table-cell">
                                   Email
@@ -1088,122 +768,366 @@ const Confirmacao = () => {
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                              {allParticipants.map((participant) => (
-                                <tr
-                                  key={participant.type === 'convidado' ? participant.id : `${participant.convidadoId}-${participant.id}`}
-                                  className={participant.type === 'convidado' ? 'hover:bg-gray-50/50 transition-colors' : 'bg-gray-50 hover:bg-gray-100/50 transition-colors'}
-                                >
-                                  <td className="px-4 py-4">
-                                    <div className="flex justify-center">
-                                      <span className={`${participant.type === 'convidado' ? 'bg-indigo-100 text-indigo-600' : 'bg-purple-100 text-purple-600'} font-medium rounded-full h-6 w-6 flex items-center justify-center text-xs`}>
-                                        {participant.globalIndex}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-4">
-                                    <div className={`flex items-center ${participant.type === 'acompanhante' ? 'pl-8 md:pl-10' : ''}`}>
-                                      <div className={`${participant.type === 'convidado' ? 'bg-indigo-100 text-indigo-600' : 'bg-purple-100 text-purple-600'} p-2 rounded-full mr-3`}>
-                                        {participant.type === 'convidado' ? <User className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
-                                      </div>
-                                      <div>
-                                        <div className="font-medium text-gray-900">
-                                          {participant.data.nome}
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-1 sm:hidden">
-                                          {formatPhoneNumber(participant.data.telefone || '')}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-4 hidden sm:table-cell">
-                                    <div className="text-gray-700">
-                                      {formatPhoneNumber(participant.data.telefone || '')}
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-4 hidden sm:table-cell">
-                                    <div className="text-gray-700">
-                                      {participant.data.email}
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-4">
-                                    <BadgeConvidadoStatus
-                                      status={participant.data.confirmado || 0}
-                                    />
-                                  </td>
-                                  <td className="px-4 py-4">
-                                    <div className="flex items-center gap-3">
-                                      <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                          type="checkbox"
-                                          checked={participant.data.presente}
-                                          onChange={() => togglePresenca(participant.type === 'convidado' ? participant.id : participant.convidadoId, participant.type === 'acompanhante' ? participant.id : null)}
-                                          className="sr-only peer" />
-                                        <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
-                                        <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
-                                      </label>
-                                      <span className="text-sm font-medium">
-                                        {participant.data.presente ? (
-                                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
-                                            <CheckCircle className="h-4 w-4" />
-                                            Presente
-                                          </span>
-                                        ) : (
-                                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
-                                            <XCircle className="h-4 w-4" />
-                                            Ausente
-                                          </span>
-                                        )}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-4 text-right whitespace-nowrap">
-                                    <div className="flex justify-end space-x-1">
-                                      {participant.type === 'convidado' ? (
-                                        <>
-                                          <button
-                                            onClick={() => handleSendWhatsapp(participant.data)}
-                                            className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
-                                            title="Enviar WhatsApp"
-                                          >
-                                            <FaWhatsapp className="h-4 w-4 cursor-pointer" />
-                                          </button>
-                                          <button
-                                            onClick={() => handleEdit(participant.id)}
-                                            className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
-                                            title="Editar convidado"
-                                          >
-                                            <Edit className="h-4 w-4 cursor-pointer" />
-                                          </button>
-                                          <button
-                                            onClick={() => handleDeleteConvidado(participant.id)}
-                                            className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Remover convidado"
-                                          >
-                                            <Trash2 className="h-4 w-4 cursor-pointer" />
-                                          </button>
-                                        </>
+                              {/* Move o contador global para fora do map, antes do tbody */}
+                              {/* E itera diretamente pelos convidadosEvento */}
+                              {convidadosEvento.map((convidado) => {
+                                globalIndex++; // Incrementa para o convidado principal
+                                const isEditing = editIndex === convidado.id;
+
+                                return (
+                                  // Use um fragmento para retornar a linha do convidado e as linhas dos acompanhantes
+                                  <React.Fragment key={convidado.id}>
+                                    <tr className="hover:bg-gray-50/50 transition-colors">
+                                      {isEditing ? (
+                                        <td className="px-4 py-4" colSpan={7}>
+                                          <div className="space-y-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-500 mb-1">
+                                                  Nome
+                                                </label>
+                                                <input
+                                                  type="text"
+                                                  name="nome"
+                                                  value={editData.nome}
+                                                  onChange={(e) =>
+                                                    setEditData({
+                                                      ...editData,
+                                                      nome: e.target.value,
+                                                    })
+                                                  }
+                                                  className="w-full px-3 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-500 mb-1">
+                                                  Telefone
+                                                </label>
+                                                <input
+                                                  type="text"
+                                                  name="telefone"
+                                                  value={editData.telefone}
+                                                  onChange={(e) =>
+                                                    setEditData({
+                                                      ...editData,
+                                                      telefone: formatPhoneNumber(e.target.value),
+                                                    })
+                                                  }
+                                                  className="w-full px-3 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="block text-xs font-medium text-gray-500 mb-1">
+                                                  Limite de Acompanhantes
+                                                </label>
+                                                <input
+                                                  type="number"
+                                                  min="0"
+                                                  value={editData.limite_acompanhante}
+                                                  onChange={(e) =>
+                                                    setEditData({
+                                                      ...editData,
+                                                      limite_acompanhante:
+                                                        parseInt(e.target.value) || 0,
+                                                    })
+                                                  }
+                                                  className="w-full px-3 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                                />
+                                              </div>
+                                            </div>
+
+                                            <div>
+                                              <div className="flex justify-between items-center mb-2">
+                                                <label className="block text-xs font-medium text-gray-500">
+                                                  Acompanhantes (
+                                                  {editData.acompanhantes?.length || 0}/
+                                                  {editData.limite_acompanhante || 0})
+                                                </label>
+                                                <button
+                                                  onClick={handleAddAcompanhante}
+                                                  className="text-white flex p-3 items-center text-xs text-bold rounded-2xl cursor-pointer bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                                                  disabled={
+                                                    editData.acompanhantes?.length >=
+                                                    (editData.limite_acompanhante || 0)
+                                                  }
+                                                >
+                                                  <Plus className="h-3 w-3 mr-1" />
+                                                  Adicionar acompanhante
+                                                </button>
+                                              </div>
+                                              <div className="space-y-2">
+                                                {editData.acompanhantes.map(
+                                                  (acompanhante, index) => (
+                                                    <div
+                                                      key={acompanhante.id || `new-${index}`}
+                                                      className="flex items-center space-x-2 pb-2 border-b border-gray-100"
+                                                    >
+                                                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                        <input
+                                                          type="text"
+                                                          value={acompanhante.nome || ""}
+                                                          onChange={(e) => {
+                                                            const updatedAcompanhantes = [...editData.acompanhantes];
+                                                            updatedAcompanhantes[index] = {
+                                                              ...updatedAcompanhantes[index],
+                                                              nome: e.target.value,
+                                                            };
+                                                            setEditData({
+                                                              ...editData,
+                                                              acompanhantes: updatedAcompanhantes,
+                                                            });
+                                                          }}
+                                                          placeholder="Nome"
+                                                          className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm"
+                                                        />
+                                                        <input
+                                                          type="text"
+                                                          value={formatPhoneNumber(acompanhante.telefone || "")}
+                                                          onChange={(e) => {
+                                                            const updatedAcompanhantes = [...editData.acompanhantes];
+                                                            updatedAcompanhantes[index] = {
+                                                              ...updatedAcompanhantes[index],
+                                                              telefone: e.target.value,
+                                                            };
+                                                            setEditData({
+                                                              ...editData,
+                                                              acompanhantes: updatedAcompanhantes,
+                                                            });
+                                                          }}
+                                                          placeholder="Telefone"
+                                                          className="w-full px-3 py-2 border border-gray-400 rounded-lg text-sm"
+                                                        />
+                                                      </div>
+                                                      <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                          handleDeleteAcompanhanteFromEditData(
+                                                            acompanhante.id,
+                                                            index
+                                                          )
+                                                        }
+                                                        className="bg-red-100 text-red-600 p-1.5 rounded-full hover:bg-red-200 transition-colors"
+                                                        title="Remover acompanhante"
+                                                      >
+                                                        <Trash2 className="h-3 w-3" />
+                                                      </button>
+                                                    </div>
+                                                  )
+                                                )}
+                                              </div>
+                                            </div>
+
+                                            <div className="flex justify-end space-x-2 pt-2">
+                                              <button
+                                                onClick={() => setEditIndex(null)}
+                                                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                                              >
+                                                Cancelar
+                                              </button>
+                                              <button
+                                                onClick={handleUpdate}
+                                                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer"
+                                              >
+                                                Salvar
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </td>
                                       ) : (
                                         <>
-                                          {/* Ações para acompanhantes (apenas remover, edição via modal principal) */}
-                                          <button
-                                            onClick={() => {
-                                              if (window.confirm(`Remover ${participant.data.nome}?`)) {
-                                                handleDeleteAcompanhante(participant.convidadoId, participant.id);
-                                                // Nota: A remoção do estado local em Confirmacao.jsx
-                                                // é feita dentro de handleDeleteAcompanhante agora.
+                                          <td className="px-4 py-4">
+                                            <div className="flex justify-center">
+                                              <span className="bg-indigo-100 text-indigo-600 font-medium rounded-full h-6 w-6 flex items-center justify-center text-xs">
+                                                {globalIndex}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-4">
+                                            <div className="flex items-center">
+                                              <div className="bg-indigo-100 p-2 rounded-full mr-3">
+                                                <User className="h-4 w-4 text-indigo-600" />
+                                              </div>
+                                              <div>
+                                                <div className="font-medium text-gray-900">
+                                                  {convidado.nome}
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1 sm:hidden">
+                                                  {convidado.telefone}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-4 hidden sm:table-cell">
+                                            <div className="text-gray-700">
+                                              {convidado.telefone}
+                                            </div>
+                                          </td>
+
+                                          <td className="">
+                                            <div className="px-4 py-4 text-gray-700 hidden sm:table-cell">
+                                              {convidado.email}
+                                            </div>
+                                          </td>
+
+                                          <td className="px-4 py-4">
+                                            <BadgeConvidadoStatus
+                                              status={
+                                                convidado.confirmado ? 1 : 0
                                               }
-                                            }}
-                                            className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Remover acompanhante"
-                                          >
-                                            <Trash2 className="h-4 w-4 cursor-pointer" />
-                                          </button>
+                                            />
+                                          </td>
+                                          <td className="px-4 py-4">
+                                            <div className="flex items-center gap-3">
+                                              <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                  type="checkbox"
+                                                  checked={convidado.presente}
+                                                  onChange={() =>
+                                                    togglePresenca(convidado.id)
+                                                  }
+                                                  className="sr-only peer"
+                                                />
+                                                <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
+                                                <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
+                                              </label>
+                                              <span className="text-sm font-medium">
+                                                {convidado.presente ? (
+                                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
+                                                    <CheckCircle className="w-4 h-4" />
+                                                    Presente
+                                                  </span>
+                                                ) : (
+                                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
+                                                    <XCircle className="w-4 h-4" />
+                                                    Ausente
+                                                  </span>
+                                                )}
+                                              </span>
+                                            </div>
+                                          </td>
+
+                                          <td className="px-4 py-4 text-right whitespace-nowrap">
+                                            <div className="flex justify-end space-x-1">
+                                              <button
+                                                onClick={() =>
+                                                  handleSendWhatsapp(convidado)
+                                                }
+                                                className="text-green-600 p-1.5 rounded-full hover:bg-green-50 transition-colors"
+                                                title="Enviar WhatsApp"
+                                              >
+                                                <FaWhatsapp className="h-4 w-4 cursor-pointer" />
+                                              </button>
+                                              <button
+                                                onClick={() => handleEdit(convidado.id)}
+                                                className="text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors"
+                                                title="Editar convidado"
+                                              >
+                                                <Edit className="h-4 w-4 cursor-pointer" />
+                                              </button>
+                                              <button
+                                                onClick={() =>
+                                                  handleDeleteConvidado(convidado.id)
+                                                }
+                                                className="text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Remover convidado"
+                                              >
+                                                <Trash2 className="h-4 w-4 cursor-pointer" />
+                                              </button>
+                                            </div>
+                                          </td>
                                         </>
                                       )}
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
+                                    </tr>
+
+                                    {/* Acompanhantes */}
+                                    {convidado.acompanhantes?.map((acompanhante) => {
+                                      globalIndex++; // Incrementa para cada acompanhante
+                                      return (
+                                        <tr
+                                          key={`${convidado.id}-${acompanhante.id}`}
+                                          className="bg-gray-50 hover:bg-gray-100/50 transition-colors"
+                                        >
+                                          <td className="px-4 py-3">
+                                            <div className="flex justify-center">
+                                              <span className="bg-purple-100 text-purple-600 font-medium rounded-full h-6 w-6 flex items-center justify-center text-xs">
+                                                {globalIndex}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3">
+                                            <div className="flex items-center pl-8 md:pl-10">
+                                              <div className="bg-purple-100 p-2 rounded-full mr-3">
+                                                <UserPlus className="h-4 w-4 text-purple-600" />
+                                              </div>
+                                              <div>
+                                                <div className="font-medium text-gray-900">
+                                                  {acompanhante.nome} (Acomp.)
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1 sm:hidden">
+                                                  {acompanhante.telefone}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3 hidden sm:table-cell">
+                                            <div className="text-gray-700">
+                                              {acompanhante.telefone}
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3 hidden sm:table-cell">
+                                            <div className="text-gray-700">
+                                              {acompanhante.email}
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3">
+                                            <BadgeConvidadoStatus
+                                              status={
+                                                acompanhante.confirmado ? 1 : 0
+                                              }
+                                            />
+                                          </td>
+                                          <td className="px-4 py-3">
+                                            <div className="flex items-center gap-3">
+                                              <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                  type="checkbox"
+                                                  checked={acompanhante.presente}
+                                                  onChange={() =>
+                                                    togglePresenca(
+                                                      convidado.id,
+                                                      acompanhante.id
+                                                    )
+                                                  }
+                                                  className="sr-only peer"
+                                                />
+                                                <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-indigo-500 transition-colors duration-300"></div>
+                                                <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow-md transition-all duration-300 peer-checked:translate-x-full"></div>
+                                              </label>
+                                              <span className="text-sm font-medium">
+                                                {acompanhante.presente ? (
+                                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 shadow-sm">
+                                                    <CheckCircle className="w-4 h-4" />
+                                                    Presente
+                                                  </span>
+                                                ) : (
+                                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
+                                                    <XCircle className="w-4 h-4" />
+                                                    Ausente
+                                                  </span>
+                                                )}
+                                              </span>
+                                            </div>
+                                          </td>
+
+                                          <td className="px-4 py-3 text-right whitespace-nowrap">
+                                            {/* As ações de edição e deleção para acompanhantes agora são tratadas no modal de edição do convidado principal */}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </React.Fragment>
+                                );
+                              })}
                             </tbody>
                           </table>
                         ) : (
@@ -1218,23 +1142,8 @@ const Confirmacao = () => {
           </div>
         </div>
       </div>
-
-      {/* Renderiza o modal de edição */}
-      {showEditModal && (
-        <EditGuestModal
-          show={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          editData={editData}
-          setEditData={setEditData}
-          onSave={handleUpdate}
-          onDeleteAcompanhante={handleDeleteAcompanhante}
-          onAddAcompanhante={handleAddAcompanhante}
-          convidadoId={editIndex}
-          eventoId={eventoId}
-        />
-      )}
     </>
   );
 };
 
-export default Confirmacao;    
+export default Confirmacao;
